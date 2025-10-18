@@ -213,39 +213,45 @@
   <script src='../js/jquery.js'></script>
   <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
 
-  <script>
-  !function(){
-    const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
-    let count = 0;
+<script>
+!function(){
+  const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
+  let count = 0;
 
-    const hateBtn = document.querySelector('.button-style2 .lk2');
-    const likeBtn = document.querySelector('.button-style1 .lk1');
+  // 1. 拿到“不喜欢”文字按钮本身
+  const hateBtn = document.querySelector('.button-style2 .bt1');
+  const likeBtn = document.querySelector('.button-style1 .lk1');
 
-    likeBtn.style.display = 'inline-block';
-    likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
-    likeBtn.style.transformOrigin = 'center';
-    likeBtn.parentElement.style.zIndex = '2';
+  // 2. 把文字改成“不喜欢”
+  hateBtn.textContent = '不喜欢:(';
 
-    hateBtn.addEventListener('click', function(e){
-      e.preventDefault();
-      if(count >= 4) return;
+  // 3. 初始化喜欢按钮
+  likeBtn.style.display = 'inline-block';
+  likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+  likeBtn.style.transformOrigin = 'center';
+  likeBtn.parentElement.style.zIndex = '2';
 
-      alert(msgs[count]);
-      count++;
+  // 4. 绑定点击（加到文字按钮上）
+  hateBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    if(count >= 4) return;
 
-      const scale = 1 + count * 0.85;
-      const shiftX = count * 35;
-      likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+    alert(msgs[count]);
+    count++;
 
-      if(count === 4){
-        const hateBox = hateBtn.parentElement;
-        hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
-        hateBox.style.transform = 'translateX(120%) rotate(30deg)';
-        hateBox.style.opacity = '0';
-      }
-    });
-  }();
-  </script>
+    const scale = 1 + count * 0.85;
+    const shiftX = count * 35;
+    likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+
+    if(count === 4){
+      const hateBox = this.closest('.button-style2');
+      hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
+      hateBox.style.transform = 'translateX(120%) rotate(30deg)';
+      hateBox.style.opacity = '0';
+    }
+  });
+}();
+</script>
 
 </body>
 </html>
