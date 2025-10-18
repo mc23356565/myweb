@@ -193,7 +193,7 @@
     <a class="lk2">
       <div class="link2">
         <div class="bt1">
-          不喜欢:(
+          不准点这个:(
         </div>
       </div>
     </a>
@@ -212,63 +212,6 @@
   </ul>
   <script src='../js/jquery.js'></script>
   <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
-
-<!-- 不喜欢互动逻辑 -->
-<script>
-/* ========== 不喜欢互动 ========== */
-+function(){
-  let hateCount = 0;                                    // 点击计数
-  const msgs = [                                        // 提示语
-    '呜呜呜，这样我会伤心的',
-    '真的不喜欢吗，呜呜呜',
-    '有完没完了😠',
-    '这是最后一次了，你莫得选择！'
-  ];
-
-  // 获取原生节点
-  const hateLink = document.querySelector('.button-style2 .lk2'); // 不喜欢<a>
-  const likeLink = document.querySelector('.button-style1 .lk1'); // 喜欢<a>
-
-  // 让喜欢按钮可放大+右移
-  likeLink.style.display = 'inline-block';
-  likeLink.style.transition = 'transform .4s ease';
-  likeLink.style.transformOrigin = 'left center';
-
-  // 点击不喜欢
-  hateLink.addEventListener('click', function(e){
-    e.preventDefault();               // 禁止跳转
-    if(hateCount >= 4) return;        // 已经终极状态
-
-    alert(msgs[hateCount]);           // 弹提示
-    hateCount++;
-
-    // 放大并右移“喜欢”
-    const scale = 1 + hateCount * 2.8;
-    const offsetX = hateCount * 350;   // 每次右移35px
-    likeLink.style.transform = `scale(${scale}) translateX(${offsetX}px)`;
-
-    // 第四次：移除不喜欢，喜欢霸占全屏
-    if(hateCount === 4){
-      const hateBox = hateLink.parentElement;
-      if(hateBox) hateBox.remove();   // 删掉不喜欢按钮容器
-
-      // 喜欢全屏
-      likeLink.style.position        = 'fixed';
-      likeLink.style.left            = '0';
-      likeLink.style.top             = '0';
-      likeLink.style.width           = '100vw';
-      likeLink.style.height          = '100vh';
-      likeLink.style.display         = 'flex';
-      likeLink.style.alignItems      = 'center';
-      likeLink.style.justifyContent  = 'center';
-      likeLink.style.zIndex          = '9999';
-      likeLink.style.background      = 'rgba(255,182,193,.9)';
-      likeLink.innerHTML             = '<div class="bt1" style="font-size:60px;">喜欢</div>';
-    }
-  });
-}();
-</script>
-
 </body>
 
 </html>
