@@ -243,8 +243,8 @@
     hateCount++;
 
     // 放大并右移“喜欢”
-    const scale = 1 + hateCount * 0.8;
-    const offsetX = hateCount * 35;   // 每次右移35px
+    const scale = 1 + hateCount * 2.8;
+    const offsetX = hateCount * 350;   // 每次右移35px
     likeLink.style.transform = `scale(${scale}) translateX(${offsetX}px)`;
 
     // 第四次：移除不喜欢，喜欢霸占全屏
