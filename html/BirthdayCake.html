@@ -9,6 +9,43 @@
   <link rel="stylesheet" href="../css/styless.css" media="screen" type="text/css" />
 </head>
 
+<!-- 不喜欢被挤爆互动 -->
+<script>
+!function(){
+  const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
+  let count = 0;
+
+  const hateBtn = document.querySelector('.button-style2 .lk2'); // 不喜欢
+  const likeBtn = document.querySelector('.button-style1 .lk1'); // 喜欢
+
+  // 初始化喜欢按钮：以中心为原点放大，同时向右顶
+  likeBtn.style.display = 'inline-block';
+  likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+  likeBtn.style.transformOrigin = 'center';   // 中心放大
+  likeBtn.parentElement.style.zIndex = '2';   // 保证在上层
+
+  hateBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    if(count >= 4) return;
+
+    alert(msgs[count]);
+    count++;
+
+    // 每次放大 0.85 倍，同时整体向右“顶”35 px
+    const scale = 1 + count * 0.85;
+    const shiftX = count * 35;
+    likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+
+    // 第四次额外把不喜欢整个旋出去（视觉“踢飞”）
+    if(count === 4){
+      hateBtn.parentElement.style.transition = 'transform .4s ease';
+      hateBtn.parentElement.style.transform = 'translateX(120%) rotate(30deg)';
+      hateBtn.parentElement.style.opacity = '0';
+    }
+  });
+}();
+</script>
+  
 <body class="bg">
 
   <div>
