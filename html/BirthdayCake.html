@@ -2,11 +2,39 @@
 <html>
 
 <head>
-
   <meta charset="UTF-8">
-
   <title>Happy Birthday</title>
   <link rel="stylesheet" href="../css/styless.css" media="screen" type="text/css" />
+  <style>
+    .button-style1 {
+      position: relative;
+      z-index: 20; /* 提高喜欢按钮的层级 */
+    }
+    
+    .button-style2 {
+      position: relative;
+      z-index: 10; /* 降低不喜欢按钮的层级 */
+    }
+    
+    /* 确保按钮样式正常显示 */
+    .link1, .link2 {
+      display: inline-block;
+      text-decoration: none;
+    }
+    
+    .bt1 {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .bt1:hover {
+      background: rgba(255,255,255,0.9);
+      transform: scale(1.05);
+    }
+  </style>
 </head>
   
 <body class="bg">
@@ -145,7 +173,7 @@
                               ;
                               M111.873,411.567c-3.119,0-9.226,0-11.874,0c-2.646,0-7.748,0-10.867,0c-7.086,0-12.698,0-18.292,0
     	c-6.592,0-12.871,7.371-19.166,3.008c-10.043-6.961-7.776-10.169,2.991-17.745c12.61-8.873,27.713,1.994,25.919-7.531
-    	c-2.589-13.742,11.008-14.513,11.365-17.789c0.441-4.051,4.235-11.107,8.051-8.175c3.113,2.393,1.007,8.008,0,13.159
+    	c-2.589-13.742,11.008-14.513,11.365-17.789c0.441-4.051,4.235-11.107,8.051-8.175c3.123,2.393,1.007,8.008,0,13.159
     	c-1.871,9.569,8.058,2.113,9.494,14.155c2.592,21.732,21.184-0.675,29.309,7.976c5.216,5.553,18.413,5.552,15.426,12.942
     	c-3.131,7.745-15.825-4.369-23.8,2.903C126.261,418.271,118.301,411.567,111.873,411.567z
                               ;
@@ -180,6 +208,7 @@
   <div class="happy">
     <img src="../img/HappyBirthday.png">
   </div>
+  
   <div class="button-style1">
     <a href="Memories.html" class="lk1">
       <div class="link1">
@@ -190,13 +219,6 @@
     </a>
   </div>
 
-  <style>
-.button-style1 {
-  position: relative;
-  z-index: 10;
-}
-</style>
-
   <div class="button-style2">
     <a href="javascript:void(0)" class="lk2">
       <div class="link2">
@@ -206,6 +228,7 @@
       </div>
     </a>
   </div>
+  
   <ul class="bg-bubbles">
     <li></li>
     <li></li>
@@ -218,48 +241,66 @@
     <li></li>
     <li></li>
   </ul>
+  
   <script src='../js/jquery.js'></script>
-  <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
+  <audio src="../music/2.mp3" autoplay="autoplay" loop="loop"></audio>
 
-<script>
-!function(){
-  const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
-  let count = 0;
+  <script>
+  !function(){
+    const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
+    let count = 0;
 
-  // 1. 拿到“不喜欢”文字按钮本身
-  const hateBtn = document.querySelector('.button-style2 .bt1');
-  const likeBtn = document.querySelector('.button-style1 .lk1');
+    // 修复：正确选择不喜欢按钮的容器
+    const hateBtn = document.querySelector('.button-style2 .bt1');
+    const likeBtn = document.querySelector('.button-style1 .lk1');
 
-  // 2. 把文字改成“不喜欢”
-  hateBtn.textContent = '不喜欢:(';
-
-  // 3. 初始化喜欢按钮
-  likeBtn.style.display = 'inline-block';
-  likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
-  likeBtn.style.transformOrigin = 'center';
-  likeBtn.parentElement.style.zIndex = '2';
-
-  // 4. 绑定点击（加到文字按钮上）
-  hateBtn.addEventListener('click', function(e){
-    e.preventDefault();
-    if(count >= 4) return;
-
-    alert(msgs[count]);
-    count++;
-
-    const scale = 1 + count * 0.85;
-    const shiftX = count * 35;
-    likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
-
-    if(count === 4){
-      const hateBox = this.closest('.button-style2');
-      hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
-      hateBox.style.transform = 'translateX(120%) rotate(30deg)';
-      hateBox.style.opacity = '0';
+    // 确保按钮文字正确
+    if (hateBtn) {
+      hateBtn.textContent = '不喜欢:(';
     }
-  });
-}();
-</script>
+
+    // 初始化喜欢按钮样式
+    if (likeBtn) {
+      likeBtn.style.display = 'inline-block';
+      likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+      likeBtn.style.transformOrigin = 'center';
+      likeBtn.parentElement.style.zIndex = '20';
+    }
+
+    // 修复：正确绑定不喜欢按钮的点击事件
+    if (hateBtn) {
+      hateBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation(); // 防止事件冒泡
+        
+        if(count >= 4) return;
+
+        alert(msgs[count]);
+        count++;
+
+        if (likeBtn) {
+          const scale = 1 + count * 0.85;
+          const shiftX = count * 35;
+          likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+        }
+
+        if(count === 4){
+          const hateBox = this.closest('.button-style2');
+          if (hateBox) {
+            hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
+            hateBox.style.transform = 'translateX(120%) rotate(30deg)';
+            hateBox.style.opacity = '0';
+            
+            // 禁用按钮点击
+            setTimeout(() => {
+              hateBox.style.pointerEvents = 'none';
+            }, 400);
+          }
+        }
+      });
+    }
+  }();
+  </script>
 
 </body>
 </html>
