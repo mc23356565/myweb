@@ -61,6 +61,48 @@
     .play-hint.show {
       opacity: 1;
     }
+    
+    /* 生日文字样式 */
+    .birthday-text {
+      position: fixed;
+      top: 20%;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: white;
+      font-size: 2em;
+      font-weight: bold;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 2s ease;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+      padding: 0 20px;
+      line-height: 1.5;
+    }
+    
+    .birthday-text.semi-transparent {
+      opacity: 0.5;
+    }
+    
+    .birthday-text.fully-visible {
+      opacity: 1;
+    }
+    
+    /* 计时器样式 */
+    .timer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      color: white;
+      font-size: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 5px;
+      z-index: 100;
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -71,6 +113,12 @@
   
   <!-- 播放提示 -->
   <div class="play-hint" id="playHint">点击右上角按钮控制音乐</div>
+
+  <!-- 生日文字 -->
+  <div class="birthday-text" id="birthdayText"></div>
+  
+  <!-- 计时器 -->
+  <div class="timer" id="timer">已观看: 0分钟0秒</div>
 
   <canvas></canvas>
   <canvas></canvas>
@@ -96,7 +144,13 @@
     const musicToggle = document.getElementById('musicToggle');
     const bgMusic = document.getElementById('bgMusic');
     const playHint = document.getElementById('playHint');
+    const birthdayText = document.getElementById('birthdayText');
+    const timerElement = document.getElementById('timer');
     let musicPlaying = false;
+    
+    // 时间控制变量
+    let startTime = Date.now();
+    let timeOffset = 0; // 用于手动调整时间
     
     // 显示提示信息
     function showHint() {
@@ -142,6 +196,96 @@
     
     // 初始显示提示
     setTimeout(showHint, 1000);
+
+    // 更新计时器显示
+    function updateTimer() {
+      const currentTime = Date.now();
+      const elapsedSeconds = (currentTime - startTime + timeOffset) / 1000;
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = Math.floor(elapsedSeconds % 60);
+      
+      timerElement.textContent = `已观看: ${minutes}分钟${seconds}秒`;
+      
+      // 继续更新
+      setTimeout(updateTimer, 1000);
+    }
+    
+    // 启动计时器
+    setTimeout(updateTimer, 1000);
+
+    // 文字显示控制
+    function checkTextDisplay() {
+      const currentTime = Date.now();
+      const elapsedSeconds = (currentTime - startTime + timeOffset) / 1000;
+      const elapsedMinutes = elapsedSeconds / 60;
+      
+      // 先重置字体大小
+      birthdayText.style.fontSize = "2em";
+      
+      // 根据时间显示不同的文字
+      if (elapsedSeconds >= 10 && elapsedSeconds < 30) {
+        // 10-30秒: 显示第一段文字
+        birthdayText.textContent = "以上就是全部内容了,看完就可以退了";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 10 && elapsedMinutes < 15) {
+        // 10-15分钟: 显示第二段文字（半透明）
+        birthdayText.textContent = "不是,怎么还没退出?";
+        birthdayText.classList.remove('fully-visible');
+        birthdayText.classList.add('semi-transparent');
+      } else if (elapsedMinutes >= 15 && elapsedMinutes < 20) {
+        // 15-20分钟: 显示第三段文字
+        birthdayText.textContent = "好吧好吧,这么有毅力";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 20 && elapsedMinutes < 21) {
+        // 20-21分钟: 显示第四段文字
+        birthdayText.textContent = "有句话,想对你说";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 21 && elapsedMinutes < 22) {
+        // 21-25分钟: 显示第五段文字
+        birthdayText.textContent = "我喜欢你,李铃钰";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 22 && elapsedMinutes < 23) {
+        // 21-25分钟: 显示第五段文字
+        birthdayText.textContent = "我胆小,害怕告诉你了,连朋友也做不成";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 23 && elapsedMinutes < 24) {
+        // 21-25分钟: 显示第五段文字
+        birthdayText.textContent = "好吧,其实你根本看不到这里";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else if (elapsedMinutes >= 24 && elapsedMinutes < 25) {
+        // 21-25分钟: 显示第五段文字
+        birthdayText.textContent = "或许这就是最后的彩蛋吧";
+        birthdayText.classList.remove('semi-transparent');
+        birthdayText.classList.add('fully-visible');
+      } else {
+        // 其他时间隐藏文字
+        birthdayText.textContent = "";
+        birthdayText.classList.remove('semi-transparent', 'fully-visible');
+      }
+      
+      // 继续检查
+      setTimeout(checkTextDisplay, 1000);
+    }
+    
+    // 启动文字显示检查
+    setTimeout(checkTextDisplay, 1000);
+
+    // 计时器点击事件 - 快速跳转时间
+    timerElement.addEventListener('click', function() {
+      // 每次点击增加10秒
+      timeOffset += 10 * 1000;
+      
+      // 如果超过25分钟，重置到开始
+      if ((Date.now() - startTime + timeOffset) / (1000 * 60) >= 25) {
+        timeOffset = 0;
+      }
+    });
 
     // 原有的烟花效果代码
     function GetRequest() {
@@ -269,7 +413,7 @@
     c2.width = c3.width = window.innerWidth;
     c2.height = c3.height = window.innerHeight;
     ctx1.fillStyle = '#000';
-    const text = '李铃钰,生日快乐！'
+    const text = '铃姐,生日快乐!'
     let textWidth = 99999999;
 
     while (textWidth > window.innerWidth) {
