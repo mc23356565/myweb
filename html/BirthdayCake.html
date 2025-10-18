@@ -193,7 +193,7 @@
     <a class="lk2">
       <div class="link2">
         <div class="bt1">
-          不准点这个:(
+          不喜欢:(
         </div>
       </div>
     </a>
@@ -212,6 +212,60 @@
   </ul>
   <script src='../js/jquery.js'></script>
   <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
+
+<script>
+/* ========== 不喜欢按钮互动 ========== */
++function(){
+  let hateCount = 0;                 // 点击次数
+  const msgs = [                     // 提示语
+    '呜呜呜，这样我会伤心的',
+    '真的不喜欢吗，呜呜呜',
+    '有完没完了😠',
+    '这是最后一次了，你莫得选择！'
+  ];
+
+  // 获取按钮
+  const hateBtn  = document.querySelector('.button-style2 .bt1');
+  const likeLink = document.querySelector('.button-style1 .lk1');
+
+  // 初始样式
+  likeLink.style.transition = 'all .4s ease';
+  likeLink.style.display    = 'inline-block';
+
+  hateBtn.style.cursor = 'pointer';
+  hateBtn.parentElement.parentElement.style.cursor = 'pointer';
+
+  // 点击事件
+  hateBtn.parentElement.parentElement.addEventListener('click', function(e){
+    e.preventDefault();              // 阻止页面跳转
+    if(hateCount >= 4) return;       // 已经最大了
+
+    // 1. 弹提示
+    alert(msgs[hateCount]);
+
+    // 2. 喜欢按钮变大
+    hateCount++;
+    const scale = 1 + hateCount * 0.8;          // 每次放大 0.8 倍
+    likeLink.style.transform = `scale(${scale})`;
+
+    // 3. 最后一次霸占全屏
+    if(hateCount === 4){
+      likeLink.style.position        = 'fixed';
+      likeLink.style.left            = '0';
+      likeLink.style.top             = '0';
+      likeLink.style.width           = '100vw';
+      likeLink.style.height          = '100vh';
+      likeLink.style.display         = 'flex';
+      likeLink.style.alignItems      = 'center';
+      likeLink.style.justifyContent  = 'center';
+      likeLink.style.zIndex          = '9999';
+      likeLink.style.background      = 'rgba(255,182,193,.9)';
+      likeLink.innerHTML             = '<div class="bt1" style="font-size:60px;">喜欢</div>';
+    }
+  });
+}();
+</script>
+
 </body>
 
 </html>
