@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="../css/styless.css" media="screen" type="text/css" />
 </head>
 
-<!-- 不喜欢被挤爆互动 -->
+<!-- 喜欢把不喜欢挤出屏幕 互动逻辑 -->
 <script>
 !function(){
   const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
@@ -18,11 +18,11 @@
   const hateBtn = document.querySelector('.button-style2 .lk2'); // 不喜欢
   const likeBtn = document.querySelector('.button-style1 .lk1'); // 喜欢
 
-  // 初始化喜欢按钮：以中心为原点放大，同时向右顶
+  // 初始化喜欢按钮：放大+右移，以中心为原点
   likeBtn.style.display = 'inline-block';
   likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
-  likeBtn.style.transformOrigin = 'center';   // 中心放大
-  likeBtn.parentElement.style.zIndex = '2';   // 保证在上层
+  likeBtn.style.transformOrigin = 'center';
+  likeBtn.parentElement.style.zIndex = '2'; // 保证在上层
 
   hateBtn.addEventListener('click', function(e){
     e.preventDefault();
@@ -31,16 +31,17 @@
     alert(msgs[count]);
     count++;
 
-    // 每次放大 0.85 倍，同时整体向右“顶”35 px
+    // 喜欢按钮：每次放大 0.85 倍 + 向右顶 35px
     const scale = 1 + count * 0.85;
     const shiftX = count * 35;
     likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
 
-    // 第四次额外把不喜欢整个旋出去（视觉“踢飞”）
+    // 第 4 次：把不喜欢踢飞（旋转+淡出）
     if(count === 4){
-      hateBtn.parentElement.style.transition = 'transform .4s ease';
-      hateBtn.parentElement.style.transform = 'translateX(120%) rotate(30deg)';
-      hateBtn.parentElement.style.opacity = '0';
+      const hateBox = hateBtn.parentElement;
+      hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
+      hateBox.style.transform = 'translateX(120%) rotate(30deg)';
+      hateBox.style.opacity = '0';
     }
   });
 }();
