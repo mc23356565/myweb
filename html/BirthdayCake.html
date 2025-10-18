@@ -8,44 +8,6 @@
   <title>Happy Birthday</title>
   <link rel="stylesheet" href="../css/styless.css" media="screen" type="text/css" />
 </head>
-
-<!-- 喜欢把不喜欢挤出屏幕 互动逻辑 -->
-<script>
-!function(){
-  const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
-  let count = 0;
-
-  const hateBtn = document.querySelector('.button-style2 .lk2'); // 不喜欢
-  const likeBtn = document.querySelector('.button-style1 .lk1'); // 喜欢
-
-  // 初始化喜欢按钮：放大+右移，以中心为原点
-  likeBtn.style.display = 'inline-block';
-  likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
-  likeBtn.style.transformOrigin = 'center';
-  likeBtn.parentElement.style.zIndex = '2'; // 保证在上层
-
-  hateBtn.addEventListener('click', function(e){
-    e.preventDefault();
-    if(count >= 4) return;
-
-    alert(msgs[count]);
-    count++;
-
-    // 喜欢按钮：每次放大 0.85 倍 + 向右顶 35px
-    const scale = 1 + count * 0.85;
-    const shiftX = count * 35;
-    likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
-
-    // 第 4 次：把不喜欢踢飞（旋转+淡出）
-    if(count === 4){
-      const hateBox = hateBtn.parentElement;
-      hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
-      hateBox.style.transform = 'translateX(120%) rotate(30deg)';
-      hateBox.style.opacity = '0';
-    }
-  });
-}();
-</script>
   
 <body class="bg">
 
@@ -250,6 +212,40 @@
   </ul>
   <script src='../js/jquery.js'></script>
   <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
-</body>
 
+  <script>
+  !function(){
+    const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
+    let count = 0;
+
+    const hateBtn = document.querySelector('.button-style2 .lk2');
+    const likeBtn = document.querySelector('.button-style1 .lk1');
+
+    likeBtn.style.display = 'inline-block';
+    likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+    likeBtn.style.transformOrigin = 'center';
+    likeBtn.parentElement.style.zIndex = '2';
+
+    hateBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      if(count >= 4) return;
+
+      alert(msgs[count]);
+      count++;
+
+      const scale = 1 + count * 0.85;
+      const shiftX = count * 35;
+      likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+
+      if(count === 4){
+        const hateBox = hateBtn.parentElement;
+        hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
+        hateBox.style.transform = 'translateX(120%) rotate(30deg)';
+        hateBox.style.opacity = '0';
+      }
+    });
+  }();
+  </script>
+
+</body>
 </html>
