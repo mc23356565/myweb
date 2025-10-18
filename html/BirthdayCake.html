@@ -2,13 +2,11 @@
 <html>
 
 <head>
-
   <meta charset="UTF-8">
-
   <title>Happy Birthday</title>
   <link rel="stylesheet" href="../css/styless.css" media="screen" type="text/css" />
 </head>
-
+  
 <body class="bg">
 
   <div>
@@ -193,7 +191,7 @@
     <a class="lk2">
       <div class="link2">
         <div class="bt1">
-          不准点这个:(
+          不喜欢:(
         </div>
       </div>
     </a>
@@ -212,6 +210,46 @@
   </ul>
   <script src='../js/jquery.js'></script>
   <audio src="../music/2.mp3" autoplay="autoplay" loop="loop">
-</body>
 
+<script>
+!function(){
+  const msgs = ['呜呜呜，这样我会伤心的','真的不喜欢吗，呜呜呜','有完没完了😠','这是最后一次了，你莫得选择！'];
+  let count = 0;
+
+  // 1. 拿到“不喜欢”文字按钮本身
+  const hateBtn = document.querySelector('.button-style2 .bt1');
+  const likeBtn = document.querySelector('.button-style1 .lk1');
+
+  // 2. 把文字改成“不喜欢”
+  hateBtn.textContent = '不喜欢:(';
+
+  // 3. 初始化喜欢按钮
+  likeBtn.style.display = 'inline-block';
+  likeBtn.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+  likeBtn.style.transformOrigin = 'center';
+  likeBtn.parentElement.style.zIndex = '2';
+
+  // 4. 绑定点击（加到文字按钮上）
+  hateBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    if(count >= 4) return;
+
+    alert(msgs[count]);
+    count++;
+
+    const scale = 1 + count * 0.85;
+    const shiftX = count * 35;
+    likeBtn.style.transform = `scale(${scale}) translateX(${shiftX}px)`;
+
+    if(count === 4){
+      const hateBox = this.closest('.button-style2');
+      hateBox.style.transition = 'transform .4s ease, opacity .4s ease';
+      hateBox.style.transform = 'translateX(120%) rotate(30deg)';
+      hateBox.style.opacity = '0';
+    }
+  });
+}();
+</script>
+
+</body>
 </html>
