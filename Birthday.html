@@ -1,36 +1,496 @@
-<!doctype html>
-<html lang="zh">
-
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday</title>
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <title>？？？</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 90vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 导航栏 */
+        .nav {
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .nav button {
+            background: transparent;
+            color: #666;
+            border: 2px solid #667eea;
+            padding: 12px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .nav button.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 页面切换 */
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+            padding: 40px;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 第一页：文件下载 */
+        .download-page {
+            text-align: center;
+            padding-top: 60px;
+        }
+        
+        .download-page h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .download-page .subtitle {
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 16px;
+        }
+        
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 25px 30px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+        
+        .file-item:hover {
+            background: #e8e8e8;
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            font-size: 32px;
+        }
+        
+        .file-name {
+            color: #333;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .download-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        
+        /* 第二页：Q&A */
+        .qa-page {
+            padding: 30px 40px 40px;
+        }
+        
+        .qa-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .qa-header h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .qa-header p {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        /* 问题列表 - 可折叠 */
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .qa-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s;
+        }
+        
+        .qa-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .question {
+            padding: 20px 25px;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            background: white;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        .question:hover {
+            background: #f0f0f0;
+        }
+        
+        .question::before {
+            content: "Q";
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .toggle-icon {
+            margin-left: auto;
+            color: #667eea;
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .qa-item.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: #fafafa;
+        }
+        
+        .qa-item.active .answer {
+            max-height: 500px; /* 最大高度，可调整 */
+            overflow-y: auto;
+            padding: 20px 25px 20px 65px;
+        }
+        
+        .answer-content {
+            color: #555;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        
+        /* 自定义滚动条 */
+        .answer::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .answer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .answer::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+        
+        /* 提示文字 */
+        .hint {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        /* 临时消息提示条 */
+        .toast-message {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: slideDownFade 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
 </head>
-
-<style>
-    .iframepage {
-        -webkit-overflow-scrolling: touch;
-        overflow-x: scroll;
-        overflow-y: hidden;
-    }
-
-    ::-webkit-scrollbar {
-        width: 0px;
-    }
-
-    /*局部滚动的dom节点*/
-    .scroll-el {
-        overflow: auto;
-    }
-</style>
-
 <body>
-    <iframe src="./html/login.html" id="iframepage" scrolling="no" onload="changeFrameHeight()" frameborder="0"
-        style="width:100%" marginwidth="0" marginheight="0"></iframe>
-    <script src="js/jquery-2.1.1.min.js" type="text/javascript"></script>
-    <script src="js/jquery-1.8.4.min.js" type="text/javascript"></script>
-</body>
+    <div class="container">
+        <div class="nav">
+            <button onclick="handleFirstPage()" id="btn1" class="active">📦 未知 📦</button>
+            <button onclick="handleEasterEgg()" id="btn2">❓ 彩蛋 ❓</button>
+        </div>
+        
+        <div id="page1" class="page active download-page">
+            <h1>你发现了...一个秘密</h1>
+            <p class="subtitle">网页的创作者留下了下面的神秘文件,然后什么也没说</p>
+            
+            <div class="file-list">
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">📝</span>
+                        <span class="file-name">Fatal Error</span>
+                    </div>
+                    <a href="Error.txt" download class="download-btn">点此查看</a>
+                </div>
+                
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">🖼️</span>
+                        <span class="file-name">一个...生日贺图???</span>
+                    </div>
+                    <a href="生日贺图.jpg" download class="download-btn">由此浏览</a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="page2" class="page qa-page">
+            <div class="qa-header">
+                <h2>废案???废稿???</h2>
+                <p>这里收录了读评论系列中,未曾录入视频中的各种,被废弃的评论,以及在QQ的部分,匿名问题.一些话题或许过于敏感,或许不适合在视频中呈现,或许会暴露他的个人隐私,但无论如何,这些问题还是在这个隐秘的角落,有了一个比较正式的答案.至少可以保证,每个问题的回答,都足够真实,或许是,网页创作者内心的真实想法的写照...当然,又有谁在意呢...</p>
+            </div>
+            
+            <div class="qa-list">
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        关于...生日
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            前几年的时候就有人问我，今年生日打算去哪庆祝。其实说实在的，这个问题对我来说，还是过于难以回答了。至少在我记忆里，10岁之后就没有再和别人一起热闹的庆祝生日了，最主要的原因，可能是因为，实在找不到，能跟我分享快乐的，所谓的朋友了。<br><br>
+                            或许有时候我也会羡慕有的人，能有一大群朋友给他庆祝生日，热热闹闹的度过这一天，这样一比可能，就显得略微有点孤单了。一件很现实的事是，至少在现在很难出现，有朋友默默的给你准备生日礼物的事情发生了，或者说这种事情从来都没有发生过，对于大多数的点头之交，遇到一个人的生日，在动态下方发一句生日快乐，可能就是最高规格的祝福了。<br><br>
+                            可能对我来说，过生日永远是一种奢望吧。毕竟这种事情出了自己，想必也不会有别人在意了。但归根结底，生日的意义或许并没有那么重大，无非是在一年的唯一的那一天，能找到一个理由，给自己好好放一天假，好好享受难得的，完全属于你的一天。既然热闹的生日会无法实现，那就在安静的角落，度过清净且无人打扰的一天，或许也是一种，美妙的时光吧。
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        关于...初心
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            提及初心的话，或许就要说到那个老生常谈的话题了，那就是做视频的初衷。这件事其实，我更感觉是命中注定的，可能是在多方因素的影响下，才最后选择了成为一名up主。<br><br>
+							其实最开始也真的没什么目的，更多的是无聊就随便发点视频玩玩。不过后来我更多的是把这件事当作是一种足迹的记录，至少能让我在历史中留下一点曾经存在过的痕迹。再到后来就是当把这件事当作一种情感寄托之后，索性也情不自禁的把更多的精力投入在了这件事情之中。<br><br>
+							要说初心的话，我个人认为还是热爱更多一些，毕竟由兴趣驱动去做事，往往会高效的多。可能后面很长一段时间，依然会是不温不火的状态，不过这应该也足够了，可能在这方面确实没什么天赋，那就索性走一步看一步，不想那么多了。（其实我还是希望视频能火的，但大概率做不到，没那个实力，更没那个运气，索性就看开了）
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        关于...朋友
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            其实这个话题我应该是最没有资格回答的，毕竟在我的人际关系中，能称得上是朋友的人，实在是，真没几个。至少在当今这个浮躁的社会，看似稳定的社交关系其实大多都是泛泛之交，这点或许在微信里体现更明显一些，毕竟至少迄今为止我的朋友就没有一个是通过微信常联系的。<br><br>
+							可能微信的功能有且仅有去应对日常的学习和工作，真正的生活永远不在这里。或者说，大量的社交关系其实都是事件驱动的，没有事情自然也就不再联系了。在这样的情境下，其实一切的关系都是基于价值交换，如果失去了价值，自然也就没有人搭理你了，很残酷，但也很现实。这样一个浮躁的社会，想要结识一位值得深交的朋友真的很难。但我也很幸运的，认识了为数不多的几位真正的朋友，或许我也更愿意把精力花在他们身上.另外的另外，突然发现我的朋友几乎全都是QQ上认识的，这还真是个神奇的社交软件)。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="hint">💡 点击问题/查询未被注视的答案</p>
+        </div>
+    </div>
+    
+    <script>
+        // 切换页面（无条件的内部函数，只用于真正的跳转）
+        function switchPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('page' + pageNum).classList.add('active');
+            document.getElementById('btn' + pageNum).classList.add('active');
+        }
 
+        // 展开/收起问答
+        function toggleQA(element) {
+            // 关闭其他已展开的
+            document.querySelectorAll('.qa-item').forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('active');
+                }
+            });
+            // 切换当前
+            element.classList.toggle('active');
+        }
+
+        // ---------- 彩蛋点击逻辑 ----------
+        let clickCount = 0;          // 记录点击彩蛋按钮的次数
+        let eggUnlocked = false;     // 是否已经解锁（第三次点击后解锁）
+        let toastTimer = null;       // 用于隐藏提示的计时器
+
+        // 显示临时提示消息
+        function showMessage(text) {
+            // 移除已存在的 toast
+            const existingToast = document.querySelector('.toast-message');
+            if (existingToast) existingToast.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            
+            // 清除之前的定时器
+            if (toastTimer) clearTimeout(toastTimer);
+            
+            // 2.5秒后自动消失
+            toastTimer = setTimeout(() => {
+                const toastToRemove = document.querySelector('.toast-message');
+                if (toastToRemove) toastToRemove.remove();
+                toastTimer = null;
+            }, 2500);
+        }
+
+        // 处理第一页按钮（直接跳转并重置计数器？需求没有提及，但为了更好的用户体验，
+        // 我们可以在点击第一页时，不重置彩蛋计数。但按照常理，用户一直点彩蛋，计数器增加；
+        // 点击第一页不影响彩蛋计数。如果觉得需要重置，可以加入重置逻辑，但题目没有要求。
+        // 这里保留计数器独立增长，不重置。但为了更贴近“拒绝访问”的语境，
+        // 或许用户切换到第一页再切回来不应该重新计数，所以计数器保持不变是合理的。）
+        function handleFirstPage() {
+            switchPage(1);
+        }
+
+        // 核心：处理彩蛋按钮点击
+        function handleEasterEgg() {
+            // 如果已经解锁，直接跳转
+            if (eggUnlocked) {
+                switchPage(2);
+                return;
+            }
+
+            // 未解锁：增加点击次数
+            clickCount++;
+
+            if (clickCount === 1) {
+                showMessage('❌ 没有彩蛋 拒绝访问');
+                // 停留在当前页面（第一页）
+                // 确保第一页是激活状态（防止按钮样式混乱）
+                if (!document.getElementById('page1').classList.contains('active')) {
+                    switchPage(1);
+                } else {
+                    // 如果已经在第一页，手动高亮按钮
+                    document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+                    document.getElementById('btn1').classList.add('active');
+                }
+            }
+            else if (clickCount === 2) {
+                showMessage('😤 你烦不烦啊,真没有彩蛋');
+                // 同样留在第一页
+                if (!document.getElementById('page1').classList.contains('active')) {
+                    switchPage(1);
+                } else {
+                    document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+                    document.getElementById('btn1').classList.add('active');
+                }
+            }
+            else if (clickCount === 3) {
+                // 第三次点击：显示解锁消息，解锁彩蛋，并跳转至彩蛋页
+                showMessage('😠 真服了你了,算了,彩蛋你想看就看吧');
+                eggUnlocked = true;          // 解锁
+                switchPage(2);                // 跳转第二页
+            }
+            // 如果超过3次，且已解锁，后续点击直接跳转（已解锁逻辑在最上面处理）
+        }
+
+        // 初始化：确保点击第一页时，也能正确激活页面，并且不会干扰彩蛋计数器
+        // 同时加一个额外保护：如果通过其他方式（比如直接访问链接）可能会使得按钮状态错乱，但我们的切换都走函数，ok。
+        // 另外，如果用户先解锁，之后按钮一直可用。需求满足。
+    </script>
+</body>
 </html>
