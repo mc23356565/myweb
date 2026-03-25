@@ -300,6 +300,108 @@
             from { opacity: 0; transform: translate(-50%, -20px); }
             to { opacity: 1; transform: translate(-50%, 0); }
         }
+
+        /* ---------- 自定义模态框 (5分钟弹窗) ---------- */
+        .custom-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .custom-dialog {
+            background: white;
+            width: 90%;
+            max-width: 460px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            padding: 28px 24px 32px;
+            text-align: center;
+            animation: fadeSlideUp 0.2s ease;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .custom-dialog p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1e2a3a;
+            margin: 12px 0;
+        }
+        .custom-dialog .dialog-message {
+            margin-bottom: 20px;
+        }
+        .underline-input {
+            border: none;
+            border-bottom: 2px dashed #667eea;
+            width: 100%;
+            font-size: 18px;
+            padding: 8px 4px;
+            margin: 16px 0 12px;
+            outline: none;
+            text-align: center;
+            background: #fef9e6;
+            border-radius: 0;
+            transition: 0.2s;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        .underline-input:focus {
+            border-bottom-color: #764ba2;
+            background: #fff5e0;
+        }
+        .dialog-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .dialog-btn:hover {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+        /* 右下角隐藏按钮 */
+        .secret-time-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(102,126,234,0.15);
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(102,126,234,0.4);
+            cursor: pointer;
+            z-index: 1100;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #667eea;
+            opacity: 0.3;
+        }
+        .secret-time-btn:hover {
+            opacity: 0.8;
+            background: rgba(102,126,234,0.3);
+            transform: scale(1.02);
+        }
+        /* 确保按钮在任何页面都能点，但只有计时生效期间有实际效果 */
     </style>
 </head>
 <body>
@@ -521,9 +623,15 @@
         </div>
     </div>
     
+    <!-- 右下角隐藏按钮 (时间+1分钟) -->
+    <div class="secret-time-btn" id="secretPlusBtn" title="+1分钟">⏳+1</div>
+    
     <script>
-        // 切换页面（无条件的内部函数，只用于真正的跳转）
+        // ======================= 原有功能 (完全保留) =======================
         function switchPage(pageNum) {
+            // 获取切换前的激活页面 (用于清理计时)
+            const oldActivePage = document.querySelector('.page.active');
+            
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
@@ -532,40 +640,39 @@
             });
             document.getElementById('page' + pageNum).classList.add('active');
             document.getElementById('btn' + pageNum).classList.add('active');
+            
+            // ********** 彩蛋计时管理 **********
+            // 如果新页面是第二页，启动/重置计时器 (重置从头开始)
+            if (pageNum === 2) {
+                startSecondPageTimer();
+            } 
+            // 如果离开第二页（新页面不是第二页，且之前页面是第二页）则停止计时并清零
+            else if (oldActivePage && oldActivePage.id === 'page2') {
+                stopAndResetSecondPageTimer();
+            }
         }
 
-        // 展开/收起问答
         function toggleQA(element) {
-            // 关闭其他已展开的
             document.querySelectorAll('.qa-item').forEach(item => {
                 if (item !== element) {
                     item.classList.remove('active');
                 }
             });
-            // 切换当前
             element.classList.toggle('active');
         }
 
-        // ---------- 彩蛋点击逻辑 ----------
-        let clickCount = 0;          // 记录点击彩蛋按钮的次数
-        let eggUnlocked = false;     // 是否已经解锁（第三次点击后解锁）
-        let toastTimer = null;       // 用于隐藏提示的计时器
+        let clickCount = 0;
+        let eggUnlocked = false;
+        let toastTimer = null;
 
-        // 显示临时提示消息
         function showMessage(text) {
-            // 移除已存在的 toast
             const existingToast = document.querySelector('.toast-message');
             if (existingToast) existingToast.remove();
-            
             const toast = document.createElement('div');
             toast.className = 'toast-message';
             toast.textContent = text;
             document.body.appendChild(toast);
-            
-            // 清除之前的定时器
             if (toastTimer) clearTimeout(toastTimer);
-            
-            // 2.5秒后自动消失
             toastTimer = setTimeout(() => {
                 const toastToRemove = document.querySelector('.toast-message');
                 if (toastToRemove) toastToRemove.remove();
@@ -573,41 +680,27 @@
             }, 2500);
         }
 
-        // 处理第一页按钮（直接跳转并重置计数器？需求没有提及，但为了更好的用户体验，
-        // 我们可以在点击第一页时，不重置彩蛋计数。但按照常理，用户一直点彩蛋，计数器增加；
-        // 点击第一页不影响彩蛋计数。如果觉得需要重置，可以加入重置逻辑，但题目没有要求。
-        // 这里保留计数器独立增长，不重置。但为了更贴近“拒绝访问”的语境，
-        // 或许用户切换到第一页再切回来不应该重新计数，所以计数器保持不变是合理的。）
         function handleFirstPage() {
             switchPage(1);
         }
 
-        // 核心：处理彩蛋按钮点击
         function handleEasterEgg() {
-            // 如果已经解锁，直接跳转
             if (eggUnlocked) {
                 switchPage(2);
                 return;
             }
-
-            // 未解锁：增加点击次数
             clickCount++;
-
             if (clickCount === 1) {
                 showMessage('❌ 没有彩蛋 拒绝访问');
-                // 停留在当前页面（第一页）
-                // 确保第一页是激活状态（防止按钮样式混乱）
                 if (!document.getElementById('page1').classList.contains('active')) {
                     switchPage(1);
                 } else {
-                    // 如果已经在第一页，手动高亮按钮
                     document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
                     document.getElementById('btn1').classList.add('active');
                 }
             }
             else if (clickCount === 2) {
                 showMessage('😤 你烦不烦啊,真没有彩蛋');
-                // 同样留在第一页
                 if (!document.getElementById('page1').classList.contains('active')) {
                     switchPage(1);
                 } else {
@@ -616,17 +709,190 @@
                 }
             }
             else if (clickCount === 3) {
-                // 第三次点击：显示解锁消息，解锁彩蛋，并跳转至彩蛋页
                 showMessage('😠 真服了你了,算了,彩蛋你想看就看吧');
-                eggUnlocked = true;          // 解锁
-                switchPage(2);                // 跳转第二页
+                eggUnlocked = true;
+                switchPage(2);
             }
-            // 如果超过3次，且已解锁，后续点击直接跳转（已解锁逻辑在最上面处理）
         }
-
-        // 初始化：确保点击第一页时，也能正确激活页面，并且不会干扰彩蛋计数器
-        // 同时加一个额外保护：如果通过其他方式（比如直接访问链接）可能会使得按钮状态错乱，但我们的切换都走函数，ok。
-        // 另外，如果用户先解锁，之后按钮一直可用。需求满足。
+        
+        // ======================= 新增: 彩蛋页面计时器 (5分钟 + 隐藏按钮+1分钟) =======================
+        let secondPageTimerInterval = null;     // 计时器id
+        let secondPageTimeLeft = 300;            // 剩余秒数 (5分钟 = 300秒)
+        let secondPageTimerActive = false;       // 是否处于计时活跃状态
+        let secondPageCompleted = false;         // 是否已完成5分钟弹窗 (避免重复弹窗)
+        let activeDialogElement = null;          // 当前弹窗DOM
+        
+        // 清除弹窗 (如果有)
+        function closeActiveDialog() {
+            if (activeDialogElement) {
+                activeDialogElement.remove();
+                activeDialogElement = null;
+            }
+        }
+        
+        // 保存名字到localStorage (记录拜访者)
+        function saveVisitorName(name) {
+            if (!name || name.trim() === "") return;
+            const storageKey = "secret_visitors_list";
+            let visitors = [];
+            const existing = localStorage.getItem(storageKey);
+            if (existing) {
+                try {
+                    visitors = JSON.parse(existing);
+                    if (!Array.isArray(visitors)) visitors = [];
+                } catch(e) { visitors = []; }
+            }
+            visitors.push({ name: name.trim(), timestamp: new Date().toISOString() });
+            localStorage.setItem(storageKey, JSON.stringify(visitors));
+            // 可选静默成功，不做弹窗提示
+        }
+        
+        // 显示5分钟到达的对话框 (带下划线输入框)
+        function showFiveMinuteDialog() {
+            if (activeDialogElement) return; // 避免重复弹窗
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-dialog-overlay';
+            const dialog = document.createElement('div');
+            dialog.className = 'custom-dialog';
+            dialog.innerHTML = `
+                <div class="dialog-message">
+                    <p>照这个时间来看，你应该是把所有文字看完了吧。</p>
+                    <p>真有耐心，同时也谢谢你愿意去看我的各种碎碎念。</p>
+                    <p>如果可以，在这里留下你的名字吧</p>
+                    <input type="text" class="underline-input" id="visitorNameInput" placeholder="__________________" autocomplete="off">
+                    <p style="font-size:13px; color:#7f8c8d;">网页会铭记每一个深刻的拜访者</p>
+                </div>
+                <button class="dialog-btn" id="confirmVisitorBtn">留下印记 ✨</button>
+            `;
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            activeDialogElement = overlay;
+            
+            const inputField = dialog.querySelector('#visitorNameInput');
+            const confirmBtn = dialog.querySelector('#confirmVisitorBtn');
+            
+            const closeAndSave = () => {
+                let name = inputField ? inputField.value.trim() : "";
+                if (name === "") {
+                    // 未输入名字也可关闭，但不保存空名字
+                    name = "匿名访客";
+                }
+                saveVisitorName(name);
+                closeActiveDialog();
+            };
+            
+            confirmBtn.addEventListener('click', closeAndSave);
+            // 按回车同样保存
+            if (inputField) {
+                inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        closeAndSave();
+                    }
+                });
+                // 自动聚焦
+                setTimeout(() => inputField.focus(), 50);
+            }
+        }
+        
+        // 停止计时并完全重置状态 (离开页面时调用)
+        function stopAndResetSecondPageTimer() {
+            if (secondPageTimerInterval) {
+                clearInterval(secondPageTimerInterval);
+                secondPageTimerInterval = null;
+            }
+            secondPageTimerActive = false;
+            secondPageCompleted = false;
+            secondPageTimeLeft = 300;   // 重置为5分钟
+            closeActiveDialog();        // 若弹窗未关闭则关闭
+        }
+        
+        // 增加一分钟 (隐藏按钮调用)
+        function addOneMinuteToTimer() {
+            // 只有在计时活跃、尚未完成5分钟弹窗、且计时器存在的情况下才增加
+            if (!secondPageTimerActive || secondPageCompleted) return;
+            if (secondPageTimerInterval === null) return;
+            // 增加60秒
+            secondPageTimeLeft += 60;
+            // 最大上限不做严格限制，但避免溢出 (最多比如1小时)
+            if (secondPageTimeLeft > 3600) secondPageTimeLeft = 3600;
+            // 显示一个小反馈 (可选，用极简toast)
+            const miniToast = document.createElement('div');
+            miniToast.className = 'toast-message';
+            miniToast.style.background = "rgba(102,126,234,0.9)";
+            miniToast.textContent = '⏲️ 静阅时间 +1分钟';
+            document.body.appendChild(miniToast);
+            setTimeout(() => miniToast.remove(), 1200);
+        }
+        
+        // 开始计时 (进入彩蛋页面时调用，会完全重置旧计时，重新开始)
+        function startSecondPageTimer() {
+            // 无论之前什么状态，先彻底清理旧计时器、弹窗
+            if (secondPageTimerInterval) {
+                clearInterval(secondPageTimerInterval);
+                secondPageTimerInterval = null;
+            }
+            closeActiveDialog();
+            secondPageTimeLeft = 300;          // 重置5分钟
+            secondPageCompleted = false;
+            secondPageTimerActive = true;
+            
+            // 启动新计时器
+            secondPageTimerInterval = setInterval(() => {
+                // 如果页面不再活跃或已标记完成或计时已停止，则不再倒计时
+                if (!secondPageTimerActive || secondPageCompleted) {
+                    return;
+                }
+                // 检查当前page2是否真的是激活页面 (防止后台残留)
+                const page2Elem = document.getElementById('page2');
+                if (!page2Elem || !page2Elem.classList.contains('active')) {
+                    // 如果页面已经不在激活状态，主动停止计时 (安全机制)
+                    stopAndResetSecondPageTimer();
+                    return;
+                }
+                
+                if (secondPageTimeLeft <= 0) {
+                    // 时间到，触发弹窗，并标记完成，停止倒计时
+                    if (!secondPageCompleted) {
+                        secondPageCompleted = true;
+                        secondPageTimerActive = false;  // 停止进一步倒计时
+                        if (secondPageTimerInterval) {
+                            clearInterval(secondPageTimerInterval);
+                            secondPageTimerInterval = null;
+                        }
+                        showFiveMinuteDialog();
+                    }
+                } else {
+                    secondPageTimeLeft--;
+                }
+            }, 1000);
+        }
+        
+        // 监听页面切换可能由于其他脚本调用，确保离开时清理；已集成在switchPage中。
+        // 额外：若页面加载时初始第二页未解锁不可能为激活，无需额外处理。
+        // 隐藏按钮事件绑定
+        const secretBtn = document.getElementById('secretPlusBtn');
+        if (secretBtn) {
+            secretBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addOneMinuteToTimer();
+            });
+        }
+        
+        // 补充一个额外的安全监听：若用户通过浏览器的后退/前进等操作可能引起页面显示变化，用MutationObserver过于复杂，
+        // 但switchPage已覆盖按钮切换场景。由于原有程序里没有其他方式改变页面，完全覆盖。
+        // 初始化时确认当前页面不是page2 (默认page1)
+        // 确保没有计时器意外启动
+        if (document.getElementById('page2').classList.contains('active')) {
+            // 极端情况: 若某时刻直接激活page2 (一般不会初始激活，但保险)
+            startSecondPageTimer();
+        } else {
+            stopAndResetSecondPageTimer();
+        }
+        
+        // 为保持全局统一，稍微修改原有页面切换函数已经增强，完全满足要求。
+        console.log("增强功能已部署：彩蛋页面计时5分钟 + 右下角隐藏按钮增加1分钟 + 本地记录访客");
     </script>
 </body>
 </html>
