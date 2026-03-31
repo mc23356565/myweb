@@ -352,7 +352,6 @@
             border-bottom-color: #764ba2;
             background: #fff5e0;
         }
-        /* 留言框样式 */
         .message-textarea {
             width: 100%;
             padding: 10px;
@@ -623,13 +622,17 @@
 							这么多问题前前后后其实收集了快一年，大概率就是我这一年各种想法的记忆集合体，大部分摘自晚上有时候闲的没事写的备忘录。写出来这么多东西，其实是不太想让别人看的，但有句古话说得好，你在别人心里远没有你想象的重要，而在我眼里大部分人不过也是一个陌生人，所以也不怕被别人看见了，毕竟你没那个耐心和精力，也不用遮遮掩掩了。<br><br>
 							最后的话也不是什么大问题，这些话应该是生日前一天晚上写的，看来看我之前写的东西，其实有些事情想法又转变了)。但无所谓了，懒得改了。后面可能也会很忙吧，四月中旬还要去打数学竞赛，我真的真的真的很想拿奖，我真的不想让那么多人对我失望，在这方面我称不上是聪明人，所以，只能在天时地利的时候，尽我所能完成这场试炼了。<br><br>
 							今年也挺意外的，我本来以为不会收到礼物了，可还有粉丝寄来的一些小装饰品，真的挺欣慰的，起码让我不那么孤独了吧。如果有机会，我真的很想找一天时间，抛弃所有的社交软件，和自己度过这安稳的一天，那种感觉真的很好。与人打交道真的太难了，很累，很烦。<br><br>
-							最后还有什么想说的呢，大概率没了。不过如果你看到这里之后，如果还对网页里附赠的文件感到疑惑，或许可以去翻翻，一些历史信息。或许是历史稿件，历史动态，或者...历史朋友圈，也许会找到新的答案。
+							最后还有什么想说的呢，大概率没了。不过如果你看到这里之后，如果还对网页里附赠的文件感到疑惑，或许可以去翻翻，一些历史信息。或许是历史稿件，历史动态，或者...历史朋友圈，也许会找到新的答案。<br><br>
+							很显然，这个网站一定没有表面那么简单。更显然的是，创建网页的显然是没经费部署服务器，直接用的免费github的网页功能，要知道在这里所有的html文件都是开源的😀。应该没有人会闲的去翻原html文件吧，应该不会。
                         </div>
                     </div>
                 </div>
             </div>
+            <p class="hint">💡 点击问题/查询未被注视的答案</p>
+        </div>
+    </div>
     
-    <div class="secret-time-btn" id="secretPlusBtn" title="+1分钟">⏳+1</div>
+    <div class="secret-time-btn" id="secretPlusBtn" title="+1分钟">?</div>
     
     <script>
         // ======================= EmailJS 配置 =======================
@@ -723,7 +726,6 @@
             }
         }
 
-        // 保存名字和留言到 localStorage
         function saveVisitorToLocal(name, message) {
             if (!name || name.trim() === "") name = "匿名访客";
             const storageKey = "secret_visitors_list";
@@ -740,7 +742,6 @@
             localStorage.setItem(storageKey, JSON.stringify(visitors));
         }
         
-        // 发送邮件（包含留言）
         async function sendEmailWithNameAndMessage(name, message) {
             if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
                 console.warn("EmailJS 未配置，邮件未发送。");
@@ -761,7 +762,6 @@
             }
         }
 
-        // 显示5分钟弹窗（含留言框）
         function showFiveMinuteDialog() {
             if (activeDialogElement) return;
             const overlay = document.createElement('div');
@@ -793,17 +793,12 @@
                 if (name === "") name = "匿名访客";
                 if (message === "") message = "(未留言)";
                 
-                // 保存到本地存储
                 saveVisitorToLocal(name, message);
                 showMessage(`✨ 感谢 ${name}，你的留言已被铭记 ✨`);
                 
-                // 发送邮件
                 sendEmailWithNameAndMessage(name, message).then(success => {
-                    if (success) {
-                        console.log("邮件已发送至 " + RECIPIENT_EMAIL);
-                    } else {
-                        console.warn("邮件发送失败，但信息已保存在本地");
-                    }
+                    if (success) console.log("邮件已发送至 " + RECIPIENT_EMAIL);
+                    else console.warn("邮件发送失败，但信息已保存在本地");
                 });
                 
                 closeActiveDialog();
@@ -845,16 +840,12 @@
             }
         }
 
+        // 修改后的加时间函数：无任何提示，静默增加60秒
         function addOneMinute() {
             if (!secondPageTimerActive || secondPageCompleted) return;
             accumulatedSeconds += 60;
             checkAndTriggerDialog();
-            const miniToast = document.createElement('div');
-            miniToast.className = 'toast-message';
-            miniToast.style.background = "rgba(102,126,234,0.9)";
-            miniToast.textContent = '⏲️ 静阅时间 +1分钟';
-            document.body.appendChild(miniToast);
-            setTimeout(() => miniToast.remove(), 1200);
+            // 移除所有用户可见的反馈（无toast、无动画）
         }
 
         function startSecondPageTimer() {
