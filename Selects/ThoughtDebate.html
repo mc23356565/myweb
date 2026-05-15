@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>个性思辨 · 分类选择 | 空曙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #ece2d4;
+            background: linear-gradient(145deg, #e8dfcf 0%, #dbceb8 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            border-bottom: 2px solid #cfbc9c;
+            padding-bottom: 1rem;
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #42351f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .back-home {
+            background: #9a7c5a;
+            border: none;
+            color: #fef3e4;
+            padding: 0.55rem 1.4rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-home:hover {
+            background: #755f41;
+            transform: translateY(-2px);
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .choice-card {
+            background: #fffbf2;
+            border-radius: 2rem;
+            border: 1px solid #ecdbbc;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .choice-card:hover {
+            transform: translateY(-8px);
+            background: #ffffff;
+            border-color: #c2a172;
+            box-shadow: 0 20px 28px -12px rgba(70,45,20,0.2);
+        }
+        .choice-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+        .choice-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4a311c;
+            margin-bottom: 0.5rem;
+        }
+        .choice-desc {
+            color: #7a6244;
+            line-height: 1.5;
+            margin: 0.8rem 0;
+        }
+        .enter-choice {
+            background: #b2885c;
+            border: none;
+            color: white;
+            padding: 0.45rem 1.3rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            margin-top: 0.6rem;
+        }
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #b19674;
+        }
+        @media (max-width: 650px) {
+            .choice-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <div class="page-title">
+            🧠 个性思辨 · 选择路径
+        </div>
+        <button class="back-home" id="backToMainBtn">🏠 返回主厅 · 记忆回廊</button>
+    </div>
+    <p style="margin-bottom: 1rem; color: #775e3f; text-align: center;">两条脉络，记录思维的两种温度</p>
+    <div class="choice-grid">
+        <div class="choice-card" id="philosophyCard">
+            <div class="choice-icon">⚖️🧠</div>
+            <div class="choice-title">思辨话题</div>
+            <div class="choice-desc">深度哲思、价值辩论、抽象命题与逻辑森林。存放那些需要反复推敲的思绪。</div>
+            <button class="enter-choice">进入思辨辑录 →</button>
+        </div>
+        <div class="choice-card" id="dailyCard">
+            <div class="choice-icon">📖🌿</div>
+            <div class="choice-title">日常想法</div>
+            <div class="choice-desc">碎碎念、生活观察、情绪切片。很无聊的日常，不过以一种新的方式记录罢了。</div>
+            <button class="enter-choice">进入日常手帖 →</button>
+        </div>
+    </div>
+    <footer>⚬ 生命绚烂，别被黑暗压垮... ⚬</footer>
+</div>
+<script>
+    document.getElementById('philosophyCard').addEventListener('click', () => {
+        window.location.href = '../Thoughts/ThoughtDebatePhilosophy.html';
+    });
+    document.getElementById('dailyCard').addEventListener('click', () => {
+        window.location.href = '../Thoughts/ThoughtDebateDaily.html';
+    });
+    document.getElementById('backToMainBtn').addEventListener('click', () => {
+        window.location.href = '../Secret.html';
+    });
+</script>
+</body>
+</html>

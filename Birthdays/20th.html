@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📜 历史档案 · 廿载回声 | 空曙</title>
+    <!-- EmailJS SDK (保留原始通讯能力) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #2c3e4e 0%, #1a2a36 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: #fef9ef;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 90vh;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #d9c8a9;
+        }
+        
+        /* 历史印章风格 */
+        .container::before {
+            content: "⚜️ 时光存档 ⚜️";
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 12px;
+            color: #c0a56b;
+            opacity: 0.4;
+            font-family: monospace;
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .nav {
+            background: #ece4d7;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            border-bottom: 2px solid #d6c5ae;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .nav button {
+            background: transparent;
+            color: #4a3b2c;
+            border: 1.5px solid #b89a7a;
+            padding: 10px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.25s;
+            backdrop-filter: blur(2px);
+            font-family: inherit;
+        }
+        
+        .nav button:hover {
+            background: #b89a7a;
+            color: white;
+            transform: translateY(-2px);
+            border-color: #8b6e4b;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .nav button.active {
+            background: #9b7b5c;
+            color: white;
+            border-color: #6e543a;
+        }
+        
+        /* 返回主页按钮样式微调，更具引导性 */
+        .back-home-btn {
+            background: #5c6e5a !important;
+            border-color: #3e553b !important;
+            color: #fef0db !important;
+        }
+        .back-home-btn:hover {
+            background: #3f553c !important;
+            transform: translateY(-2px);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.35s ease;
+            padding: 40px;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .download-page {
+            text-align: center;
+            padding-top: 50px;
+        }
+        
+        .download-page h1 {
+            color: #3c2a1f;
+            font-size: 32px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .download-page .subtitle {
+            color: #6e5a45;
+            margin-bottom: 45px;
+            font-size: 15px;
+            border-left: 3px solid #d4b88c;
+            padding-left: 16px;
+            display: inline-block;
+            background: #fff6ea;
+            border-radius: 30px;
+            padding: 8px 24px;
+        }
+        
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 28px;
+            background: #fff7ef;
+            border-radius: 28px;
+            transition: all 0.25s;
+            border: 1px solid #ecdbba;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.02);
+        }
+        
+        .file-item:hover {
+            background: #fff1e2;
+            transform: translateX(6px);
+            border-color: #cfb28b;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        
+        .file-icon {
+            font-size: 36px;
+        }
+        
+        .file-name {
+            color: #4d3822;
+            font-weight: 650;
+            font-size: 18px;
+        }
+        
+        .download-btn {
+            background: #a28464;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .download-btn:hover {
+            background: #7f6242;
+            transform: scale(1.02);
+        }
+        
+        /* QA区域 古卷风格 */
+        .qa-page {
+            padding: 30px 40px 45px;
+        }
+        
+        .qa-header {
+            text-align: center;
+            margin-bottom: 32px;
+            background: #f7efdf;
+            border-radius: 48px;
+            padding: 20px 20px;
+            border: 1px solid #e0cfb4;
+        }
+        
+        .qa-header h2 {
+            color: #4f3a25;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+        
+        .qa-header p {
+            color: #7f684d;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 85%;
+            margin: 0 auto;
+        }
+        
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        
+        .qa-item {
+            background: #ffffffea;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #e3d2bc;
+            transition: all 0.2s;
+        }
+        
+        .qa-item:hover {
+            box-shadow: 0 6px 14px rgba(87, 62, 37, 0.08);
+        }
+        
+        .question {
+            padding: 18px 24px;
+            font-weight: 600;
+            color: #3f2d1b;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            background: #fefaf3;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        .question:hover {
+            background: #f5ede1;
+        }
+        
+        .question::before {
+            content: "🗝️";
+            background: #cbbd9e;
+            color: #2e241a;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            background: #e2d1ba;
+        }
+        
+        .toggle-icon {
+            margin-left: auto;
+            color: #aa8c64;
+            font-size: 14px;
+            transition: transform 0.25s;
+        }
+        
+        .qa-item.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.3s ease;
+            background: #fef7ec;
+        }
+        
+        .qa-item.active .answer {
+            max-height: 750px;
+            overflow-y: auto;
+            padding: 18px 28px 24px 70px;
+        }
+        
+        .answer-content {
+            color: #4a3a28;
+            line-height: 1.75;
+            font-size: 14.5px;
+        }
+        
+        .answer::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .answer::-webkit-scrollbar-track {
+            background: #ede0cf;
+            border-radius: 6px;
+        }
+        
+        .answer::-webkit-scrollbar-thumb {
+            background: #b28b60;
+            border-radius: 6px;
+        }
+        
+        .hint {
+            text-align: center;
+            color: #af936e;
+            font-size: 12px;
+            margin-top: 28px;
+            font-style: italic;
+        }
+        
+        .toast-message {
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c2b26e6;
+            backdrop-filter: blur(8px);
+            color: #ffecce;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            border: 1px solid #bb9a6e;
+            animation: slideDownFade 0.25s ease;
+            white-space: nowrap;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        .custom-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(28, 20, 12, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .custom-dialog {
+            background: #fff6ea;
+            width: 90%;
+            max-width: 460px;
+            border-radius: 48px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.4);
+            padding: 28px 26px 34px;
+            text-align: center;
+            border: 1px solid #e5cfb0;
+            animation: fadeSlideUp 0.2s ease;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .custom-dialog p {
+            font-size: 15px;
+            line-height: 1.55;
+            color: #3e2d1d;
+        }
+        .underline-input {
+            border: none;
+            border-bottom: 2px dashed #b69464;
+            width: 100%;
+            font-size: 18px;
+            padding: 8px 6px;
+            margin: 16px 0 10px;
+            outline: none;
+            text-align: center;
+            background: #fef3e2;
+            border-radius: 20px;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .underline-input:focus {
+            border-bottom-color: #8b6946;
+            background: #fff0df;
+        }
+        .message-textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0 12px;
+            border: 1px solid #dfc9ae;
+            border-radius: 24px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            background: #fffcf5;
+        }
+        .message-textarea:focus {
+            border-color: #b68b54;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(182, 139, 84, 0.2);
+        }
+        .dialog-btn {
+            background: linear-gradient(145deg, #9e7c5a, #836645);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 80px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+        .dialog-btn:hover {
+            background: #6f543a;
+            transform: scale(0.96);
+        }
+        .secret-time-btn {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            width: 48px;
+            height: 48px;
+            background: #ab8b64b3;
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            border: 1px solid #e5caa7;
+            cursor: pointer;
+            z-index: 1100;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fdf4e2;
+            font-weight: bold;
+            opacity: 0.5;
+        }
+        .secret-time-btn:hover {
+            opacity: 1;
+            background: #c9aa7e;
+            transform: scale(1.02);
+        }
+        /* 历史标注 */
+        .archive-badge {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            font-size: 11px;
+            background: #d9c8b4;
+            padding: 4px 12px;
+            border-radius: 40px;
+            color: #4a3622;
+            font-family: monospace;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 12;
+        }
+        @media (max-width: 650px) {
+            .page { padding: 28px 18px; }
+            .qa-item.active .answer { padding: 16px 16px 20px 48px; }
+            .question { padding: 14px 18px; }
+            .nav button { padding: 8px 18px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 历史档案徽章 -->
+        <div class="archive-badge">📀 20th · 遗响档案 | 2026 📀</div>
+        
+        <div class="nav">
+            <!-- 返回主页面按钮：跳转至 Secret.html（上一级目录） -->
+            <button onclick="goBackToSecret()" class="back-home-btn" style="background:#6a5a48; border-color:#4f3e2e;">🏠 重返主站</button>
+            <button onclick="handleFirstPage()" id="btn1" class="active">📦 尘封文件 📦</button>
+            <button onclick="handleEasterEgg()" id="btn2">🎭 时光彩蛋 🎭</button>
+        </div>
+        
+        <!-- 页面1：下载区 -->
+        <div id="page1" class="page active download-page">
+            <h1>📁 废墟中的回响</h1>
+            <p class="subtitle">这座站点曾封存于记忆角落，如今以历史形态陈列。下方是昔日的遗稿与贺图，若你抵达此处，已是时光的见证者。</p>
+            
+            <div class="file-list">
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">📜</span>
+                        <span class="file-name">Fatal Error · 残篇</span>
+                    </div>
+                    <!-- 资源路径已改为 Texts 文件夹 -->
+                    <a href="../Texts/Error.txt" download class="download-btn">拓印残页</a>
+                </div>
+                
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">🖼️</span>
+                        <span class="file-name">廿岁贺图 · 遗影</span>
+                    </div>
+                    <!-- 资源路径已改为 Pictures 文件夹 -->
+                    <a href="../Pictures/生日贺图.jpg" download class="download-btn">观览旧影</a>
+                </div>
+            </div>
+            <p style="margin-top: 38px; font-size: 12px; color: #b2916e;">⚙️ 注：文件存放于 <span style="font-family: monospace;">Texts/</span> 与 <span style="font-family: monospace;">Pictures/</span> 目录，与 Birthdays 文件夹同级。</p>
+        </div>
+        
+        <!-- 页面2：问答遗迹 / 彩蛋内容 -->
+        <div id="page2" class="page qa-page">
+            <div class="qa-header">
+                <h2>🗝️ 废弃的密室手札</h2>
+                <p>这个页面是原本生日连环解密的废案，所有问题与回答皆来自“读评论”未曾面世的私密存档。<br>
+                现以历史文献形式陈列，每一个字都是过去心境的真实刻印。如偶入此间，静阅即安。</p>
+            </div>
+            
+            <div class="qa-list">
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        今年生日有什么想法吗
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            前几年的时候就有人问我，今年生日打算去哪庆祝。其实说实在的，这个问题对我来说，还是过于难以回答了。至少在我记忆里，10岁之后就没有再和别人一起热闹的庆祝生日了，最主要的原因，可能是因为，实在找不到，能跟我分享快乐的，所谓的朋友了。<br><br>
+                            或许有时候我也会羡慕有的人，能有一大群朋友给他庆祝生日，热热闹闹的度过这一天，这样一比可能，就显得略微有点孤单了。一件很现实的事是，至少在现在很难出现，有朋友默默的给你准备生日礼物的事情发生了，或者说这种事情从来都没有发生过，对于大多数的点头之交，遇到一个人的生日，在动态下方发一句生日快乐，可能就是最高规格的祝福了。<br><br>
+                            可能对我来说，过生日永远是一种奢望吧。毕竟这种事情出了自己，想必也不会有别人在意了。但归根结底，生日的意义或许并没有那么重大，无非是在一年的唯一的那一天，能找到一个理由，给自己好好放一天假，好好享受难得的，完全属于你的一天。既然热闹的生日会无法实现，那就在安静的角落，度过清净且无人打扰的一天，或许也是一种，美妙的时光吧。
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        做这一行你的初心是什么
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            提及初心的话，或许就要说到那个老生常谈的话题了，那就是做视频的初衷。这件事其实，我更感觉是命中注定的，可能是在多方因素的影响下，才最后选择了成为一名up主。<br><br>
+							其实最开始也真的没什么目的，更多的是无聊就随便发点视频玩玩。不过后来我更多的是把这件事当作是一种足迹的记录，至少能让我在历史中留下一点曾经存在过的痕迹。再到后来就是当把这件事当作一种情感寄托之后，索性也情不自禁的把更多的精力投入在了这件事情之中。<br><br>
+							要说初心的话，我个人认为还是热爱更多一些，毕竟由兴趣驱动去做事，往往会高效的多。可能后面很长一段时间，依然会是不温不火的状态，不过这应该也足够了，可能在这方面确实没什么天赋，那就索性走一步看一步，不想那么多了。（其实我还是希望视频能火的，但大概率做不到，没那个实力，更没那个运气，索性就看开了）
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        为什么网名叫空曙
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            空曙这个名字，当时也是有一点想法的。对我来说，我不太喜欢前去那些人员密集的公共场所，还是更加倾向于待在无人的角落享受闲暇的时光。或许，这种状态，我个人感觉和星空有几分相似，空旷且无边界，自由且无限制。可能是源于这样的灵感，我用一个空字来描述我的理想内心状态。<br><br>
+							可一味地在无边界的空中漫游，难免会陷入虚无主义，久而久之，或许会成为空心人，那样与其说是活着，不如说是，带着最低的欲望按照既定的生存程序正常运行。这时候，可能人的心中总要有一份执念，一份对未来的希望，或者说，一份值得你毕生去追求之事。这些东西单用一个曙字，即可完美概括，或许把曙理解为曙光，更加贴切。<br><br>
+							当然有了中文网名，自然是要取一个与之相关的英文名。我首先想到的是黎明(Dawn)，如果用浪漫一点的话来说，已经光芒四射的黎明，也就是用照亮(light)的过去式来描述，组合起来就变成了Dawnlit，总而言之，我认为这是一个，寓意很好的网名，我也非常喜欢，我给我自己在网上赋予的，空曙这个身份。<br><br>
+							还有一个小插曲，仅凭空曙二字描述一个人，还是略显单调。所以最后是从一款，让我热泪盈眶的游戏中，提取出来一个让我难以忘怀的前缀——Dreemurr，意为逐梦。所以最后，完整的空曙之名，也便由此诞生了。取名的故事大概发生在初三那一段时间，挺久远了，只能说，当时还是有点年轻和中二，取的名字，怪浪漫的，不过我喜欢。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        空曙如何处理负面情绪的
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            负面情绪的话，或许是始终难以避开的一个话题，不过对我来说，这种事情很难和别人描述。或者说，向别人诉说烦恼是一种对他人极不负责的行为，因为我没有义务让别人去帮我解决我自己的情绪垃圾，所以处理情绪这种事情，大概率情况可能是，能忍就忍，就过去了。<br><br>
+							不过有时候自然会有情绪崩溃的时候，至于遇到这种情况，我可能会找个角落哭一会吧，其实也没什么丢人的，不让被人看见就可以了。再想不开了，可能会听听音乐，只能说，没什么过不去的。<br><br>
+							有人可能不会认同我这种做法，他们会问我，有事为啥不说。一方面是，不好意思，更多的可能是，我认为至少目前我还没有遇到，能无条件信任我，听我烦心事的好朋友。虽说有两三个关系很好，但我更希望的是在他们面前分享快乐，而不是说一些丧气话，因为，我也不想成为，扫兴的那一个人。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        空曙是怎么看待朋友的，朋友多吗
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            其实这个问题我是最没有发言权的，因为应该没有朋友比我还少的人了(可能都会觉得我孤僻，不好相处，不过从小到大都被别人以这样的眼光看，早也习惯了)，至于朋友的多少，这要取决于你对朋友的定义是什么。如果朋友指的是较为长期的社交关系，那这样的朋友似乎也是有一定数量的，但我认为这种关系和友谊的差距，还是过于远了。毕竟大部分的关系其实都是不同程度的价值交换，对我来说，很多人认识我无非是看我能在学习上帮助他们，对他们来说是一个廉价的解题机器，仅此而已。也不能说这种关系不好，我只能说，在我的视角里，这种情况只能说是，能叫上名的陌生人而已。不过这种关系似乎也比，所谓的同学关系，要好得多，至少我知道我在你那里，还是有利用价值的。只不过如果哪一天我失去了利用价值，这种关系可能也会瞬间断裂吧。很悲惨的一个现实是，现在的大学生活充斥着大量的虚假人际关系，所以我可能更倾向于脱离人群，远离错综复杂的关系网，去找到属于我的关系净土吧。<br><br>
+							如果上面的关系再进一步，可能就是能做到不定期的聊天，分享生活以及打游戏。这种关系我更倾向于用另一个词语描述，那就是同好，可能会有一定的信任，但我更认为这种关系下产生的更多是共同快乐，一旦涉及到一些负面情绪，这样的社交关系下似乎也显得和陌生人没两样了，可能和报喜不报忧更像一些吧。不过很难想象的是，对我来说，长这么大能达到这种关系的朋友，似乎一双手都能数的出来，而且基本全都是网友(顶级社恐发力了)，不过，我觉得，认识他们，也不赖，只需要在闲暇的时候，能产生一些共同的美好记忆，就足够了。<br><br>
+							下面应该是我所认为真正的朋友了，至少目前对我来说，能达到这个程度的朋友，似乎...只有一个人?(也不知道算不算)。如果我能愿意和你说我的心事，倾诉我的想法，可能是真的把你当自己人了，我也可以无条件的信任你，也会尽我所能在你困难的时候给你最大的帮助。不过这样的朋友似乎真的，从概率学角度来看，是无限趋近于不可能事件。至少据我的经验，大部分人对这种深度的友谊，呈排斥状态，具体表现为，回避。有时候我耗尽毕生勇气想把你当成自己人，换来的是疏远的时候，我就知道了，到此为止就好。<br><br>
+							朋友这个东西可能每个人都有不同的看法，对我来说，我并不喜欢表面的融洽与和谐，更崇尚深度的关系与陪伴。这种事情不必强求，既然遇不到，那就要意识到，人生这个战场上，你的背后空无一人，能依靠的其实只有你自己，努力去让自己变得更强，永远是最稳妥且最好走的一条路。对我来说，我自然希望交到新朋友，可我也害怕再被所谓的朋友关系道德绑架，向我一味的索取，如果你想认识我，那就多和我聊聊天，可能就熟了(可能我会不敢主动发信息，主要是真的社恐，害怕)。另外还有一点，感觉其实这种表面社交关系大概率都是微信上的，要交朋友还得是QQ权威，所以如果想认识我，不管你是谁，从QQ上聊起(夹个私货 空曙的QQ号是2576902958，这个问题答案写的实在是太长了，大概率也没人会耐心看完，所以我再夹个私货，中午或者下午，可能会生日会直播，还有两个新视频，以及在发的视频稿件中，会有一些隐藏内容，等待发掘)，一定是个明智的选择。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        做视频到现在，后悔吗
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            这个事情的话，现在已经不用说后悔不后悔了，我认为还是一种个人的道路选择，至少对我现在来说，我很荣幸能通过视频遇到许许多多的观众朋友，你们也给我带来了很多意外的乐趣，我也非常欣慰，通过我的视频，让你们获得到了多一份的快乐和收获，至少从这个角度来说，我是不会后悔的。<br><br>
+							但要说后悔的想法，倒也发生过。大概就是当你辛辛苦苦做的内容，期待他能得到良好反馈时，现实的视频数据给了你狠狠的一巴掌，然后就会开始怀疑，自己到底是不是哪里做的不太好，是不是自己水平还不够。但至少从我目前的经验来看，在不刻意蹭热度的情况下，视频的热度真的完全取决于运气。因为你永远也想不到，一个村民语视频，或者说一个人机验证视频，都能有二三十万播放。所以从这个角度来看，做自媒体这件事也无疑给我带来了许多额外的顾虑，让我不得不花费更多的时间，去把我的精力投入到已经需要凭借运气的事情上，可能在别人看来似乎也是有点不值当吧。<br><br>
+							还有个题外话，之前也有人劝过我，别再发xxx视频了，根本没人看，你要是发xxx一定能火。我之前对这种建议还会考虑一下，但现在我确定不会再听从这种意见了。我做视频的初衷，从来都不是为了火，最初的目的，就是最淳朴的，记录一个少年的成长点滴，当多年后，一个成年人重新回看他少年时做下的一个个视频，无疑是一份宝贵的精神财富。我可能永远都不会火，但我会永远做我热爱的东西无论是MC还是数学，都是我的执念，在我的人生轨迹不发生重大意外的前提下，自媒体这件事我会一直做下去，就算我，永远也不会成为，知名up主。<br><br>
+							所以总结起来，我能很自豪的说，很高兴通过我的视频认识你们，我是空曙，今后的日子，还请继续多多关照。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        空曙能教我找对象吗
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            这种事情你问一个究极寡王是不是有点不合适😡，想要对象?自己new一个去😃。<br><br>
+							好吧，不开玩笑了。虽然我没有实战经验吧，但我感觉，爱情这个东西，每个人还是有不同都看法的。在大学阶段，找对象永远是支线任务，而非核心主线。如果真的有喜欢的人，那就尝试去争取，若没有找到合适的另一半，或许提升自我才是最佳出路。<br><br>
+							至少活到现在了，以前我总认为没有什么是逻辑讲不通的，因为把逻辑捋顺了就能明白事件的合理性。但是长这么大了，大概也就是今年，我才逐渐理解了，感情这个好不讲道理的东西，很难避免的现在确实没之前那么理性了(不过该学习 该需要动脑子的时候依然是绝对理性)，可能对生活也更多抱有一种感性的幻想，不知道怎么回事，也可能我真的晚熟吧(可能这些有些人早就意识到了)。<br><br>
+							意识到倒也不是坏事，至少我明白了并非所有事情都能用逻辑解决，感情这个东西是真的，不讲道理。我也能大概体会到，如果喜欢上一个，不喜欢你的人，也会相当难受。至于到这时候肯定有人会问我，有没有喜欢的，emmm，不太想说，或者说，我更希望把这个问题的答案，作为一种新形态的薛定谔的猫。可能我也会默默喜欢上一个人，也会默默关注她，但我可能并没有勇气迈出下一步，也并不确定这到底是不是双向奔赴，毕竟一切的单相思最终永远都是苦情剧。所以在我没有准备好直面这些问题之前，这些想法依然不能打扰我日常的学习和生活，如果等未来的哪天，我主动回应了这件事，至少说明，我在这些问题上有了一个明确的答案，或者说，确定的结果。<br><br>
+							所以至少目前看来，与情感相关的事情，我依然是一个lv0的萌新，要想升级，似乎需要了解更多的人情世故，但这貌似是个死循环(你让重度社恐去社交吗，吓哭了)。总之，这终将是一场持久战，可能以后也不会有结果，我也会做好，寡一辈子的准备，当然，我也会准备等待着，我的心上人。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        想听空曙的歌单(能推荐几首歌吗)
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            我的歌曲偏好可能跟大部分人不太一样，鄙人比较喜欢听纯音乐，独爱plum的各种作曲。可能没有歌词的音乐更能引发我的一些想象，听完之后感触更加深刻。不过这几年有歌词的歌也或多或少听了几首，其中也有许多我非常喜爱的。既然话都说到这份上了，那就顺带推荐几首吧(另外，我的网易云用户id是1578261119，想看我歌单的可以自行去看，下面就列举十首我最爱的歌)<br><br>
+							第一首不得不强推的，必然是Plum的神曲Diamond in the sky(天空之钻)，这首歌曾经被我用来做纬度空岛第一期的花絮。对我来说，这首歌听着，更像是电影结束后，那令人感动的谢幕曲，总会让我想到，曾经的各种经历，然后意识到早已经过了如此多的事情，难免会想到很多思绪，自然而然的泪目了。第一次我听到这首，是实打实的哭出来了，可能也不会有人能理解，听个歌还给听哭了，但这真的很感动，尤其是当我崩溃绝望的时候，这首歌陪我度过了一个个难熬的夜晚，所以这首歌当之无愧是心中top1.<br><br>
+							第二首的更想要推荐千坂的Fragments，这首歌听起来更像是旅程的开始，一切充满未知，一个旅者开启了他自己的逐梦之旅，非常适合用来做视频中系列首集的结束曲(虽然我好像没用过)。更多是好听，治愈人心，自然也能排上心中第二名。<br><br>
+							第三名需要给到quree的One forgotten night和Thousand nights remembered,这两首可以有一个对照。前者是难忘的一夜，更多是表达了孤独和忧伤，但后者更像是在孤独与绝望中涅槃重生，可能是和我的一些经历共鸣了吧，所以我真的喜欢这两首歌。听这两首也不知道哭几次了，反正每听一次都会百感交集。<br><br>
+							第四名是带歌词的一首歌，Cloudier的Heartbeat。虽然好像是一首情歌，但是真的很甜很好听很治愈，虽然做这首歌的两个人已经分手了吧)。但是我觉得这更像是人们对美好爱情最生动的一个解释，不必多说，这里给到夯，甜甜的，好磕。<br><br>
+							第五名必须给到节奏医生的独家曲 All the times，真正的神作。特别是游戏里的演出效果，真的久久难以忘怀，咖啡很重要，最重要的是做咖啡的人，当你意识到这一点时，就已经坠入了爱情的漩涡。磨碎幻影，滴落清醒，是这种阵痛，为你我证明，正式最纯爱的无声告白，太浪漫了，加上完美的窗口演示效果，夯爆了。<br><br>
+							第六名，必须是MC的神曲Cat(Caution&Crisis Remix)，这首歌保留了C418一往的作曲特色，融入了独属于MC玩家的巨浪高潮。音乐响起那一刻，所有方块人的DNA都动了，此生不悔入MC，来世还做方块人，这就是MC，我们方块人心中最伟大的信念。<br><br>
+							第七名给到Juggernaut的Antler，这首歌的空灵感太对味了，和鹿角一样，充满奇幻色彩，像极了一场异世界冒险，魔幻是主要的色调。耐心品味，这是一场绝佳的视听盛宴。<br><br>
+							第八名就给到Undertale的Hopes and dreams，也是老生常谈的话题，梦想和希望，在这个地下世界，给了我们类似于传统，却又不同于传统的解释。配合上游戏剧情，那个情感冲击力，依然是巨大的。<br><br>
+							第九名可以给到Lazer Boomerang的time to pretend，有一说一，这首歌现在被用烂了。可当我第一次用这首歌的时候，是洞穴工厂的第一期，当时全网几乎没别人用过，可能我也算是在这首歌火之前少有发现它的人。这首歌更多是一种决心，量产一切的决心，来自一位冒险者，最坚定的信念，最深刻的执念。<br><br>
+							第十名，就给到 使一颗心免于哀伤 吧，米哈游的经典曲目，我相信流萤的故事在当时感动且治愈了很多人，包括我。至少我知道，飞蝇扑火，向死而生，这也是对梦想的一种，深刻的执念。<br><br>
+							大概就先推荐这几首歌吧，排名没有褒贬意味，大概就是想到啥写啥了，但这些绝对是我非常喜欢听的，基本都循环上百遍了，夯爆了属于是。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        请客观锐评一下你自己
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            好吧好吧，简单评价一下吧。至少从我的视角来说，有些事情还是能看清的。要说的话，还是从个人的各种缺点和小毛病说起比较好一些，毕竟先说好的方面有自恋风险()<br><br>
+							我最大的问题或许是总是以最悲观的角度去推测即将发生的事情，一件事情只要没有十足的把握就总会认为，我什么也做不到。其实我很努力的去尝试乐观了，但还是避免不了去想一些很坏的可能性。这毛病要说不大，但有些问题真要是往深处想，真的就是无休止的内耗，挺可怕的，可能比一个没有终止条件的递归还要可怕。不过这几年其实已经要好多了，至少在我的过往经历中，存在成功的样本作为数据参考，以此估算成功率也不至于让想法过于悲观。不过这样的想法其实也算是一种风险预警吧，至少仔细考虑过最坏结果，也算是能在事情真实发生的时候有一个最低的心理预期。<br><br>
+							其他的方面更多的都是一些小毛病，比如社恐，急脾气，有点过于追求完美啥的，这些是我自己能察觉的，但是大抵应该改不掉，可能这就是我的个性了。总之，这些特质，在某种意义上也让我做成了一些事情，不过搞砸的事情似乎更多()。终归是锐评，只能说，可能还有很多问题存在于我视野的盲区没有发现，或许也有很多人在背后议论我的行为，说我坏话。但他人的评价最多也只能作为多维参考因素中的其中一维数据，可能前几年我还会很在意别人的看法，不过自从经历了网暴，加上各种人的议论后，其实内心也相当麻木了，现在更多的或许只是想好好睡一觉，不想那么多杂七杂八的事，或许就是奢望了。<br><br>
+							刚刚谈的更多是不好的方面，好的方面的话，我觉得最大的优点可能就是，对自己认定的事有着莫名而来的热情和动力吧。至少我想要去实现一个想法，会为了这件事学很多东西，也不也觉得累。其实也算是我个人难得的优势了，总之，倒也不赖。其他的方面个人还是认为是从这一个特质上延伸而来的其他个性，可能是我的兴趣恰好撞上了能被普世大众所理解的东西，仅此而已。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        你认为需要面对最大的课题是什么
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+							最大的课题吗，我认为这件事在每个年龄阶段可能会有不同的感悟吧。<br><br>
+							在我初三和高三这六年，最大的课题是调整心态应对前所未有的压力。那六年，只能说，河南的中学，还是太权威了，让我度过了人生迄今为止，最灰暗的六年。某种程度上，这一段时间已经成为心理创伤了。我很不认同，到了大学会怀念高中的说法，高中除了给我带来巨大的心理负担，自我怀疑，焦虑，恐惧之外，我没有体验到所谓美好的青春，没有感受到所谓的同学情谊。让我明白的只有一件事，高中已经是一个小社会了，在一个班里，不管你干什么，只要你会成为对方的竞争对手，就会被其他人想方设法的诋毁和抹黑。我的亲身经历，至少在教室外面听到过室内所谓同学对我的肆意贬低，评价我为数学魔怔人，离开数学就是个废物...不提这个话题了，这些过往经历只会让我感到压抑。至少那六年，有四年的时光，我把唯一的心里寄托，放在了视频创作上，至少感谢我自己，在河南这个地狱模式高考下，成功生存到了最后，虽然最后结果也并不是太好，但一切都，值得了已经。<br><br>
+							呃，话题好像又扯远了，说着课题结果又聊起来高中了。至于后面的时间，我也悟出来了一个课题，或许更加宏达且有意义，而且应该是值得我一生去追寻答案的课题。或许那就是，适应孤独，其后学会与独处相伴。<br><br>
+							其实我的过往经历可能和很多人都不同，每个年龄阶段最大的特点，那就是相当狭窄的社交圈和充沛的自我思考时间。我曾经好好想过一个问题，如果把我长这么大，这么多年经历以来，所有的，在我视角中能成为朋友的人列出来，到底有几个。之前我真的很认真的算过，最后答案，也挺搞笑的，其实说到底，我这么多年就认识了，15个朋友，其中有绝大多数因为各种原因，也已经不再联系了。可能从社会学这个角度来说，我应该算是一个各种意义上的孤立节点，被单独剔除的特例吧，其实要说来也挺酷的。其实明白这件事之后，我也就接受现状了，一个人独处也有很多好处，至少我能去思考很多事情，想很多事情，做很多想做的事情。<br><br>
+							我喜欢在思绪中漫游，写下零星的想法，在未来某天这些想法或许就会成为创作的动机，成为乍现的灵感。长时间的独处，最大的弊端是会让人变得孤僻，人的劣根性就告诉了我，任何的人都需要去找一个宣泄窗口。当视频的创作无法满足我输出的需求后，我会去尝试其他各种不会影响别人的输出方式，之前可能会发朋友圈，QQ动态，之类的东西。但我其实很不喜欢把自己的一些想法简简单单暴露在外面，也不喜欢刻意的遮掩和躲藏。我喜欢的是那种，把想法藏在一个密室，可能是一个偏僻的角落，但总能被发现，密室或许不需要上锁，看似紧闭的大门只需要稍微用力即可推开。<br><br>
+							换种更通俗的方式说，就是我不太喜欢朋友圈的推送机制，它会把我的想法推送给好友列表的每一个人，这样其实并不太好。我理想的想法是，这些想法是公开的，只不过，想要查看这些信息的前提是你愿意走到那个偏僻的角落，推开那间密室。或许是需要刻意的点开朋友圈主页，点开我的动态，或是其他方式，不管什么方式，只要要保证，是因为愿意了解我，才会展现这些信息。这样的宣泄方式，才是我想要的。但很头疼的是，没有任何一个平台，是有这样的需求的。(其实朋友圈可以做到，那就是发之前把所有人屏蔽了，再解除屏蔽，但那样还是太麻烦了，而且个人感觉这样有点刻意了。某音的日常在一定程度上可以达到这样的目的，但比较抽象的是逆天的推流机制，如果某条内容火了那就炸缸了，还有就是日常内容还是会被关注的人推送。QQ动态一直用到现在，里面的内容已经更加细化和日常，也无所谓被别人看到了，在一定程度上来说是最真实的，可惜啊，现在用QQ的，越来越少了。b站的动态视频，也是很好的选择，可那边毕竟更多是以空曙的身份存在，只是我的一个缩影)<br><br>
+							之前一段时间我发现了一个好东西，那就是微信的状态，毕竟我觉得应该不会有人闲得蛋疼打开别人发的状态细看吧(最多也就是看下状态的文字)。所以有一长段时间，我把状态当做赛博日记来写了，实践证明，确实很安全，没有人看到。不过后来还是炸缸了，那天在做了几套卷子，成绩极不理想，加上在烦恼新视频剪辑，以及那一周连续的掉粉，和繁忙的学校事务，让我真的很焦虑，恐惧，所以就照常在状态也记录了。结果现实就是这么的魔幻，我唯独写的唯一一次较为消极的内容，还真被看到了(哦对了，这个到底有没有人看是可以通过抓包分析的，具体怎么搞的就不说了，毕竟是我自己写的石山程序)，甚至还点了赞，甚至还不止一个，然后就吓哭了，再也不敢乱发状态了。<br><br>
+							所以话又说回来了，生日也是个很好的，宣泄窗口，只不过公然发这些东西还是太草率了，于是就写了个相当草率，草到没边了的网站。至于这个彩蛋页面也不是随随便便进的，至少要点三下，感觉应该不会有多少人有这个耐心，也很符合我的预期。网页，加上各种彩蛋，各种角落的文本，以及过去的我，给我写下的话，凑上了大概也有小一万个字了。所以说有时候真不是作文难写，找对话题，即便是语文学渣也能滔滔不绝。信息都有时效性，这么多字也不是一天打好的，做网页的想法很早就有了，所以这些字也是很早之前就开始打了，也算一种时空性的对话，只不过，更多算是一种自娱自乐。20岁的生日，我只希望能过得，更有一些记忆点。所以我想了很多种形式，让我不要忘记它，最后留下来的内容，是我感觉最有代表性的。<br><br>
+							然后就是怎么又tmd写了这么多东西，真不想写了，现在我像极了一个疯子工程师在竭力介绍他的巧思，可周围没有一个观众。在别人眼里他是疯子，但，谁又知道呢，疯子和天才本就在一瞬之间，或许这就是他，最深的执念呢。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="question">
+                        最后的问题...
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="answer">
+                        <div class="answer-content">
+                            这一页说是彩蛋，其实更多是我的一些想法树洞了属于是。能翻下来这么多问题然后再看到这句话的你也是够无聊了，说真的，不过我相信这么多文字没人会仔细看的，所以这些东西走的更多是真诚路线，或者说这些文字也并非是随意乱写的，没准又有什么彩蛋中彩蛋，谁知道呢。<br><br>
+							这么多问题前前后后其实收集了快一年，大概率就是我这一年各种想法的记忆集合体，大部分摘自晚上有时候闲的没事写的备忘录。写出来这么多东西，其实是不太想让别人看的，但有句古话说得好，你在别人心里远没有你想象的重要，而在我眼里大部分人不过也是一个陌生人，所以也不怕被别人看见了，毕竟你没那个耐心和精力，也不用遮遮掩掩了。<br><br>
+							最后的话也不是什么大问题，这些话应该是生日前一天晚上写的，看来看我之前写的东西，其实有些事情想法又转变了)。但无所谓了，懒得改了。后面可能也会很忙吧，四月中旬还要去打数学竞赛，我真的真的真的很想拿奖，我真的不想让那么多人对我失望，在这方面我称不上是聪明人，所以，只能在天时地利的时候，尽我所能完成这场试炼了。<br><br>
+							今年也挺意外的，我本来以为不会收到礼物了，可还有粉丝寄来的一些小装饰品，真的挺欣慰的，起码让我不那么孤独了吧。如果有机会，我真的很想找一天时间，抛弃所有的社交软件，和自己度过这安稳的一天，那种感觉真的很好。与人打交道真的太难了，很累，很烦。<br><br>
+							最后还有什么想说的呢，大概率没了。不过如果你看到这里之后，如果还对网页里附赠的文件感到疑惑，或许可以去翻翻，一些历史信息。或许是历史稿件，历史动态，或者...历史朋友圈，也许会找到新的答案。<br><br>
+							很显然，这个网站一定没有表面那么简单。更显然的是，创建网页的显然是没经费部署服务器，直接用的免费github的网页功能，要知道在这里所有的html文件都是开源的😀。应该没有人会闲的去翻原html文件吧，应该不会。
+                        </div>
+                    </div>
+                </div>
+			</div>
+            <p class="hint">✍️ 轻触任一问题，展阅旧日独白 | 时光深处的答案</p>
+        </div>
+    </div>
+    
+    <div class="secret-time-btn" id="secretPlusBtn" title="+1分钟 · 时光延伸">⏳</div>
+    
+    <script>
+        // -------------------- EmailJS 配置（原样保留）---------------------
+        const EMAILJS_PUBLIC_KEY = "vH-LF4G2lUnkKpKcv";
+        const EMAILJS_SERVICE_ID = "birth001";
+        const EMAILJS_TEMPLATE_ID = "template_02vjyr6";
+        const RECIPIENT_EMAIL = "DreemurrDawnlit@outlook.com";
+        
+        (function initEmailJS() {
+            if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+                emailjs.init(EMAILJS_PUBLIC_KEY);
+                console.log("EmailJS 历史模块已加载");
+            }
+        })();
+        
+        // -------------------- 页面切换 & 彩蛋逻辑(原样)--------------------
+        function switchPage(pageNum) {
+            const oldActivePage = document.querySelector('.page.active');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('page' + pageNum).classList.add('active');
+            document.getElementById('btn' + pageNum).classList.add('active');
+            if (pageNum === 2) startSecondPageTimer();
+            else if (oldActivePage && oldActivePage.id === 'page2') stopAndResetSecondPageTimer();
+        }
+        
+        function toggleQA(element) {
+            document.querySelectorAll('.qa-item').forEach(item => {
+                if (item !== element) item.classList.remove('active');
+            });
+            element.classList.toggle('active');
+        }
+        
+        let clickCount = 0;
+        let eggUnlocked = false;
+        let toastTimer = null;
+        function showMessage(text) {
+            const existingToast = document.querySelector('.toast-message');
+            if (existingToast) existingToast.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { const t = document.querySelector('.toast-message'); if(t) t.remove(); toastTimer = null; }, 2500);
+        }
+        function handleFirstPage() { switchPage(1); }
+        function handleEasterEgg() {
+            if (eggUnlocked) { switchPage(2); return; }
+            clickCount++;
+            if (clickCount === 1) { showMessage('❌ 没有彩蛋 拒绝访问'); if (!document.getElementById('page1').classList.contains('active')) switchPage(1); else { document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active')); document.getElementById('btn1').classList.add('active'); } }
+            else if (clickCount === 2) { showMessage('😤 你烦不烦啊,真没有彩蛋'); if (!document.getElementById('page1').classList.contains('active')) switchPage(1); else { document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active')); document.getElementById('btn1').classList.add('active'); } }
+            else if (clickCount === 3) { showMessage('😠 真服了你了,算了,彩蛋你想看就看吧'); eggUnlocked = true; switchPage(2); }
+        }
+        
+        // 计时&对话框等原封保留
+        let secondPageTimerInterval = null, accumulatedSeconds = 0, secondPageTimerActive = false, secondPageCompleted = false, activeDialogElement = null;
+        function closeActiveDialog() { if (activeDialogElement) { activeDialogElement.remove(); activeDialogElement = null; } }
+        function saveVisitorToLocal(name, message) { const storageKey = "secret_visitors_list"; let visitors = []; const existing = localStorage.getItem(storageKey); if (existing) { try { visitors = JSON.parse(existing); if (!Array.isArray(visitors)) visitors = []; } catch(e) { visitors = []; } } visitors.push({ name: name.trim(), message: message || "(无留言)", timestamp: new Date().toLocaleString() }); localStorage.setItem(storageKey, JSON.stringify(visitors)); }
+        async function sendEmailWithNameAndMessage(name, message) { if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") return false; try { const templateParams = { to_email: RECIPIENT_EMAIL, from_name: name, message: `访客：${name}\n留言：${message || "（无留言）"}\n时间：${new Date().toLocaleString()}` }; await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams); return true; } catch(e) { return false; } }
+        function showFiveMinuteDialog() { if (activeDialogElement) return; const overlay = document.createElement('div'); overlay.className = 'custom-dialog-overlay'; const dialog = document.createElement('div'); dialog.className = 'custom-dialog'; dialog.innerHTML = `<div class="dialog-message"><p>📜 你已在这片遗迹停留许久，每一段文字都认真读完。</p><p>若愿意，留下你的名字与寄语吧，我会将这份心意封存。</p><input type="text" class="underline-input" id="visitorNameInput" placeholder="你的名字" autocomplete="off"><textarea class="message-textarea" id="visitorMessageInput" rows="3" placeholder="想说的话...（选填）"></textarea><p style="font-size:12px;">历史会记住每一个到访者</p></div><button class="dialog-btn" id="confirmVisitorBtn">镌刻印记 ✨</button>`; overlay.appendChild(dialog); document.body.appendChild(overlay); activeDialogElement = overlay; const nameInput = dialog.querySelector('#visitorNameInput'), messageInput = dialog.querySelector('#visitorMessageInput'), confirmBtn = dialog.querySelector('#confirmVisitorBtn'); const closeAndSave = async () => { let name = nameInput ? nameInput.value.trim() : ""; let message = messageInput ? messageInput.value.trim() : ""; if (name === "") name = "匿名访客"; if (message === "") message = "(未留言)"; saveVisitorToLocal(name, message); showMessage(`✨ 感谢 ${name}，你的留言已存入历史纪念 ✨`); sendEmailWithNameAndMessage(name, message); closeActiveDialog(); }; confirmBtn.addEventListener('click', closeAndSave); if (nameInput) { nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); closeAndSave(); } }); setTimeout(() => nameInput.focus(), 50); } }
+        function stopAndResetSecondPageTimer() { if (secondPageTimerInterval) clearInterval(secondPageTimerInterval); secondPageTimerInterval = null; secondPageTimerActive = false; secondPageCompleted = false; accumulatedSeconds = 0; closeActiveDialog(); }
+        function checkAndTriggerDialog() { if (!secondPageTimerActive || secondPageCompleted) return; if (accumulatedSeconds >= 300) { secondPageCompleted = true; secondPageTimerActive = false; if (secondPageTimerInterval) clearInterval(secondPageTimerInterval); secondPageTimerInterval = null; showFiveMinuteDialog(); } }
+        function addOneMinute() { if (!secondPageTimerActive || secondPageCompleted) return; accumulatedSeconds += 60; checkAndTriggerDialog(); }
+        function startSecondPageTimer() { if (secondPageTimerInterval) clearInterval(secondPageTimerInterval); closeActiveDialog(); accumulatedSeconds = 0; secondPageCompleted = false; secondPageTimerActive = true; secondPageTimerInterval = setInterval(() => { const page2Elem = document.getElementById('page2'); if (!page2Elem || !page2Elem.classList.contains('active') || !secondPageTimerActive) { if (secondPageTimerActive) stopAndResetSecondPageTimer(); return; } if (secondPageCompleted) return; accumulatedSeconds++; checkAndTriggerDialog(); }, 1000); }
+        const secretBtn = document.getElementById('secretPlusBtn'); if (secretBtn) secretBtn.addEventListener('click', (e) => { e.stopPropagation(); addOneMinute(); });
+        if (document.getElementById('page2').classList.contains('active')) startSecondPageTimer();
+        
+        function goBackToSecret() {
+            window.location.href = "../Selects/BirthdayArchive.html";
+        }
+    </script>
+</body>
+</html>

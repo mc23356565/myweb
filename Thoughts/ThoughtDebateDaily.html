@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日常想法 · 生活索引 | 空曙</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+            background: #f5ede0;
+            padding: 2rem 1.5rem;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: baseline;
+            flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 2px solid #dac29c; padding-bottom: 1rem;
+        }
+        .page-title { font-size: 1.8rem; font-weight: 600; color: #4f3a22; }
+        .back-buttons { display: flex; gap: 12px; }
+        .back-btn {
+            background: #b28b60; color: white; border: none; padding: 0.5rem 1.2rem;
+            border-radius: 40px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
+        }
+        .back-btn:hover { background: #8d6843; transform: translateY(-2px); }
+        
+        /* 筛选栏 */
+        .filter-bar {
+            background: #fef7ec;
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            margin: 1rem 0 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            justify-content: space-between;
+            border: 1px solid #e5cfb2;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-label {
+            font-weight: 600;
+            color: #5f482e;
+        }
+        .search-input, .date-selector {
+            background: #fff;
+            border: 1px solid #d6bc96;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            width: 200px;
+        }
+        .reset-filter {
+            background: #d9c2a2;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-filter:hover {
+            background: #c2a477;
+            color: white;
+        }
+        .stats {
+            font-size: 0.8rem;
+            color: #9a7e5c;
+        }
+        
+        .daily-list { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
+        .daily-card {
+            background: #fffaf2; border-radius: 1.5rem; border: 1px solid #e6d2b5;
+            padding: 1.2rem 1.5rem; transition: 0.2s;
+        }
+        .daily-title { font-weight: 700; font-size: 1.1rem; color: #4f321b; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .daily-date { font-family: monospace; background: #efe0cd; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.7rem; color: #7b5a3b; }
+        .daily-content { color: #5f4a32; line-height: 1.6; font-size: 0.9rem; margin-top: 0.4rem; white-space: pre-wrap; }
+        .no-data {
+            text-align: center; padding: 2rem; background: #fdf5e8;
+            border-radius: 1.5rem; color: #b69063;
+        }
+        .expand-hint { text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: #b6906a; }
+        footer { margin-top: 2rem; text-align: center; font-size: 0.7rem; color: #b98f66; }
+        @media (max-width: 700px) {
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .search-input, .date-selector { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <div class="page-title">📓 日常想法 · 浮光掠影</div>
+        <div class="back-buttons">
+            <button class="back-btn" id="backToDebateMenuDaily">← 返回分类</button>
+            <button class="back-btn" id="backToMainFromDaily">🏠 主厅</button>
+        </div>
+    </div>
+    <p style="color: #775e3f; margin-bottom: 0.8rem;">🌱 零碎的日常感悟，支持按内容搜索和按日期筛选。</p>
+    
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">🔎 搜索</span>
+            <input type="text" id="searchInputDaily" class="search-input" placeholder="搜索想法内容...">
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">📅 日期</span>
+            <input type="date" id="dateFilterInputDaily" class="date-selector">
+        </div>
+        <button id="resetFilterBtnDaily" class="reset-filter">清除筛选</button>
+        <div class="stats" id="statsInfoDaily"></div>
+    </div>
+    
+    <div class="daily-list" id="dailyContainer"></div>
+    <footer>⚬ 日常即星辰 · 每一粒微光都值得记录 ⚬</footer>
+</div>
+<script>
+    // ========= 日常想法数据库（可无限扩展） =========
+    const DAILY_JOURNAL = [
+        {
+            date: "2025-05-10",
+            content: "空 占个位"
+        },
+        {
+            date: "2025-05-03",
+            content: "空 占个位"
+        },
+        {
+            date: "2025-04-22",
+            content: "空 占个位"
+        },
+        {
+            date: "2025-07-01",
+            content: "空 占个位"
+        }
+    ];
+
+    let currentSearchDaily = "";
+    let currentDateDaily = "";
+
+    function renderDaily() {
+        const container = document.getElementById('dailyContainer');
+        const statsSpan = document.getElementById('statsInfoDaily');
+        if (!container) return;
+        
+        let filtered = [...DAILY_JOURNAL];
+        // 按日期筛选
+        if (currentDateDaily) {
+            filtered = filtered.filter(entry => entry.date === currentDateDaily);
+        }
+        // 按内容搜索
+        if (currentSearchDaily.trim() !== "") {
+            const kw = currentSearchDaily.trim().toLowerCase();
+            filtered = filtered.filter(entry => entry.content.toLowerCase().includes(kw));
+        }
+        // 按日期降序排序
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="no-data">📭 没有找到匹配的日常记录，试试清除筛选或添加新内容～</div>';
+            statsSpan.innerText = `共 0 条记录`;
+            return;
+        }
+        statsSpan.innerText = `📌 显示 ${filtered.length} 条日常${currentDateDaily ? ` (日期 ${currentDateDaily})` : ''}${currentSearchDaily ? ` (搜索: ${currentSearchDaily})` : ''}`;
+        
+        container.innerHTML = '';
+        filtered.forEach(entry => {
+            const card = document.createElement('div');
+            card.className = 'daily-card';
+            const displayDate = new Date(entry.date).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+            card.innerHTML = `
+                <div class="daily-title">
+                    <span class="daily-date">📅 ${displayDate}</span>
+                </div>
+                <div class="daily-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m==='&') return '&amp;';
+            if(m==='<') return '&lt;';
+            if(m==='>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function initFiltersDaily() {
+        const searchInput = document.getElementById('searchInputDaily');
+        const dateInput = document.getElementById('dateFilterInputDaily');
+        const resetBtn = document.getElementById('resetFilterBtnDaily');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                currentSearchDaily = e.target.value;
+                renderDaily();
+            });
+        }
+        if (dateInput) {
+            dateInput.addEventListener('change', (e) => {
+                currentDateDaily = e.target.value;
+                renderDaily();
+            });
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                if (dateInput) dateInput.value = '';
+                currentSearchDaily = '';
+                currentDateDaily = '';
+                renderDaily();
+            });
+        }
+    }
+    
+    document.getElementById('backToDebateMenuDaily').addEventListener('click', () => window.location.href = '../Selects/ThoughtDebate.html');
+    document.getElementById('backToMainFromDaily').addEventListener('click', () => window.location.href = '../Secret.html');
+    
+    renderDaily();
+    initFiltersDaily();
+</script>
+</body>
+</html>

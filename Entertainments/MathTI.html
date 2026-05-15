@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MatHTI · 数学人格测试 | 抽象整活版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'SF Pro Text', 'Inter', 'PingFang SC', Roboto, monospace;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fc 0%, #eef2f5 100%);
+            padding: 2rem 1rem;
+            color: #0f172a;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.96);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 50px -20px rgba(0,0,0,0.25);
+            padding: 1.5rem 1.8rem 2.2rem;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px dashed #fde047;
+            padding-bottom: 1.2rem;
+        }
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, #b45309, #eab308, #2b7a4b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        .hero .tagline {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .hero .sub {
+            font-size: 1rem;
+            color: #475569;
+            background: #fef9e6;
+            display: inline-block;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            margin-top: 0.8rem;
+        }
+        .dim-badge {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1rem 0 0.5rem;
+            font-size: 0.7rem;
+        }
+        .dim-badge span {
+            background: #e9ecef;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .stats {
+            background: #f1f5f9;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.2rem 0 1.5rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .answered-count {
+            background: #f59e0b;
+            color: white;
+            border-radius: 30px;
+            padding: 0.2rem 0.8rem;
+        }
+        .back {
+            background: none;
+            border: 1px solid #cbd5e1;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back:hover {
+            background: #e2e8f0;
+        }
+        .reset-all {
+            background: none;
+            border: 1px solid #cbd5e1;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-all:hover {
+            background: #e2e8f0;
+        }
+        .questions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .question-item {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 1.2rem;
+            border: 1px solid #eef2ff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .q-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #f59e0b;
+            background: #fef9e6;
+            display: inline-block;
+            padding: 0.1rem 0.7rem;
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
+        }
+        .q-text {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0.5rem 0 0.8rem;
+        }
+        .options-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.3rem;
+        }
+        .opt-btn {
+            flex: 1;
+            min-width: 130px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 60px;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #1e293b;
+        }
+        .opt-btn.selected {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: white;
+            box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+        }
+        .action-btn {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            background: #1e293b;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            min-width: 120px;
+        }
+        .btn-secondary {
+            background: #475569;
+        }
+        .btn-reset {
+            background: #9c1f1f;
+        }
+        .btn:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+        .result-card {
+            background: #fef9e3;
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1rem;
+            border: 1px solid #fde68a;
+        }
+        .result-type {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: monospace;
+            letter-spacing: 4px;
+            background: #0f172a;
+            display: inline-block;
+            padding: 0.2rem 1.2rem;
+            border-radius: 60px;
+            color: #fbbf24;
+            margin: 0.5rem 0;
+        }
+        .result-desc {
+            font-size: 0.95rem;
+            color: #2d3e50;
+            margin-top: 0.5rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+            text-align: left;
+            background: #fff7e0;
+            padding: 1rem;
+            border-radius: 1.2rem;
+        }
+        .radar-container {
+            max-width: 400px;
+            margin: 1.5rem auto 0.5rem;
+            position: relative;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            background: rgba(255,255,240,0.6);
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+        hr {
+            margin: 0.8rem 0;
+            border: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1.8rem;
+            color: #6c757d;
+        }
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            .options-row { flex-direction: column; }
+            .opt-btn { min-width: auto; }
+            .hero .tagline { font-size: 1.5rem; }
+            .action-btn { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>🧠 MBTI早就过时了</h1>
+        <div class="tagline">🔥 快来测测你的 MatHTI 🔥</div>
+        <div class="sub">数学人格暴论 · 复合维度影响 · 开启你的数学人生</div>
+        <div class="dim-badge">
+            <span>🧮 计算(C) ⇄ 证明(L)</span>
+            <span>📐 几何(G) ⇄ 代数(A)</span>
+            <span>🎯 结果(R) ⇄ 过程(P)</span>
+            <span>✨ 直觉(N) ⇄ 严谨(D)</span>
+        </div>
+    </div>
+
+    <div class="stats">
+        <span>📋 30道灵魂拷问（题目&选项全随机）</span>
+        <span>✅ 已选 <span id="answeredCounter">0</span> / 30</span>
+        <span class="reset-all" id="clearAnswersBtn">🗑️ 清空当前答案</span>
+		<span class="back" onclick="goBackToSecret()">🏠 重返主站</span>
+    </div>
+
+    <div id="questionsContainer" class="questions-grid"></div>
+
+    <div class="action-btn">
+        <button class="btn" id="submitBtn">✨ 生成我的 MatHTI 人格 ✨</button>
+        <button class="btn btn-secondary" id="scrollTopBtn">📜 回到顶部</button>
+        <button class="btn btn-reset" id="retakeBtn">🔄 再测一次（全新乱序）</button>
+    </div>
+
+    <div id="resultArea" style="display: none;">
+        <div class="result-card">
+            <div>🧬 你的数学人格代码</div>
+            <div class="result-type" id="resultType">----</div>
+            <div class="result-desc" id="resultDesc"></div>
+            <div class="radar-container">
+                <canvas id="radarChart" width="400" height="400"></canvas>
+            </div>
+            <hr>
+            <div style="font-size:0.8rem;">⚠️ 纯抽象整活，摆烂率超过40%会触发隐藏结局</div>
+        </div>
+    </div>
+    <footer>MatHTI = Mathematics Hell Type Indicator · 再测一次会重置所有题目顺序</footer>
+</div>
+
+<script>
+    // ======================= 题库 =======================
+    // 维度顺序: 0=计算(C负/ L正), 1=几何(G负/ A正), 2=结果(R负/ P正), 3=直觉(N负/ D正)
+    // 每个选项增加 isTilt 标记是否为摆烂选项
+    const rawQuestionBank = [
+        { dim:0, text: "面对一道积分题，你内心真实想法是？", 
+          opts: [
+              { label: "🔢 无脑算！秒了，答案就是它", deltas: [-2, 0, -1, 0], isTilt: false },
+              { label: "📈 先泰勒展开近似算一下", deltas: [-1, 0, 0, -1], isTilt: false },
+              { label: "📜 讨论可积性和原函数存在性", deltas: [1, 0, 1, 0], isTilt: false },
+              { label: "🧠 用勒贝格积分严格分析", deltas: [2, 0, 0, 1], isTilt: false },
+              { label: "😭 你干嘛~哎哟！我破防了 这题我不会啊啊啊", deltas: [-0.5, -0.3, -0.7, -0.4], isTilt: true }
+          ] },
+        { dim:0, text: "如何看待 0.999... = 1 这个等式？",
+          opts: [
+              { label: "💯 就是1，极限定义完事", deltas: [-2, 0, -1, -1], isTilt: false },
+              { label: "🤔 勉强接受，但心里不舒服", deltas: [-1, 0, 0, 0], isTilt: false },
+              { label: "🧐 必须用戴德金分割严格证明", deltas: [1, 0, 1, 1], isTilt: false },
+              { label: "📖 涉及到实数构造，写篇论文", deltas: [2, 0, 1, 2], isTilt: false },
+              { label: "😱 别问我！我选择晕厥 救命啊", deltas: [-0.4, -0.6, -0.2, -0.8], isTilt: true }
+          ] },
+        { dim:0, text: "解方程时，你的舒适区是？",
+          opts: [
+              { label: "⚡ 数值解，近似就完事", deltas: [-2, 0, -1, -1], isTilt: false },
+              { label: "🎯 解析解，但要快", deltas: [-1, 0, -1, 0], isTilt: false },
+              { label: "📐 讨论解的结构和存在性", deltas: [1, 0, 1, 0], isTilt: false },
+              { label: "🔍 用代数几何证明解集性质", deltas: [2, 0, 0, 1], isTilt: false },
+              { label: "🤯 解不出来！我裂开了 呜呜呜", deltas: [-0.6, -0.4, -0.5, -0.3], isTilt: true }
+          ] },
+        { dim:0, text: "微分方程课上，你更愿意？",
+          opts: [
+              { label: "💻 跑个数值模拟看看图像", deltas: [-2, -1, -1, 0], isTilt: false },
+              { label: "📊 求个特解交差", deltas: [-1, 0, -1, 0], isTilt: false },
+              { label: "📜 推导通解公式", deltas: [1, 0, 1, 0], isTilt: false },
+              { label: "🧙 讨论解的稳定性与奇点", deltas: [2, 0, 1, 1], isTilt: false },
+              { label: "🥴 老师你别讲了 我要回家 啊巴啊巴", deltas: [-0.3, -0.5, -0.6, -0.4], isTilt: true }
+          ] },
+        { dim:1, text: "几何与代数，你天然倾向？",
+          opts: [
+              { label: "📐 画图！一切都能可视化", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "📏 辅助线就是我的浪漫", deltas: [0, -1, 0, -1], isTilt: false },
+              { label: "✖️ 向量坐标暴力破解", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "🔣 范畴论统一几何与代数", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "😵 我分不清 真的分不清 你杀了我吧", deltas: [-0.5, -0.5, -0.5, -0.5], isTilt: true }
+          ] },
+        { dim:1, text: "你的数学草稿纸更接近？",
+          opts: [
+              { label: "🎨 画满坐标系、三角形、抛物线", deltas: [0, -2, -1, -1], isTilt: false },
+              { label: "📐 草图为主，偶尔算算", deltas: [0, -1, 0, 0], isTilt: false },
+              { label: "🔢 满纸的矩阵，积分和Σ符号", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "🧩 抽象代数符号，群环域", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "🧻 全是擦眼泪的痕迹 我太难了", deltas: [-0.4, -0.4, -0.6, -0.2], isTilt: true }
+          ] },
+        { dim:1, text: "三角形全等与向量点积，你选？",
+          opts: [
+              { label: "📐 俺就喜欢用基本定理，传统几何的浪漫", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "🧭 作辅助线，经典永流传", deltas: [0, -1, -1, -1], isTilt: false },
+              { label: "➡️ 建系用向量坐标算", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "📊 用复数表示旋转，代数几何双修", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "🚫 这题不配我 哇的一声哭出来", deltas: [-0.6, -0.6, -0.2, -0.4], isTilt: true }
+          ] },
+        { dim:1, text: "你更想研究？",
+          opts: [
+              { label: "🌀 分形、拓扑、克莱因瓶", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "📐 欧氏几何与尺规作图", deltas: [0, -1, 0, 0], isTilt: false },
+              { label: "🧮 抽象代数、数论", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "🔗 范畴论与同调代数", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "🛌 我选择躺在床上研究天花板 数学退退退", deltas: [-0.3, -0.3, -0.8, -0.3], isTilt: true }
+          ] },
+        { dim:2, text: "考试只剩5分钟，一道大题没写完，你会？",
+          opts: [
+              { label: "🎲 直接写个答案，赌一把", deltas: [0, 0, -2, -1], isTilt: false },
+              { label: "🏁 把关键步骤写出来，答案随便", deltas: [0, 0, -1, 0], isTilt: false },
+              { label: "📝 疯狂写过程，骗步骤分", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "📖 写满逻辑链，最后写‘解毕’", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "😶 我直接交卷 毁灭吧 赶紧的 累了", deltas: [-0.5, -0.4, -0.5, -0.4], isTilt: true }
+          ] },
+        { dim:2, text: "老师给了一道“过程分>答案分”的题，你？",
+          opts: [
+              { label: "🎯 凑出最终答案，过程简略", deltas: [0, 0, -2, -1], isTilt: false },
+              { label: "⚖️ 一半时间凑答案，一半写过程", deltas: [0, 0, -1, 0], isTilt: false },
+              { label: "📋 每一步都写清楚，答案随缘", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "📖 写满三页推导，追求完美", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "😭 老师你鲨了我吧 我一个字都写不出", deltas: [-0.6, -0.2, -0.6, -0.4], isTilt: true }
+          ] },
+        { dim:2, text: "数学建模比赛，你更看重？",
+          opts: [
+              { label: "🏆 结果准确，能拿奖", deltas: [0, 0, -2, 0], isTilt: false },
+              { label: "📈 模型实用，预测靠谱", deltas: [0, 0, -1, -1], isTilt: false },
+              { label: "📐 推导过程严谨漂亮", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "📚 论文写得像数学年刊", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "🎭 我是来摸鱼的 结果随便 过程更随便", deltas: [-0.4, -0.3, -0.5, -0.6], isTilt: true }
+          ] },
+        { dim:2, text: "发朋友圈晒数学，你会晒？",
+          opts: [
+              { label: "💯 满分的试卷截图", deltas: [0, 0, -2, -1], isTilt: false },
+              { label: "✨ 一道难题的正确最终答案", deltas: [0, 0, -1, 0], isTilt: false },
+              { label: "📓 写满推导的精致笔记", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "📖 自己整理的定理证明集", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "🤡 晒自己崩溃的草稿纸 配文：数学你欠我的拿什么还", deltas: [-0.3, -0.3, -0.4, -0.8], isTilt: true }
+          ] },
+        { dim:3, text: "面对新定理，你最先关注？",
+          opts: [
+              { label: "💡 它有什么用？直观上为什么对", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "🤔 它和哪些已知结论相关", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "📖 证明过程有没有漏洞", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "🔍 公理基础是否牢固", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "😶 我看不懂 但我大受震撼 放过我吧", deltas: [-0.5, -0.2, -0.3, -0.6], isTilt: true }
+          ] },
+        { dim:3, text: "数学直觉和严谨推导，你更依赖？",
+          opts: [
+              { label: "✨ 直觉先飞，灵感最重要", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "⚡ 直觉指引，再补严谨", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "📐 两者平衡，互相验证", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "⚙️ 没有严谨的直觉都是幻觉", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "🌀 我全都要但全不会 精神状态遥遥领先", deltas: [-0.4, -0.5, -0.4, -0.5], isTilt: true }
+          ] },
+        { dim:3, text: "对于“显然易证”四个字，你的态度？",
+          opts: [
+              { label: "😏 跳过，反正我信了", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "🤨 稍微想一下，觉得确实显然", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "🤯 不，这一点也不显然！要证", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "📜 把它写出来，顺便推广一下", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "🙈 我瞎了 我看不到‘显然’ 救命", deltas: [-0.6, -0.4, -0.2, -0.6], isTilt: true }
+          ] },
+        { dim:3, text: "你认为数学的本质是？",
+          opts: [
+              { label: "✨ 发现隐藏模式的直觉艺术", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "🎭 人类心智的创造性游戏", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "📐 形式逻辑的严密大厦", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "🔗 宇宙的底层语言", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "💤 本质就是让我犯困+发疯的东西 啊对对对", deltas: [-0.3, -0.3, -0.7, -0.3], isTilt: true }
+          ] },
+        { dim:0, text: "极限题，你更喜欢？",
+          opts: [
+              { label: "📉 等价无穷小，秒了", deltas: [-2, 0, -1, -1], isTilt: false },
+              { label: "📊 洛必达，算就完事", deltas: [-1, 0, 0, 0], isTilt: false },
+              { label: "🐉 ε-δ语言，严谨夹逼", deltas: [1, 0, 1, 1], isTilt: false },
+              { label: "🧠 用超实数非标准分析", deltas: [2, 0, 1, 2], isTilt: false },
+              { label: "😵 极限不存在 我的脑细胞先不存在了", deltas: [-0.5, -0.3, -0.5, -0.5], isTilt: true }
+          ] },
+        { dim:0, text: "三次方程求根，你？",
+          opts: [
+              { label: "📱 卡西欧solve，数值解", deltas: [-2, 0, -1, 0], isTilt: false },
+              { label: "🧮 试根法，猜一个", deltas: [-1, 0, -1, -1], isTilt: false },
+              { label: "🧙 卡尔丹公式硬推", deltas: [1, 0, 1, 0], isTilt: false },
+              { label: "📜 用伽罗瓦理论讨论可解性", deltas: [2, 0, 0, 1], isTilt: false },
+              { label: "💀 我选择不解 直接向数学投降 你赢了", deltas: [-0.4, -0.5, -0.6, -0.3], isTilt: true }
+          ] },
+        { dim:1, text: "线性代数中，你觉得灵魂是？",
+          opts: [
+              { label: "📐 向量空间的几何直觉", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "🎯 线性变换的几何意义", deltas: [0, -1, 0, 0], isTilt: false },
+              { label: "📊 矩阵的代数运算", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "🔗 张量积与范畴结构", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "🥴 我连特征值都求不明白 别问了 求求了", deltas: [-0.3, -0.6, -0.4, -0.5], isTilt: true }
+          ] },
+        { dim:1, text: "复数与向量，你更偏爱？",
+          opts: [
+              { label: "🌀 复平面旋转的几何直观", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "📐 用向量点积和叉积", deltas: [0, -1, 0, 0], isTilt: false },
+              { label: "➕ 代数运算 + i²=-1", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "🧩 用复数做几何变换", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "🤷 我分不清实部虚部 啊啊啊啊啊", deltas: [-0.5, -0.4, -0.3, -0.6], isTilt: true }
+          ] },
+        { dim:2, text: "竞赛时间不够，你会？",
+          opts: [
+              { label: "🎲 猜个答案，万一对了呢", deltas: [0, 0, -2, -1], isTilt: false },
+              { label: "🏁 写关键步骤，赌一半分", deltas: [0, 0, -1, 0], isTilt: false },
+              { label: "✍️ 把能写的推理全写上", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "📋 列个思路框架，拿思路分", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "😭 交白卷 早死早超生 毁灭吧", deltas: [-0.6, -0.2, -0.6, -0.4], isTilt: true }
+          ] },
+        { dim:2, text: "对于数学计算压轴题，你的看法是？",
+          opts: [
+              { label: "🏆 计算压轴？小丑，只要算不死，就往死里算，生死看淡，不服就算", deltas: [-2, 0, -1, 1], isTilt: false },
+              { label: "🎯 我不到啊，纯证明人，计算？吓哭了", deltas: [1, 0, 0, 0], isTilt: false },
+              { label: "📝 计算压轴题吗，感觉不如证明压轴", deltas: [2, 0, 0, 0], isTilt: false },
+              { label: "🔍 计算题不是猜个数然后乱写过程就可以了😠", deltas: [0, 0, -1, -1], isTilt: false },
+              { label: "🛋️ 嘻嘻，压轴题？不会喵😀", deltas: [-0.3, -0.5, -0.4, -0.6], isTilt: true }
+          ] },
+        { dim:3, text: "遇到数学悖论（罗素悖论），你？",
+          opts: [
+              { label: "🤔 有趣，打破思维定式", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "😵 感觉脑袋要炸了", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "🔍 仔细分析公理系统", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "📖 研究类型论如何避免", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "😴 悖论是啥？我选择睡觉+发疯", deltas: [-0.4, -0.3, -0.5, -0.6], isTilt: true }
+          ] },
+        { dim:3, text: "数学老师说“这题用几何直觉”，你？",
+          opts: [
+              { label: "✨ 懂了！画个图猜一下", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "📐 尝试构造几何模型", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "🔍 建系硬算，不要直觉", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "⚙️ 用解析几何验证直觉", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "🙉 我选择闭上眼睛 脑内循环‘你干嘛~哎哟’", deltas: [-0.5, -0.4, -0.2, -0.7], isTilt: true }
+          ] },
+        { dim:0, text: "概率题，你习惯？",
+          opts: [
+              { label: "🎲 蒙特卡洛模拟，估算", deltas: [-2, 0, -1, -1], isTilt: false },
+              { label: "📊 用频率近似概率", deltas: [-1, 0, 0, 0], isTilt: false },
+              { label: "📐 古典概型严格计算", deltas: [1, 0, 1, 0], isTilt: false },
+              { label: "🧠 测度论公理化处理", deltas: [2, 0, 0, 1], isTilt: false },
+              { label: "🍀 反正我都选C 爱对不对此生就这样了", deltas: [-0.6, -0.2, -0.5, -0.3], isTilt: true }
+          ] },
+        { dim:1, text: "你心中数学家的巅峰是？",
+          opts: [
+              { label: "📐 欧拉（直觉与计算之神）", deltas: [-1, -2, 0, -1], isTilt: false },
+              { label: "🎨 黎曼（几何与分析的桥梁）", deltas: [0, -1, 0, -1], isTilt: false },
+              { label: "📘 希尔伯特（形式主义领袖）", deltas: [0, 1, 0, 1], isTilt: false },
+              { label: "🔗 格罗滕迪克（抽象代数几何教皇）", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "😴 我谁都不认识 我只认识床", deltas: [-0.2, -0.5, -0.6, -0.5], isTilt: true }
+          ] },
+        { dim:2, text: "数学作业，你更在意？",
+          opts: [
+              { label: "✅ 最终答案对不对", deltas: [0, 0, -2, -1], isTilt: false },
+              { label: "📝 步骤有没有写清楚", deltas: [0, 0, -1, 0], isTilt: false },
+              { label: "📖 有没有多种解法", deltas: [0, 0, 1, 0], isTilt: false },
+              { label: "🔍 有没有逻辑漏洞", deltas: [0, 0, 2, 1], isTilt: false },
+              { label: "📅 反正明天交 今晚再说 摆烂永不过时", deltas: [-0.4, -0.3, -0.5, -0.4], isTilt: true }
+          ] },
+        { dim:3, text: "面对一道没见过的难题，你经常？",
+          opts: [
+              { label: "💡 灵光一闪，猜个方向", deltas: [0, 0, 0, -2], isTilt: false },
+              { label: "📚 回忆类似题型", deltas: [0, 0, 0, -1], isTilt: false },
+              { label: "🧩 分类讨论，枚举情况", deltas: [0, 0, 0, 1], isTilt: false },
+              { label: "📐 从定义出发，硬推", deltas: [0, 0, 0, 2], isTilt: false },
+              { label: "😢 我选择百度一下 然后百度也看不懂 崩溃了", deltas: [-0.5, -0.3, -0.4, -0.6], isTilt: true }
+          ] },
+        { dim:0, text: "计算器和纸笔，你更信任？",
+          opts: [
+              { label: "📱 计算器，快准狠", deltas: [-2, 0, -1, 0], isTilt: false },
+              { label: "✏️ 心算，拒绝工具", deltas: [-1, 0, -1, -1], isTilt: false },
+              { label: "📐 笔算，踏实", deltas: [1, 0, 0, 0], isTilt: false },
+              { label: "🧠 符号演算系统", deltas: [2, 0, 1, 1], isTilt: false },
+              { label: "🤯 我信命 交给命运吧", deltas: [-0.4, -0.4, -0.5, -0.5], isTilt: true }
+          ] },
+        { dim:1, text: "你的数学笔记风格？",
+          opts: [
+              { label: "📐 图形为主，文字为辅", deltas: [0, -2, 0, -1], isTilt: false },
+              { label: "📝 图文并茂，比例均衡", deltas: [0, -1, 0, 0], isTilt: false },
+              { label: "🔢 满篇公式推导", deltas: [0, 1, 0, 0], isTilt: false },
+              { label: "📖 公理-定理-证明，教科书式", deltas: [0, 2, 0, 1], isTilt: false },
+              { label: "📄 空白，因为没听课 主打一个信任", deltas: [-0.3, -0.6, -0.2, -0.4], isTilt: true }
+          ] }
+    ];
+
+    // 随机打乱数组
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 生成全新乱序题目（题目乱序 + 每个题目内选项乱序）
+    function generateShuffledQuestions() {
+        const shuffledQuestions = shuffleArray([...rawQuestionBank]);
+        return shuffledQuestions.map(q => ({
+            ...q,
+            opts: shuffleArray([...q.opts])
+        }));
+    }
+
+    let questions = generateShuffledQuestions();
+    // 存储每个题目的选中信息: { deltas, isTilt }
+    let answers = new Array(30).fill(null);
+    let radarChart = null;
+
+    const container = document.getElementById('questionsContainer');
+
+    function renderQuestions() {
+        container.innerHTML = '';
+        questions.forEach((q, idx) => {
+            const selected = answers[idx];
+            const qDiv = document.createElement('div');
+            qDiv.className = 'question-item';
+            const dimName = getDimName(q.dim);
+            qDiv.innerHTML = `
+                <div class="q-title">维度已隐藏</div>
+                <div class="q-text">${idx+1}. ${q.text}</div>
+                <div class="options-row" data-qidx="${idx}">
+                    ${q.opts.map((opt, optIdx) => {
+                        const isSelected = selected && selected.deltas === opt.deltas;
+                        return `<div class="opt-btn ${isSelected ? 'selected' : ''}" data-deltas='${JSON.stringify(opt.deltas)}' data-istilt='${opt.isTilt}'>${opt.label}</div>`;
+                    }).join('')}
+                </div>
+            `;
+            container.appendChild(qDiv);
+        });
+        attachClickEvents();
+        updateCounter();
+    }
+
+    function getDimName(dim) {
+        const map = {0:'⚖️ 计算/证明',1:'📐 几何/代数',2:'🎯 结果/过程',3:'✨ 直觉/严谨'};
+        return map[dim];
+    }
+
+    function attachClickEvents() {
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(btn => {
+            btn.removeEventListener('click', optClickHandler);
+            btn.addEventListener('click', optClickHandler);
+        });
+    }
+
+    function optClickHandler(e) {
+        const btn = e.currentTarget;
+        const deltasStr = btn.getAttribute('data-deltas');
+        const deltas = JSON.parse(deltasStr);
+        const isTilt = btn.getAttribute('data-istilt') === 'true';
+        const parentRow = btn.closest('.options-row');
+        const qIdx = parseInt(parentRow.getAttribute('data-qidx'));
+        if (isNaN(qIdx)) return;
+        answers[qIdx] = { deltas, isTilt };
+        const allBtns = parentRow.querySelectorAll('.opt-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateCounter();
+    }
+
+    function updateCounter() {
+        const answered = answers.filter(a => a !== null).length;
+        document.getElementById('answeredCounter').innerText = answered;
+    }
+
+    function clearAnswersOnly() {
+        for (let i = 0; i < answers.length; i++) answers[i] = null;
+        renderQuestions();
+        document.getElementById('resultArea').style.display = 'none';
+        if (radarChart) { radarChart.destroy(); radarChart = null; }
+    }
+
+    function fullRetake() {
+        questions = generateShuffledQuestions();
+        answers = new Array(30).fill(null);
+        renderQuestions();
+        document.getElementById('resultArea').style.display = 'none';
+        if (radarChart) { radarChart.destroy(); radarChart = null; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function computeDimensionScores() {
+        let dimScores = [0, 0, 0, 0];
+        for (let i = 0; i < answers.length; i++) {
+            const item = answers[i];
+            if (!item) continue;
+            const deltas = item.deltas;
+            for (let d = 0; d < 4; d++) {
+                dimScores[d] += deltas[d];
+            }
+        }
+        return dimScores;
+    }
+
+    function getPersonalityType(scores) {
+        let type = '';
+        type += scores[0] < 0 ? 'C' : (scores[0] > 0 ? 'L' : 'C');
+        type += scores[1] < 0 ? 'G' : (scores[1] > 0 ? 'A' : 'G');
+        type += scores[2] < 0 ? 'R' : (scores[2] > 0 ? 'P' : 'R');
+        type += scores[3] < 0 ? 'N' : (scores[3] > 0 ? 'D' : 'N');
+        return type;
+    }
+
+    // 计算摆烂比例并判断是否触发摆烂结局
+    function getTiltRatio() {
+        let tiltCount = 0;
+        let totalAnswered = 0;
+        for (let i = 0; i < answers.length; i++) {
+            const item = answers[i];
+            if (item) {
+                totalAnswered++;
+                if (item.isTilt) tiltCount++;
+            }
+        }
+        // 只考虑已答题目，但正常情况全答完才提交，所以totalAnswered=30
+        const ratio = totalAnswered === 0 ? 0 : tiltCount / totalAnswered;
+        return { tiltCount, totalAnswered, ratio };
+    }
+
+    // 摆烂结局描述
+    function getTiltEndingDescription(ratio) {
+        const percent = Math.round(ratio * 100);
+        return `💀 **摆烂之王 · 数学已死** 💀<br><br>
+        你选择了 ${percent}% 的摆烂选项（共${Math.round(ratio*30)}题），成功触发了隐藏结局。<br><br>
+		数学虐你千百遍，你待数学如初恋<br>
+        你的数学态度：遇到难题第一反应是“我不会啊啊啊”，看到积分号就想哭，极限不存在你的脑细胞先不存在了。<br>
+        数学老师已经放弃了你，但你获得了真正的自由——反正这辈子也用不上泰勒展开。<br><br>
+        🎭 建议：下次再测时，试着认真选几个选项？算了，摆烂也挺好。<br>
+        🏆 成就解锁：「数学摆烂大师」`;
+    }
+
+    function getDescription(type, balanced) {
+        // 注意：balanced参数不再使用，但保留以防万一
+        const map = {
+            'CGRN': '🎲 **计算-几何-结果-直觉 (混沌几何计算使)**\n你相信直觉比草稿纸更快，辅助线全凭缘分，答案经常离奇正确。数学老师看到你的卷子会怀疑自己教了个巫师。优点：心算几何面积像呼吸；缺点：永远解释不清过程，被当成蒙题惯犯。',
+            'CGRD': '📏 **计算-几何-结果-严谨 (尺规圣体)**\n你画图不用尺，但误差小于0.01mm。你算体积必须精确到第九位小数，否则浑身难受。考试时你的草稿纸宛如艺术品，但会因为纠结一个小数点浪费半小时。',
+            'CGPN': '🌀 **计算-几何-过程-直觉 (飘逸辅助线仙人)**\n你擅长画莫名其妙但有用的辅助线，过程写得像意识流小说，最后答案往往对一半。同学觉得你是个玄学家，你自己也不知道怎么证出来的。',
+            'CGPD': '🏛️ **计算-几何-过程-严谨 (古典几何工匠)**\n你每一步都写∵∴，连“显然”都会证明。画一个圆要用尺规作图画三次确保完美。数学系教授看了你的作业会流泪——因为太啰嗦，但又挑不出错。',
+            'CARN': '⚡ **计算-代数-结果-直觉 (代数闪电侠)**\n你解方程比计算器还快，但从不写过程。老师问你“这步怎么来的”，你答：“就……突然想到的。” 代数直觉堪比拉马努金，但期末考试因为步骤分痛失20分。',
+            'CARD': '🤖 **计算-代数-结果-严谨 (算法机器人)**\n你是行走的CAS系统，任何代数问题都能快速给出精确解，并且每一步都严格符合规范。你的数学作业像机器打印的，但你因此失去了凑数的乐趣。',
+            'CAPN': '🎭 **计算-代数-过程-直觉 (混沌代数玩家)**\n你经常发明奇怪的符号和缩写，过程天马行空但最终答案经常正确。同学看不懂你的草稿，你也看不懂昨天的自己。人称“数学界毕加索”。',
+            'CAPD': '📚 **计算-代数-过程-严谨 (推导苦行僧)**\n你喜欢把因式分解拆成十步，解方程要写“因为…所以…”的循环。你的草稿纸能当教科书出版，但考试永远差5分钟写完。',
+            'LGRN': '🧙 **证明-几何-结果-直觉 (几何神棍)**\n你常说“显然这三点共线”，但其实你只是看着像。你擅长用直觉跳过关键步骤，结论经常蒙对，但证明过程会被助教画满问号。',
+            'LGRD': '📐 **证明-几何-结果-严谨 (欧几里得再世)**\n你的几何证明滴水不漏，连“两点之间线段最短”都要引用公理。你写的“证毕”二字自带神圣光芒。缺点：一道题能写两小时。',
+            'LGPN': '✨ **证明-几何-过程-直觉 (灵性证明家)**\n你的证明思路像散文诗，每一步都出乎意料但逻辑上勉强能通。老师改卷时需要脑补你的思路，最后给了你一半过程分并批注“有灵性，但下次说人话”。',
+            'LGPD': '⚙️ **证明-几何-过程-严谨 (逻辑暴君)**\n你要求每个辅助线都必须有理由，每个全等必须列满SSS/SAS。你的证明过程长达三页，但无懈可击。同学称你为“几何审判官”。',
+            'LARN': '💡 **证明-代数-结果-直觉 (代数先知)**\n你经常一眼看出代数结构的本质，然后写出结论：“由XX定理可知”。虽然跳步严重，但结果全对。教授怀疑你家里有标准答案。',
+            'LARD': '🔬 **证明-代数-结果-严谨 (形式主义教皇)**\n你的代数证明像论文附录，每个符号都有定义，每个引理都标了出处。你坚信“没有严谨就没有数学”。和你讨论数学像在参加答辩。',
+            'LAPN': '🌪️ **证明-代数-过程-直觉 (抽象代数诗人)**\n你的证明充满了“自然地”“容易看出”“不妨设”，读者需要极强的信仰才能跟上。你本人觉得逻辑无比清晰，其他人觉得你在写天书。',
+            'LAPD': '📖 **证明-代数-过程-严谨 (希尔伯特门徒)**\n你写证明时会先列公理，再推引理，最后证定理，格式堪比《几何原本》。你的数学笔记可以影印出版，但你自己经常陷入“过度严谨导致写不完”的困境。(冷知识: 你的数学人格和空曙一样)'
+        };
+        return map[type] || '🧬 **薛定谔型人格**\n你介于严谨与直觉之间，没人能预测你的数学行为。可能是天才，也可能是民科，建议再测一次。';
+    }
+
+    function drawRadar(scores) {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (radarChart) radarChart.destroy();
+        radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['计算倾向 (负C/正L)', '几何倾向 (负G/正A)', '结果倾向 (负R/正P)', '直觉倾向 (负N/正D)'],
+                datasets: [{
+                    label: '你的维度净得分',
+                    data: scores,
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    borderColor: '#f59e0b',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#f59e0b',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: false,
+                        ticks: { stepSize: 5, backdropColor: 'transparent' },
+                        title: { display: true, text: '净得分 (负→左倾向，正→右倾向)' }
+                    }
+                },
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw.toFixed(2)}` } }
+                }
+            }
+        });
+    }
+	
+    function goBackToSecret() {
+        window.location.href = "../Selects/FunProjects.html";
+    }
+
+    function submitAndShow() {
+        const answeredCount = answers.filter(a => a !== null).length;
+        if (answeredCount < 30) {
+            alert(`还差 ${30 - answeredCount} 道题没选！快把你的数学灵魂填满再测～ 摆烂也要选完啊！`);
+            return;
+        }
+        const scores = computeDimensionScores();
+        const { ratio, tiltCount } = getTiltRatio();
+        const isTiltEnding = ratio >= 0.4; // 摆烂选项占比 >= 40%
+        
+        let displayType = '';
+        let desc = '';
+        if (isTiltEnding) {
+            displayType = '💀 摆烂之王 💀';
+            desc = getTiltEndingDescription(ratio);
+        } else {
+            const type = getPersonalityType(scores);
+            displayType = type;
+            desc = getDescription(type, false);
+        }
+        
+        const resultDiv = document.getElementById('resultArea');
+        resultDiv.style.display = 'block';
+        document.getElementById('resultType').innerHTML = displayType;
+        document.getElementById('resultDesc').innerHTML = `<strong>${isTiltEnding ? '隐藏结局' : displayType + ' · 人格解析'}</strong><br><br>${desc.replace(/\n/g,'<br>')}`;
+        drawRadar(scores);
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', submitAndShow);
+    document.getElementById('clearAnswersBtn').addEventListener('click', clearAnswersOnly);
+    document.getElementById('retakeBtn').addEventListener('click', fullRetake);
+    document.getElementById('scrollTopBtn').addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    renderQuestions();
+</script>
+</body>
+</html>
