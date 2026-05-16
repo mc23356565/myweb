@@ -30,7 +30,6 @@
         }
         .back-btn:hover { background: #755f41; transform: translateY(-2px); }
         
-        /* 筛选栏 */
         .filter-bar {
             background: #fef7ec;
             padding: 1rem 1.5rem;
@@ -110,12 +109,24 @@
             max-height: 800px; padding: 1.2rem 1.8rem 1.8rem 1.8rem;
         }
         .topic-item.expanded .expand-icon { transform: rotate(180deg); }
-        .topic-content { color: #5b4a34; line-height: 1.7; font-size: 0.9rem; white-space: pre-wrap; }
+        
+        /* 段落样式 */
+        .topic-content p {
+            margin-bottom: 1em;
+            line-height: 1.7;
+        }
+        .topic-content p:last-child {
+            margin-bottom: 0;
+        }
+        .topic-content br {
+            display: block;
+            margin: 0.3em 0;
+        }
+        
         .no-data {
             text-align: center; padding: 2rem; background: #fdf5e8;
             border-radius: 1.5rem; color: #b69063;
         }
-        .expand-hint { text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: #b6906a; }
         footer { margin-top: 2rem; text-align: center; font-size: 0.7rem; color: #af8f6b; }
         @media (max-width: 700px) {
             .filter-bar { flex-direction: column; align-items: stretch; }
@@ -132,9 +143,8 @@
             <button class="back-btn" id="backToMainFromPhil">🏠 主厅</button>
         </div>
     </div>
-    <p style="color: #775e3f; margin-bottom: 0.5rem;">🔍 点击条目展开思辨全文，支持按标题/内容搜索和日期筛选。</p>
+    <p style="color: #775e3f; margin-bottom: 0.5rem;">🔍 点击条目展开思辨全文，支持搜索和日期筛选。段落之间空一行即可自动分段。</p>
     
-    <!-- 筛选栏 -->
     <div class="filter-bar">
         <div class="filter-group">
             <span class="filter-label">🔎 搜索</span>
@@ -152,27 +162,51 @@
     <footer>⚬ 思辨无止境 · 每一次叩问都是星火 ⚬</footer>
 </div>
 <script>
-    // ========= 思辨话题数据库（添加日期字段，可无限扩展） =========
+    // ========= 思辨话题数据库（可无限扩展） =========
     const PHILOSOPHY_TOPICS = [
         {
             date: "2025-03-15",
-            title: "1",
-            content: "1"
+            title: "孤独是否是一种必要的成长滤镜？",
+            content: "长期独处让我看清了自己的边界。孤独不是缺失，而是把世界调成静音，听见内心最细微的振动。\n\n当我们不再害怕独自面对命题，思考才真正开始。\n\n这是一种沉默的力量，它不喧嚣，却持久。"
         },
         {
             date: "2025-04-22",
-            title: "2",
-            content: "2"
+            title: "理性与感性的战场：逻辑能解决一切吗？",
+            content: "我曾坚信万物皆可推导，直到发现感情、艺术和某些突如其来的悲伤毫无公式可循。\n\n后来明白，理性是地图，感性是风景，两者共存才是完整。"
         },
         {
             date: "2025-07-10",
-            title: "3",
-            content: "3"
+            title: "人为什么要寻求「意义」？",
+            content: "或许意义本就是人类自己编织的网。我们害怕虚无，于是给存在挂上各种标签。\n\n但即使意义是被建构的，选择相信什么仍然是一种自由。\n\n这自由，弥足珍贵。"
         }
+        // 未来在此处添加新话题 ↓ 格式：{ date: "YYYY-MM-DD", title: "...", content: "段落1\n\n段落2\n\n段落3" }
     ];
 
     let currentSearch = "";
     let currentDate = "";
+
+    // 智能分段函数：将连续两个及以上换行符转换为 <p> 段落，单个换行符转换为 <br>
+    function formatParagraphs(text) {
+        if (!text) return '';
+        let escaped = escapeHtml(text);
+        let paragraphs = escaped.split(/\n\s*\n/);
+        let result = paragraphs.map(para => {
+            let inner = para.replace(/\n/g, '<br>');
+            if (inner.trim() === '') return '';
+            return '<p>' + inner + '</p>';
+        }).join('');
+        return result;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m==='&') return '&amp;';
+            if(m==='<') return '&lt;';
+            if(m==='>') return '&gt;';
+            return m;
+        });
+    }
 
     function renderTopics() {
         const container = document.getElementById('philosophyContainer');
@@ -180,11 +214,9 @@
         if (!container) return;
         
         let filtered = [...PHILOSOPHY_TOPICS];
-        // 按日期筛选
         if (currentDate) {
             filtered = filtered.filter(t => t.date === currentDate);
         }
-        // 按搜索词筛选（标题或内容）
         if (currentSearch.trim() !== "") {
             const kw = currentSearch.trim().toLowerCase();
             filtered = filtered.filter(t => 
@@ -192,7 +224,6 @@
                 t.content.toLowerCase().includes(kw)
             );
         }
-        // 按日期降序排序
         filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
         
         if (filtered.length === 0) {
@@ -207,6 +238,7 @@
             const itemDiv = document.createElement('div');
             itemDiv.className = 'topic-item';
             const displayDate = new Date(topic.date).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+            const formattedContent = formatParagraphs(topic.content);
             itemDiv.innerHTML = `
                 <div class="topic-summary" data-idx="${idx}">
                     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -216,23 +248,13 @@
                     <div class="expand-icon">▼</div>
                 </div>
                 <div class="topic-detail">
-                    <div class="topic-content">${escapeHtml(topic.content).replace(/\n/g, '<br>')}</div>
+                    <div class="topic-content">${formattedContent}</div>
                 </div>
             `;
             const summary = itemDiv.querySelector('.topic-summary');
             summary.addEventListener('click', () => itemDiv.classList.toggle('expanded'));
             container.appendChild(itemDiv);
         });
-    }
-    
-    function escapeHtml(str) { 
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) { 
-            if(m==='&') return '&amp;'; 
-            if(m==='<') return '&lt;'; 
-            if(m==='>') return '&gt;'; 
-            return m; 
-        }); 
     }
     
     function initFilters() {
@@ -263,7 +285,7 @@
         }
     }
     
-    document.getElementById('backToDebateMenu').addEventListener('click', () => window.location.href = '../Selects/ThoughtDebate.html');
+    document.getElementById('backToDebateMenu').addEventListener('click', () => window.location.href = '../Select/ThoughtDebate.html');
     document.getElementById('backToMainFromPhil').addEventListener('click', () => window.location.href = '../Secret.html');
     
     renderTopics();
