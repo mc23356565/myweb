@@ -23,8 +23,7 @@
             border-radius: 40px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
         }
         .back-btn:hover { background: #8d6843; transform: translateY(-2px); }
-        
-        /* 筛选栏 */
+
         .filter-bar {
             background: #fef7ec;
             padding: 1rem 1.5rem;
@@ -74,24 +73,81 @@
             font-size: 0.8rem;
             color: #9a7e5c;
         }
-        
+
         .daily-list { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
         .daily-card {
             background: #fffaf2; border-radius: 1.5rem; border: 1px solid #e6d2b5;
-            padding: 1.2rem 1.5rem; transition: 0.2s;
+            overflow: hidden;
+            transition: 0.2s;
         }
-        .daily-title { font-weight: 700; font-size: 1.1rem; color: #4f321b; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .daily-date { font-family: monospace; background: #efe0cd; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.7rem; color: #7b5a3b; }
-        .daily-content { color: #5f4a32; line-height: 1.6; font-size: 0.9rem; margin-top: 0.4rem; white-space: pre-wrap; }
+        .daily-header {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fffaf2;
+            transition: background 0.2s;
+        }
+        .daily-header:hover {
+            background: #f6ede0;
+        }
+        .daily-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #4f321b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .daily-date {
+            font-family: monospace;
+            background: #efe0cd;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #7b5a3b;
+        }
+        .toggle-icon {
+            color: #b68b60;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+        }
+        .daily-card.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+        .daily-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s;
+            background: #fefaf2;
+            border-top: 1px solid #eedfcb;
+        }
+        .daily-card.open .daily-content {
+            max-height: 800px;
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+        }
+        .daily-content p {
+            margin-bottom: 1em;
+            line-height: 1.7;
+        }
+        .daily-content p:last-child {
+            margin-bottom: 0;
+        }
+        .daily-content br {
+            display: block;
+            margin: 0.3em 0;
+        }
         .no-data {
             text-align: center; padding: 2rem; background: #fdf5e8;
             border-radius: 1.5rem; color: #b69063;
         }
-        .expand-hint { text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: #b6906a; }
         footer { margin-top: 2rem; text-align: center; font-size: 0.7rem; color: #b98f66; }
         @media (max-width: 700px) {
             .filter-bar { flex-direction: column; align-items: stretch; }
             .search-input, .date-selector { width: 100%; }
+            .daily-header { padding: 0.8rem 1rem; }
         }
     </style>
 </head>
@@ -104,9 +160,8 @@
             <button class="back-btn" id="backToMainFromDaily">🏠 主厅</button>
         </div>
     </div>
-    <p style="color: #775e3f; margin-bottom: 0.8rem;">🌱 零碎的日常感悟，支持按内容搜索和按日期筛选。</p>
-    
-    <!-- 筛选栏 -->
+    <p style="color: #775e3f; margin-bottom: 0.8rem;">🌱 点击日期展开/收起日记，支持搜索和日期筛选。</p>
+
     <div class="filter-bar">
         <div class="filter-group">
             <span class="filter-label">🔎 搜索</span>
@@ -119,7 +174,7 @@
         <button id="resetFilterBtnDaily" class="reset-filter">清除筛选</button>
         <div class="stats" id="statsInfoDaily"></div>
     </div>
-    
+
     <div class="daily-list" id="dailyContainer"></div>
     <footer>⚬ 日常即星辰 · 每一粒微光都值得记录 ⚬</footer>
 </div>
@@ -130,62 +185,98 @@
             content: "前一段情绪出了很多大问题，反思下来感觉就是缺少一个输出的窗口，不管以什么样的方式吧，至少我找到了一个，比较隐晦的，寂静的角落，算是，树洞吗。就当是在一个神秘的角落，写下的赛博日记罢了。或许这里，能够卸下伪装的面具，好好和自己反思，和解。\n\n说实话，很累，很累，很累。没有人，理解我的想法，观众只会在他们的视角里，去抹黑和诋毁别人的信仰。或许在他们眼里，我也只是任由操纵的傀儡，卑微的制作视频，去提供那可怜的情绪价值。自媒体的生涯，对我而言本来就是体验与分享，我想要把有趣新鲜的内容，哪怕是游戏，同样带给每一位志同道合的观众，有时也在想，是不是真的错了，我也完全可以，蹭流量热度，进而来达到客观的收益，可这样，似乎依然偏离初心了吧。\n\n复杂的事情我没想那么多，姑且走一步看一步吧，这学期算是新的挑战，课不少，但感觉不赖，或许，可能会有点孤独吧。但，又有谁能真的走进内心，去理解别人的感受呢，所以就，慢慢习惯吧，一切都会好的。\n\n人际关系本就千疮百孔，或许别人也只是想要得到我那廉价的帮助吧，价值交换是关系的本质特征。所以，换个角度，这也何尝不是，践行了“逐梦”之名呢。走下去吧，空曙，独行侠也很帅，能永远信任和支持你的，也永远只有你自己。"
         },
         {
-            date: "2025-05-03",
-            content: "空 占个位"
+            date: "2025-09-12",
+            content: "严格来讲是今天凌晨，有一说一，感觉我的生活，过得可能还，蛮失败的。这一段每天晚上，都会胡思乱想，但奈何没有朋友去聊真心话，很多事情不方便网上说，既然能决定这个方式写赛博日记，那就索性不顾虑那么多了，想说的不想说的全都写出来吧，也算倾诉了。\n\n我是个烂人，上学期间，经常被别人背后蛐蛐，说我是书呆子，不与人沟通，是个异类。这些或许都被我听到了，但我也不敢与他们争论，或许他们说的对，我是异类，我是怪人，不然一个正常人，怎么会默默在一个无人的角落，伤心抹泪。高考当时心态不好，不出意料的考出了三年来为数不多的地方低分，似乎，我的失败，在他们眼里，是极好的乐子，在他们的认知里，那个整天就知道学数学的书呆子，最终跌落了神坛。\n\n现实可能对当时的一个少年，还是过于沉重和残酷了，我开始学会了逃避，学会去寻找自己的精神世界。可，他们为什么，要把我那脆弱的梦想，当做笑话一样，把我的账号肆意传播，在班里循环播放，让我极为难堪，那或许对我来说，是最绝望和无助的时刻。\n\n人生还是太难了，处处都是恶意，我只能带上虚假的面具，去尽量与每个人和睦相处，或许，看似乐观的人的背后，内心深处总会有创伤的历史吧。别人无条件的信任，说实话，会让我感到，慌乱，毕竟，有谁会真的喜欢一个烂人呢。但是，谁又不希望，能找一个，真正的挚友，或者是，真正能理解你的另一半呢。\n\n好吧，似乎还是想的太多了，还是梦里什么都有。这么多年的经历，我只学到了一件事，提升自我才是最有价值的投资，对自己宽容点吧，别在意别人的眼光，生活没那么多观众，别被坏情绪煽动，或许这才是生活最本质的样貌。"
         },
         {
-            date: "2025-04-22",
-            content: "空 占个位"
+            date: "2025-09-13",
+            content: "终于能，有个短暂的休息了。最重要的依然是，找到自己热爱的事，去提升自我，永远更有价值。这么多年了，我最不害怕的，就是孤独，兴许是早已习惯了。只是，真的能有人，哪怕停下来，看一眼，我的作品吗。\n\n最可悲的，或许也是满腔热血做出的成果，被随意丢在角落，无人问津吧。以后晚上还是不发这么emo的话题了，想开点，不然越整越难过，好好睡一觉，明天依然是明天，值得让人期待。​"
         },
         {
-            date: "2025-07-01",
-            content: "空 占个位"
+            date: "2025-09-14",
+            content: "最后还是，做出来了。有点艰辛，但好在，还是有想法和灵感。我并不想一味待在曾经的舒适区，去突破并探索新的风格，依然相当重要，我也坚信，明天会更好。\n\n要说不开心的话，可能是，有些关系，慢慢也就淡了吧，不过也确实是这样，尊重客观规律，人与人的相处，本就是阶段性的。但我所热爱的东西，不应受限制，下面依然是要努力把快乐带给各位，淦，加油空曙。"
+        },
+        {
+            date: "2025-09-15",
+            content: "头疼，有点感冒，没睡好。最难受的一集，还有被实验报告支配。唉，熬吧，会过去的。"
+        },
+        {
+            date: "2025-09-17",
+            content: "挺好的，泛型有意思，不过还得练，任重道远，慢慢学吧。什么也没发生，最好不过了。"
+        },
+        {
+            date: "2025-09-18",
+            content: "杜绝内耗，静心提升自我。正视情感，直面挑战。没做到这些之前，还要继续加油，空曙。事情很多，但，行动力这么强，一定可以做完。"
+        },
+        {
+            date: "2025-09-19",
+            content: "说实话，今天我才明白了，朋友才是游戏的最高配置。当我发觉，自己已经无法单纯依靠游戏去消磨时光，想去打打羽毛球，玩桥牌，才发现，我一个朋友，也凑不出来。说不难顶是假的，没人在意，不必强求。只是感慨两句而已，还是去干点，曾经的老本行吧。"
+        },
+        {
+            date: "2025-09-22",
+            content: "事情慢慢稳定下来了，这段时间，给自己放个假，不去刻意完成什么目标了，节奏放慢点，学会享受生活吧。任何方面的事情，都任重道远，慢慢来吧。"
+        },
+        {
+            date: "2025-09-25",
+            content: "很喜欢之前写的一段话，回忆碎片繁星漫步，记录在心中账簿，好似梦回当初，初心依旧如故。路途虽阻，摆脱束缚，逐梦之路，勇敢奔赴。\n\n自媒体这一行，好像是在和曾经的自己对话，一次次的场景相互印证，或许也才成就了，如今的空曙吧。我很喜欢，空曙这个化名，至少，我认为没有比他更有意义的网名了。作为一个十年有余的老网民，互联网似乎承载了我半个人生，现实中几乎没有知心朋友，能够调解心情的唯一手段，或许就是沉浸在属于自己的圈子里，消磨时光。\n\n这样的生活，也不赖。把目光专注于眼前的一切，似乎也没那么焦虑了，每天都是一场冒险，所以，晚安空曙，祝你好运。"
+        },
+        {
+            date: "2025-09-26",
+            content: "一段想了很久的话\n\n你曾用幽火点亮深空,也曾用深海创造虚无。\n你曾用科技响彻苍穹,也曾用水域填补孤独。\n你曾将枯竭化为绿渊,也曾将烈火炽烤长空。\n你曾让生命点缀星海,也曾让地狱侵染人间。\n你曾令人类炊火生香,也曾令时间轮回往复。你曾使植物遍布原野,也曾使星球迷失彼方。\n你曾使艳阳光照宏宇,既创造了生命,亦创造了灭亡。\n\n​或许，在另一个方块世界，我就是造物主，我即为创世神。\n​我曾于平凡的世界追寻答案，也曾在洞穴的工厂探求生机。\n​我曾在缥缈的虚空绝处求生，也曾在静谧的深海体验生活。\n​我曾处时空裂缝间任意穿梭，也曾在狭小的囚笼循规蹈矩。\n我曾向往去触及科技与魔法，也曾亲自去体验绚烂的冒险。\n我曾在机器轰鸣下陷入沉思，也曾在静谧星空上探讨生命。\n\n​或许，一切都只是一场梦，一个心怀愿景的少年，所做的那一场，值得让他铭记一生的，梦。"
+        },
+        {
+            date: "2025-10-03",
+            content: "很失望，说真的，我很伤心，非常非常伤心。我花费了，难以想象的时间和精力，最后只是这样一个结果，真的很不甘心，但真的，无能为力。我曾经一直自称是为爱发电，可热爱，也需要一定基本的热度保障啊。\n\n不然搞得像，我发视频在自娱自乐，像个小丑一样，做所谓的史诗级生存系列，最后零人在意。\n\n好吧，大抵这就是现实吧，我真的很绝望，很无助，很无奈，很伤心，很痛苦，多希望有人能理解我，而不是说风凉话，可这是不可能发生的。我也就有这能力，能在一个无人的角落，说点心里话，发发牢骚了。\n\n可能，这会的难过，会过去，但这次的失败，可能会记一辈子，也算是一次教训吧，不要把你的所有精力放在一件事上，学会给自己缓冲的余地，为自己而活，而且永远记住，从来都没有人会真的在意你，能拯救你的，只有你自己，空曙。"
+        },
+        {
+            date: "2025-10-04",
+            content: "平心而论，今天我才意识到一个问题。如果我真的想活的逍遥自在，最好的办法就是放下一切，做视频已经从最开始生活的目标，慢慢演变成压力了，而且毫无正反馈。我真的，有时候，很想从，up主这个身份脱身，可我却舍不得我的粉丝们。我对不起你们，我不是一个强大的人，没有像你们想的那样，能够把视频越做越好，让你们失望了...但我真的在努力做，只是，不尽人意罢了。"
+        },
+        {
+            date: "2025-10-07",
+            content: "过了一个假期，​啥也没干，​但又好像啥都干了，算是进入下一段时光了。​先把乡村水域更完，再去搞Gregmagic，​就这样吧。"
+        },
+        {
+            date: "2025-10-10",
+            content: "线代试验视频，快问快答，​数竞系列 实战演练 约三期，​乡村水域 约四期，​Gregmagic 第二期计划中，​暂时先来这么多计划吧，也不知道到底能完成几项。"
+        },
+        {
+            date: "2025-11-02",
+            content: "视频都不看完，肆意评论，很不礼貌。"
+        },
+        {
+            date: "2025-11-05",
+            content: "世界上最悲催的事情，可能就是没有事时0人在意，一旦有重大事情发现，那些躺尸的好友列表也会变得火热，或许我只是一个廉价的工具吧。"
+        },
+        {
+            date: "2026-01-11",
+            content: "新的一年，想做的真的很多，但真的一行动，才知道很多事情，并没有想象的那么美好。"
+        },
+        {
+            date: "2026-04-14",
+            content: "闲来无聊，写了一篇小说，哈哈，其实就是根据我悲催的经历改编的。感觉，发出来，也可以，做一个小小的伪装，到时候简单设计一下，让这个文本变得巨长无比，应该就没人能看完了。\n\n反正平常也没人会显得无聊翻我朋友圈，我的朋友圈在别人的眼里，应该是毫无营养的垃圾吧，但，那又代表不了什么，至少对我来说，那是最值得珍视的事情。"
+        },
+        {
+            date: "2026-05-16",
+            content: "好久好久，没有写日记了，应该是，这一段渐渐忙起来了，自然也就没有心思去胡思乱想了，那就简短总结一下吧。\n\n今年对我来说，上半年，无比幸运。在多种因素共同作用下，最后还是拿到了我梦寐以求的国一，当时真的感觉，付出这么多，一切都值了，至少我没有辜负任何人的期望，站在了我曾经梦想站在的一个高度上。虽然，呃，由于参赛进而影响了，真名被爆了，照片被爆了，但其实，也无所谓了。\n\n第二件很幸运的事，那就是我在今年，遇到了一些，非常友好的群友，让我重新，呃，可以说，再次感受到了人性里的真善美，有时候以最淳朴的目标去进行思想的碰撞，这样的经历才是无比美好的。同时，我还认识了一位，非常非常非常，重要的，朋友。TA之前告诉我，我已经做的很好了，应该自信一点，聊了很多，可以说，是TA把我从泥潭中拉了上来，给我了非常非常大的帮助。我真的非常非常感谢，能遇到这样一位知音，能从多个角度真正的尊重我，理解我，包容我，特别是当我把我的一些想法给TA看的时候，没有半分敷衍。对于一件小事，或许持有相似的看法，那是默契，或许想法不同，但通过交流，可以达到思想上的共鸣。我希望，这份友谊可以，尽可能的持续下去，可能在未来，它也会成为我记忆中，最璀璨的篇章。\n\n当然，还有一些微不足道的小事情，就比如，小号经过了一年多的发展，终于慢慢有起色了，这一段也算慢慢赚到了小号的第一桶金。和大号的突然爆火不同，小号的粉丝量是我一点点看着涨上来的，虽然速度不快，但真的，非常非常有成就感。特别是有人评论，催更系列的时候，我非常非常的开心，因为这可以证明，我制作的内容，真的帮到了各位观众朋友，这样就完全足够了。如果可能的话，小号做到1万粉丝，我会搞一期特别节目，去感谢每一位观众朋友，真的，没有他们的支持，我永远无法走到今天。\n\n从某种角度来说，2025年是我最绝望和内耗的一年，让我经历了暗无天日的时光，多种痛苦，包括情感上的洗礼，或许，算是情劫吧(不太想说，总之并不是一段愉快的回忆，就当是我付错了真心，都过去了)。但今年应该是真的转运了，我能够去把我毕生的精力，放在我所热爱的事上，这样的生活，我十分满意，我也不再回去关注，别人对我的看法。我会毫无顾忌的继续分享生活，分享日常，以我的视角观察，思考，品味世界，我会和那位挚友说的那样，尝试去变得，更自信一些，相信未来，应该会比现在的生活要好很多。至少，一切献给青春那最崇高的梦想，只要心有所属，世界之理为你解明，我也终将抵达，之前从未敢设想的新的高度。"
         }
     ];
 
     let currentSearchDaily = "";
     let currentDateDaily = "";
 
-    function renderDaily() {
-        const container = document.getElementById('dailyContainer');
-        const statsSpan = document.getElementById('statsInfoDaily');
-        if (!container) return;
-        
-        let filtered = [...DAILY_JOURNAL];
-        // 按日期筛选
-        if (currentDateDaily) {
-            filtered = filtered.filter(entry => entry.date === currentDateDaily);
-        }
-        // 按内容搜索
-        if (currentSearchDaily.trim() !== "") {
-            const kw = currentSearchDaily.trim().toLowerCase();
-            filtered = filtered.filter(entry => entry.content.toLowerCase().includes(kw));
-        }
-        // 按日期降序排序
-        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-        
-        if (filtered.length === 0) {
-            container.innerHTML = '<div class="no-data">📭 没有找到匹配的日常记录，试试清除筛选或添加新内容～</div>';
-            statsSpan.innerText = `共 0 条记录`;
-            return;
-        }
-        statsSpan.innerText = `📌 显示 ${filtered.length} 条日常${currentDateDaily ? ` (日期 ${currentDateDaily})` : ''}${currentSearchDaily ? ` (搜索: ${currentSearchDaily})` : ''}`;
-        
-        container.innerHTML = '';
-        filtered.forEach(entry => {
-            const card = document.createElement('div');
-            card.className = 'daily-card';
-            const displayDate = new Date(entry.date).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
-            card.innerHTML = `
-                <div class="daily-title">
-                    <span class="daily-date">📅 ${displayDate}</span>
-                </div>
-                <div class="daily-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
-            `;
-            container.appendChild(card);
-        });
+    function formatParagraphs(text) {
+        if (!text) return '';
+        let escaped = escapeHtml(text);
+        let paragraphs = escaped.split(/\n\s*\n/);
+        let result = paragraphs.map(para => {
+            let inner = para.replace(/\n/g, '<br>');
+            if (inner.trim() === '') return '';
+            return '<p>' + inner + '</p>';
+        }).join('');
+        return result;
     }
-    
+
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -195,12 +286,59 @@
             return m;
         });
     }
-    
+
+    function renderDaily() {
+        const container = document.getElementById('dailyContainer');
+        const statsSpan = document.getElementById('statsInfoDaily');
+        if (!container) return;
+
+        let filtered = [...DAILY_JOURNAL];
+        if (currentDateDaily) {
+            filtered = filtered.filter(entry => entry.date === currentDateDaily);
+        }
+        if (currentSearchDaily.trim() !== "") {
+            const kw = currentSearchDaily.trim().toLowerCase();
+            filtered = filtered.filter(entry => entry.content.toLowerCase().includes(kw));
+        }
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="no-data">📭 没有找到匹配的日常记录，试试清除筛选或添加新内容～</div>';
+            statsSpan.innerText = `共 0 条记录`;
+            return;
+        }
+        statsSpan.innerText = `📌 显示 ${filtered.length} 条日常${currentDateDaily ? ` (日期 ${currentDateDaily})` : ''}${currentSearchDaily ? ` (搜索: ${currentSearchDaily})` : ''}`;
+
+        container.innerHTML = '';
+        filtered.forEach(entry => {
+            const card = document.createElement('div');
+            card.className = 'daily-card';
+            const displayDate = new Date(entry.date).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+            const formattedContent = formatParagraphs(entry.content);
+            card.innerHTML = `
+                <div class="daily-header">
+                    <div class="daily-title">
+                        <span class="daily-date">📅 ${displayDate}</span>
+                    </div>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="daily-content">
+                    <div class="content-inner">${formattedContent}</div>
+                </div>
+            `;
+            const header = card.querySelector('.daily-header');
+            header.addEventListener('click', () => {
+                card.classList.toggle('open');
+            });
+            container.appendChild(card);
+        });
+    }
+
     function initFiltersDaily() {
         const searchInput = document.getElementById('searchInputDaily');
         const dateInput = document.getElementById('dateFilterInputDaily');
         const resetBtn = document.getElementById('resetFilterBtnDaily');
-        
+
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 currentSearchDaily = e.target.value;
@@ -223,10 +361,10 @@
             });
         }
     }
-    
+
     document.getElementById('backToDebateMenuDaily').addEventListener('click', () => window.location.href = '../Selects/ThoughtDebate.html');
     document.getElementById('backToMainFromDaily').addEventListener('click', () => window.location.href = '../Secret.html');
-    
+
     renderDaily();
     initFiltersDaily();
 </script>
