@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>个性思辨 · 分类选择 | 空曙</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
@@ -18,123 +14,102 @@
             min-height: 100vh;
             padding: 2rem 1.5rem;
         }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 1000px; margin: 0 auto; }
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 2.5rem;
-            border-bottom: 2px solid #cfbc9c;
-            padding-bottom: 1rem;
+            display: flex; justify-content: space-between; align-items: baseline;
+            flex-wrap: wrap; margin-bottom: 2.5rem; border-bottom: 2px solid #cfbc9c; padding-bottom: 1rem;
         }
-        .page-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #42351f;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .page-title { font-size: 2rem; font-weight: 600; color: #42351f; display: flex; align-items: center; gap: 10px; }
         .back-home {
-            background: #9a7c5a;
-            border: none;
-            color: #fef3e4;
-            padding: 0.55rem 1.4rem;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
+            background: #9a7c5a; border: none; color: #fef3e4; padding: 0.55rem 1.4rem;
+            border-radius: 40px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s;
         }
-        .back-home:hover {
-            background: #755f41;
-            transform: translateY(-2px);
-        }
-
+        .back-home:hover { background: #755f41; transform: translateY(-2px); }
         .choice-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem; margin: 3rem 0;
         }
         .choice-card {
-            background: #fffbf2;
-            border-radius: 2rem;
-            border: 1px solid #ecdbbc;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            background: #fffbf2; border-radius: 2rem; border: 1px solid #ecdbbc;
+            padding: 2rem 1.5rem; text-align: center; cursor: pointer;
+            transition: all 0.25s; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
-        .choice-card:hover {
-            transform: translateY(-8px);
-            background: #ffffff;
-            border-color: #c2a172;
-            box-shadow: 0 20px 28px -12px rgba(70,45,20,0.2);
-        }
-        .choice-icon {
-            font-size: 3rem;
-            margin-bottom: 0.75rem;
-        }
-        .choice-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #4a311c;
-            margin-bottom: 0.5rem;
-        }
-        .choice-desc {
-            color: #7a6244;
-            line-height: 1.5;
-            margin: 0.8rem 0;
-        }
+        .choice-card:hover { transform: translateY(-8px); background: #ffffff; border-color: #c2a172; }
+        .choice-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+        .choice-title { font-size: 1.8rem; font-weight: 700; color: #4a311c; margin-bottom: 0.5rem; }
+        .choice-desc { color: #7a6244; line-height: 1.5; margin: 0.8rem 0; }
         .enter-choice {
-            background: #b2885c;
-            border: none;
-            color: white;
-            padding: 0.45rem 1.3rem;
-            border-radius: 2rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            margin-top: 0.6rem;
+            background: #b2885c; border: none; color: white; padding: 0.45rem 1.3rem;
+            border-radius: 2rem; font-weight: 500; display: inline-flex; align-items: center;
+            gap: 6px; cursor: pointer; margin-top: 0.6rem;
         }
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #b19674;
+        footer { margin-top: 2rem; text-align: center; font-size: 0.75rem; color: #b19674; }
+
+        .quiz-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
         }
-        @media (max-width: 650px) {
-            .choice-title { font-size: 1.4rem; }
+        .quiz-modal {
+            background: #fffef7; border-radius: 2rem; max-width: 520px; width: 90%;
+            padding: 1.5rem 1.8rem 1.8rem; position: relative;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3); border: 1px solid #e2cfb2;
+            text-align: center; animation: fadeSlideUp 0.2s ease;
         }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-close {
+            position: absolute; top: 12px; right: 18px;
+            font-size: 24px; cursor: pointer; color: #b2895c;
+            transition: 0.2s; line-height: 1;
+        }
+        .quiz-close:hover { color: #6b4a2e; }
+        .quiz-modal h3 { font-size: 1.6rem; color: #4f3622; margin-bottom: 0.2rem; }
+        .quiz-intro { font-size: 0.85rem; color: #a0815d; margin-bottom: 1.2rem; border-bottom: 1px dashed #ecdbba; display: inline-block; padding-bottom: 0.2rem; }
+        .quiz-question { 
+            font-size: 1.05rem; line-height: 1.6; color: #2d2418; margin-bottom: 0.8rem; 
+            background: #fef5e8; padding: 0.8rem; border-radius: 1.5rem; 
+        }
+        .blank { 
+            display: inline-block; 
+            width: 120px;
+            border-bottom: 2px solid #b2885c;
+            margin: 0 4px;
+            vertical-align: baseline;
+            line-height: 1;
+        }
+        .quiz-input {
+            width: 100%; padding: 0.7rem 1rem; border: 2px solid #e0cfb6; border-radius: 60px;
+            font-size: 1rem; margin: 0.5rem 0 1.2rem; outline: none; text-align: center; background: white;
+        }
+        .quiz-input:focus { border-color: #b2885c; }
+        .quiz-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #9b7b5a; color: white; border: none; padding: 0.5rem 1.3rem;
+            border-radius: 40px; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+        }
+        .quiz-btn:hover { background: #7e5f3e; }
+        .quiz-btn.secondary { background: #b99e7c; }
+        .quiz-btn.secondary:hover { background: #9a7e5c; }
+        .error-msg { color: #c25a3a; font-size: 0.8rem; margin-top: 0.8rem; min-height: 2.5rem; }
+        .success-msg { color: #2e7d64; font-size: 0.9rem; margin-top: 0.5rem; }
+        @media (max-width: 650px) { .choice-title { font-size: 1.4rem; } .quiz-modal { padding: 1rem 1.2rem 1.2rem; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="top-bar">
-        <div class="page-title">
-            🧠 个性思辨 · 选择路径
-        </div>
+        <div class="page-title">🧠 个性思辨 · 选择路径</div>
         <button class="back-home" id="backToMainBtn">🏠 返回主厅 · 记忆回廊</button>
     </div>
     <p style="margin-bottom: 1rem; color: #775e3f; text-align: center;">两条脉络，记录思维的两种温度</p>
     <div class="choice-grid">
-        <div class="choice-card" id="philosophyCard">
+        <div class="choice-card" id="philosophyCard" data-link="../Thoughts/ThoughtDebatePhilosophy.html">
             <div class="choice-icon">⚖️🧠</div>
             <div class="choice-title">思辨话题</div>
             <div class="choice-desc">深度哲思、价值辩论、抽象命题与逻辑森林。存放那些需要反复推敲的思绪。</div>
             <button class="enter-choice">进入思辨辑录 →</button>
         </div>
-        <div class="choice-card" id="dailyCard">
+        <div class="choice-card" id="dailyCard" data-link="../Thoughts/ThoughtDebateDaily.html">
             <div class="choice-icon">📖🌿</div>
             <div class="choice-title">日常想法</div>
             <div class="choice-desc">碎碎念、生活观察、情绪切片。很无聊的日常，不过以一种新的方式记录罢了。</div>
@@ -143,13 +118,169 @@
     </div>
     <footer>⚬ 生命绚烂，别被黑暗压垮... ⚬</footer>
 </div>
+
 <script>
-    document.getElementById('philosophyCard').addEventListener('click', () => {
-        window.location.href = '../Thoughts/ThoughtDebatePhilosophy.html';
-    });
-    document.getElementById('dailyCard').addEventListener('click', () => {
-        window.location.href = '../Thoughts/ThoughtDebateDaily.html';
-    });
+    const QUESTION_BANK = [
+        { question: "空曙的英文网名是 ______", answers: ["dawnlit", "Dawnlit"], hint: "💡 提示：它和“曙光”有关，首字母大写～" },
+        { question: "空曙最喜欢的纯音乐作者是 ______", answers: ["plum", "Plum", "Plum音乐", "Plum工作室"], hint: "🎵 提示：一个四个字母的名字，代表作《Diamond in the sky》" },
+        { question: "“逐梦”这个含义对应的英文前缀是 ______", answers: ["dreemurr", "Dreemurr"], hint: "✨ 提示：来自《Undertale》中一个充满决心的姓氏" },
+        { question: "空曙在20岁生日网站中提到的废案文件名是 ______", answers: ["Fatal Error", "fatal error", "Fatal error", "FatalError"], hint: "📄 提示：两个单词，第一个是“致命的”，第二个是“错误”" },
+        { question: "空曙最喜欢的MC音乐重置版本是 ______", answers: ["Cat (Caution&Crisis Remix)", "Cat", "cat"], hint: "🐱 提示：一首C418的经典曲子，后面有“(Caution&Crisis Remix)”" }
+    ];
+
+    let verifiedLinks = new Set();
+    try {
+        const stored = sessionStorage.getItem('quiz_verified_links');
+        if (stored) {
+            const arr = JSON.parse(stored);
+            verifiedLinks = new Set(arr);
+        }
+    } catch(e) {}
+
+    function saveVerifiedLink(link) {
+        verifiedLinks.add(link);
+        sessionStorage.setItem('quiz_verified_links', JSON.stringify([...verifiedLinks]));
+    }
+
+    function isLinkVerified(link) {
+        return verifiedLinks.has(link);
+    }
+
+    let currentPendingLink = null;
+    let currentQuestionObj = null;
+    let activeOverlay = null;
+
+    function getRandomQuestion() {
+        const idx = Math.floor(Math.random() * QUESTION_BANK.length);
+        return { ...QUESTION_BANK[idx] };
+    }
+
+    function formatQuestionText(text) {
+        return text.replace(/_{3,}/g, '<span class="blank"></span>');
+    }
+
+    function refreshQuestion(modalElement) {
+        const newQ = getRandomQuestion();
+        currentQuestionObj = newQ;
+        const questionHtml = formatQuestionText(newQ.question);
+        const questionDiv = modalElement.querySelector('.quiz-question');
+        if (questionDiv) questionDiv.innerHTML = questionHtml;
+        const errorMsgDiv = modalElement.querySelector('#quizErrorMsg');
+        if (errorMsgDiv) errorMsgDiv.innerHTML = '';
+        const inputField = modalElement.querySelector('#quizFillInput');
+        if (inputField) { inputField.value = ''; inputField.focus(); }
+    }
+
+    function closeQuizModal() {
+        if (activeOverlay) {
+            activeOverlay.remove();
+            activeOverlay = null;
+            currentPendingLink = null;
+            currentQuestionObj = null;
+        }
+    }
+
+    function showSuccessAndRedirect(link) {
+        if (activeOverlay) {
+            const errorDiv = activeOverlay.querySelector('#quizErrorMsg');
+            if (errorDiv) {
+                errorDiv.innerHTML = '<span class="success-msg">✨ 正确！思维之门为你敞开，即将前往思辨之境... ✨</span>';
+                errorDiv.style.color = '#2e7d64';
+            }
+            const btns = activeOverlay.querySelectorAll('.quiz-btn');
+            btns.forEach(btn => btn.disabled = true);
+            setTimeout(() => {
+                closeQuizModal();
+                window.location.href = link;
+            }, 800);
+        } else {
+            window.location.href = link;
+        }
+    }
+
+    function showQuizModal(targetLink) {
+        if (isLinkVerified(targetLink)) {
+            window.location.href = targetLink;
+            return;
+        }
+        if (activeOverlay) closeQuizModal();
+        currentPendingLink = targetLink;
+        currentQuestionObj = getRandomQuestion();
+        const q = currentQuestionObj;
+        const questionHtml = formatQuestionText(q.question);
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'quiz-overlay';
+        overlay.innerHTML = `
+            <div class="quiz-modal">
+                <div class="quiz-close" id="quizCloseBtn">✕</div>
+                <h3>🔐 思维守护者</h3>
+                <div class="quiz-intro">「只有真正了解空曙的人，才能踏入这片思辨之地」</div>
+                <div class="quiz-question">${questionHtml}</div>
+                <input type="text" id="quizFillInput" class="quiz-input" placeholder="在这里写下你的答案" autocomplete="off">
+                <div class="quiz-buttons">
+                    <button class="quiz-btn secondary" id="refreshQuestionBtn">🔄 换一道</button>
+                    <button class="quiz-btn" id="submitQuizBtn">验证 · 进入</button>
+                </div>
+                <div class="error-msg" id="quizErrorMsg"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        activeOverlay = overlay;
+        
+        const inputField = overlay.querySelector('#quizFillInput');
+        const submitBtn = overlay.querySelector('#submitQuizBtn');
+        const refreshBtn = overlay.querySelector('#refreshQuestionBtn');
+        const closeBtn = overlay.querySelector('#quizCloseBtn');
+        const errorMsgDiv = overlay.querySelector('#quizErrorMsg');
+        
+        if (inputField) inputField.focus();
+        
+        const verify = () => {
+            const userAnswer = inputField ? inputField.value.trim() : "";
+            const isCorrect = currentQuestionObj.answers.some(ans => ans.toLowerCase() === userAnswer.toLowerCase());
+            if (isCorrect) {
+                saveVerifiedLink(currentPendingLink);
+                showSuccessAndRedirect(currentPendingLink);
+            } else {
+                errorMsgDiv.innerHTML = `❌ 不对哦～ ${currentQuestionObj.hint || "再回忆一下？"}`;
+                if (inputField) { inputField.value = ""; inputField.focus(); }
+            }
+        };
+        
+        const refresh = () => {
+            refreshQuestion(overlay);
+            errorMsgDiv.innerHTML = '';
+        };
+        
+        submitBtn.addEventListener('click', verify);
+        refreshBtn.addEventListener('click', refresh);
+        closeBtn.addEventListener('click', closeQuizModal);
+        if (inputField) {
+            inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') verify(); });
+        }
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeQuizModal(); });
+    }
+
+    function bindCard(cardId, link) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        card.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('.enter-choice')) return;
+            showQuizModal(link);
+        });
+        const btn = card.querySelector('.enter-choice');
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showQuizModal(link);
+            });
+        }
+    }
+
+    bindCard('philosophyCard', '../Thoughts/ThoughtDebatePhilosophy.html');
+    bindCard('dailyCard', '../Thoughts/ThoughtDebateDaily.html');
+
     document.getElementById('backToMainBtn').addEventListener('click', () => {
         window.location.href = '../Secret.html';
     });
