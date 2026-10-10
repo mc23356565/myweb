@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>生辰纪念 · 年轮回响 | 空曙</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #e7dfd1;
+            background-image: radial-gradient(circle at 10% 20%, rgba(200, 180, 150, 0.1) 2%, transparent 2.5%),
+                              radial-gradient(circle at 85% 65%, rgba(160, 130, 95, 0.08) 1.5%, transparent 2%);
+            background-size: 32px 32px, 28px 28px;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+
+        .archive-container { max-width: 1200px; margin: 0 auto; }
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: baseline;
+            flex-wrap: wrap; margin-bottom: 2.5rem; border-bottom: 2px solid #d6c5ae; padding-bottom: 1rem;
+        }
+        .back-home {
+            background: #a78763; border: none; color: #fef6e8; padding: 0.55rem 1.4rem;
+            border-radius: 40px; font-size: 0.9rem; font-weight: 500; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .back-home:hover { background: #826a48; transform: translateY(-2px); }
+        .page-title {
+            font-size: 2rem; font-weight: 600; color: #4e3622; display: flex; align-items: center; gap: 12px;
+        }
+        .page-title span { background: #dccfba; padding: 0.2rem 0.9rem; border-radius: 60px; font-size: 0.9rem; color: #5b3f26; }
+
+        .years-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem; margin: 2rem 0 2.5rem;
+        }
+        .birth-card {
+            background: #fffbf2; border-radius: 2rem; transition: all 0.25s ease;
+            box-shadow: 0 12px 22px -10px rgba(0,0,0,0.15); border: 1px solid #eddbbc;
+            overflow: hidden; cursor: pointer;
+        }
+        .birth-card:hover { transform: translateY(-8px); background: #ffffff; border-color: #c6a97c; }
+        .card-banner { height: 120px; background: linear-gradient(130deg, #dcc194, #b8946c); display: flex; align-items: center; justify-content: center; font-size: 3.4rem; }
+        .card-content { padding: 1.6rem 1.5rem 1.8rem; }
+        .birth-year { font-size: 1.9rem; font-weight: 700; color: #4f351f; margin-bottom: 0.3rem; }
+        .birth-sub { color: #9f8464; font-size: 0.85rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 6px; }
+        .desc { color: #5e4a33; line-height: 1.5; font-size: 0.9rem; margin: 0.6rem 0 1.2rem; }
+        .enter-archive {
+            background: #ba9572; border: none; color: white; padding: 0.5rem 1.4rem;
+            border-radius: 3rem; font-weight: 500; font-size: 0.85rem; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .enter-archive:hover { background: #9a744f; }
+        footer { margin-top: 2.2rem; text-align: center; font-size: 0.7rem; color: #b19674; }
+
+        /* 问答弹窗样式 */
+        .quiz-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+        }
+        .quiz-modal {
+            background: #fffef7; border-radius: 2rem; max-width: 520px; width: 90%;
+            padding: 1.5rem 1.8rem 1.8rem; position: relative;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3); border: 1px solid #e2cfb2;
+            text-align: center; animation: fadeSlideUp 0.2s ease;
+        }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-close {
+            position: absolute; top: 12px; right: 18px;
+            font-size: 24px; cursor: pointer; color: #b2895c;
+            transition: 0.2s; line-height: 1;
+        }
+        .quiz-close:hover { color: #6b4a2e; }
+        .quiz-modal h3 { font-size: 1.6rem; color: #4f3622; margin-bottom: 0.2rem; }
+        .quiz-intro { font-size: 0.85rem; color: #a0815d; margin-bottom: 1.2rem; border-bottom: 1px dashed #ecdbba; display: inline-block; padding-bottom: 0.2rem; }
+        .quiz-question { 
+            font-size: 1.05rem; line-height: 1.6; color: #2d2418; margin-bottom: 0.8rem; 
+            background: #fef5e8; padding: 0.8rem; border-radius: 1.5rem; 
+        }
+        .blank { 
+            display: inline-block; 
+            width: 120px;
+            border-bottom: 2px solid #b2885c;
+            margin: 0 4px;
+            vertical-align: baseline;   /* 与文字基线对齐 */
+            line-height: 1;
+        }
+        .quiz-input {
+            width: 100%; padding: 0.7rem 1rem; border: 2px solid #e0cfb6; border-radius: 60px;
+            font-size: 1rem; margin: 0.5rem 0 1.2rem; outline: none; text-align: center; background: white;
+        }
+        .quiz-input:focus { border-color: #b2885c; }
+        .quiz-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #9b7b5a; color: white; border: none; padding: 0.5rem 1.3rem;
+            border-radius: 40px; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+        }
+        .quiz-btn:hover { background: #7e5f3e; }
+        .quiz-btn.secondary { background: #b99e7c; }
+        .quiz-btn.secondary:hover { background: #9a7e5c; }
+        .error-msg { color: #c25a3a; font-size: 0.8rem; margin-top: 0.8rem; min-height: 2.5rem; }
+        .success-msg { color: #2e7d64; font-size: 0.9rem; margin-top: 0.5rem; }
+        @media (max-width: 680px) { .page-title { font-size: 1.6rem; } .quiz-modal { padding: 1rem 1.2rem 1.2rem; } }
+    </style>
+</head>
+<body>
+<div class="archive-container">
+    <div class="top-bar">
+        <div class="page-title">🎂 生辰纪念 · 年轮回廊 </div>
+        <button class="back-home" id="backToMainBtn">🏠 返回主厅 · 记忆回廊</button>
+    </div>
+    <p style="margin-bottom: 1rem; color: #846e50; font-size: 0.9rem; border-left: 3px solid #c2a075; padding-left: 1rem;">
+        ✦ 每一道年轮都是一座记忆密室，轻触卡片，重返那一年的独白时刻 ✦
+    </p>
+    <div class="years-grid" id="birthdayYearsContainer"></div>
+    <footer>⚬ 不过是一些往昔的记忆，而已... ⚬</footer>
+</div>
+
+<script>
+    // ======================= 可配置题库 =======================
+    const QUESTION_BANK = [
+        { question: "空曙的准确英文释疑是 ______", answers: ["dawnlit", "Dawnlit"], hint: "💡 提示：空曙的另一层含义，是被照耀的曙光" },
+        { question: "空曙的生日是(yyyy-mm-dd) ______", answers: ["2026-04-06"], hint: "💡 提示：每年空曙的生日，几乎都会在某个地方发一个所谓读评论的视频" },
+        { question: "“逐梦”该词出自某个游戏，其对应的姓氏的英文全称是 ______", answers: ["dreemurr", "Dreemurr"], hint: "💡 提示：听到这个姓氏，罪恶爬上脊背，你充满了决心" },
+        { question: "根据上文填写下文: 空怀逸兴思, ______", answers: ["曙色映新途","曙色映新途。","曙色映新途."], hint: "💡 提示：似乎是一首，在他的个性签名里，或朋友圈中，出现过的原创诗" },
+        { question: "空曙的mbti是 ______", answers: ["intp","INTP"], hint: "💡 提示：这还需要提示吗...送分题.jpg" },
+        { question: "空曙的盗版MC游戏名是 ______", answers: ["mc_23356565","mc23356565"], hint: "💡 提示：有没有可能，你现在访问的这个网站的网址，就有这道题的答案" },
+        { question: "空曙的声音，经某些声音鉴定软件，测出来的结果是 ______", answers: ["青叔音","青年音","奶糖音","青叔音+奶糖音"], hint: "💡 提示：没提示，就那几种音色，你就猜吧" },
+        { question: "某整活测试sbti，空曙测得的结果是 ______", answers: ["THINK","think","思考者","思考者think","思考者THINK","THINK思考者","think思考者","THINK(思考者)","思考者(THINK)","think(思考者)","思考者(think)"], hint: "💡 提示：动态可能发过(但好像没了)，不过似乎可以根据他的性格进行反推" },
+        { question: "空曙做的最多的菜是 ______", answers: ["麻婆豆腐","豆腐"], hint: "💡 提示：发过朋友圈" },
+        { question: "高中阶段，空曙在众多模拟考试中，考过的最高分是(阿拉伯数字) ______", answers: ["666"], hint: "💡 提示：这个分数被做成表情包了" }
+    ];
+
+    let verifiedLinks = new Set();
+    try {
+        const stored = sessionStorage.getItem('quiz_verified_links');
+        if (stored) {
+            const arr = JSON.parse(stored);
+            verifiedLinks = new Set(arr);
+        }
+    } catch(e) {}
+
+    function saveVerifiedLink(link) {
+        verifiedLinks.add(link);
+        sessionStorage.setItem('quiz_verified_links', JSON.stringify([...verifiedLinks]));
+    }
+
+    function isLinkVerified(link) {
+        return verifiedLinks.has(link);
+    }
+
+    let currentPendingLink = null;
+    let currentQuestionObj = null;
+    let activeOverlay = null;
+
+    function getRandomQuestion() {
+        const idx = Math.floor(Math.random() * QUESTION_BANK.length);
+        return { ...QUESTION_BANK[idx] };
+    }
+
+    function formatQuestionText(text) {
+        return text.replace(/_{3,}/g, '<span class="blank"></span>');
+    }
+
+    function refreshQuestion(modalElement) {
+        const newQ = getRandomQuestion();
+        currentQuestionObj = newQ;
+        const questionHtml = formatQuestionText(newQ.question);
+        const questionDiv = modalElement.querySelector('.quiz-question');
+        if (questionDiv) questionDiv.innerHTML = questionHtml;
+        const errorMsgDiv = modalElement.querySelector('#quizErrorMsg');
+        if (errorMsgDiv) errorMsgDiv.innerHTML = '';
+        const inputField = modalElement.querySelector('#quizFillInput');
+        if (inputField) { inputField.value = ''; inputField.focus(); }
+    }
+
+    function closeQuizModal() {
+        if (activeOverlay) {
+            activeOverlay.remove();
+            activeOverlay = null;
+            currentPendingLink = null;
+            currentQuestionObj = null;
+        }
+    }
+
+    function showSuccessAndRedirect(link) {
+        if (activeOverlay) {
+            const errorDiv = activeOverlay.querySelector('#quizErrorMsg');
+            if (errorDiv) {
+                errorDiv.innerHTML = '<span class="success-msg">✨ 咕咕嘎嘎！居然答对了！空曙给你点了一个大大的赞，并允许你窥探他的更多秘密 ✨</span>';
+                errorDiv.style.color = '#2e7d64';
+            }
+            const btns = activeOverlay.querySelectorAll('.quiz-btn');
+            btns.forEach(btn => btn.disabled = true);
+            setTimeout(() => {
+                closeQuizModal();
+                window.location.href = link;
+            }, 800);
+        } else {
+            window.location.href = link;
+        }
+    }
+
+    function showQuizModal(targetLink) {
+        if (isLinkVerified(targetLink)) {
+            window.location.href = targetLink;
+            return;
+        }
+        if (activeOverlay) closeQuizModal();
+        currentPendingLink = targetLink;
+        currentQuestionObj = getRandomQuestion();
+        const q = currentQuestionObj;
+        const questionHtml = formatQuestionText(q.question);
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'quiz-overlay';
+        overlay.innerHTML = `
+            <div class="quiz-modal">
+                <div class="quiz-close" id="quizCloseBtn">✕</div>
+                <h3>🔐 记忆守卫者</h3>
+                <div class="quiz-intro">「这里埋藏了脆弱的记忆，唯有经过检验的旅者才能涉足勘探」</div>
+                <div class="quiz-question">${questionHtml}</div>
+                <input type="text" id="quizFillInput" class="quiz-input" placeholder="在这里写下你的答案" autocomplete="off">
+                <div class="quiz-buttons">
+                    <button class="quiz-btn secondary" id="refreshQuestionBtn">🔄 换一道</button>
+                    <button class="quiz-btn" id="submitQuizBtn">验证 · 开启密室</button>
+                </div>
+                <div class="error-msg" id="quizErrorMsg"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        activeOverlay = overlay;
+        
+        const inputField = overlay.querySelector('#quizFillInput');
+        const submitBtn = overlay.querySelector('#submitQuizBtn');
+        const refreshBtn = overlay.querySelector('#refreshQuestionBtn');
+        const closeBtn = overlay.querySelector('#quizCloseBtn');
+        const errorMsgDiv = overlay.querySelector('#quizErrorMsg');
+        
+        if (inputField) inputField.focus();
+        
+        const verify = () => {
+            const userAnswer = inputField ? inputField.value.trim() : "";
+            const isCorrect = currentQuestionObj.answers.some(ans => ans.toLowerCase() === userAnswer.toLowerCase());
+            if (isCorrect) {
+                saveVerifiedLink(currentPendingLink);
+                showSuccessAndRedirect(currentPendingLink);
+            } else {
+                errorMsgDiv.innerHTML = `❌ 不对哦，再想想～ ${currentQuestionObj.hint || "再试试看？"}`;
+                if (inputField) { inputField.value = ""; inputField.focus(); }
+            }
+        };
+        
+        const refresh = () => {
+            refreshQuestion(overlay);
+            errorMsgDiv.innerHTML = '';
+        };
+        
+        submitBtn.addEventListener('click', verify);
+        refreshBtn.addEventListener('click', refresh);
+        closeBtn.addEventListener('click', closeQuizModal);
+        if (inputField) {
+            inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') verify(); });
+        }
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeQuizModal(); });
+    }
+
+    const BIRTHDAY_RECORDS = [
+        {
+            id: "20th",
+            yearLabel: "沉寂 · 二十岁",
+            bannerIcon: "🎂✨",
+            subText: "2026 · 孤寂之年",
+            description: "最煎熬的那年，历经磨难，无边的内耗与绝望，在此刻写下了一封漫长的内心书信...这里似乎还有一些，尚未发现的秘密",
+            pageUrl: "../Birthdays/20th.html"
+        },
+    ];
+
+    function renderYearCards() {
+        const container = document.getElementById('birthdayYearsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (BIRTHDAY_RECORDS.length === 0) {
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; background:#fef2e4; border-radius:2rem;">✨ 暂无生辰档案，等待时光填充 ✨</div>`;
+            return;
+        }
+        BIRTHDAY_RECORDS.forEach(record => {
+            const card = document.createElement('div');
+            card.className = 'birth-card';
+            const link = record.pageUrl;
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.closest('.enter-archive')) return;
+                showQuizModal(link);
+            });
+            card.innerHTML = `
+                <div class="card-banner">${record.bannerIcon || '🎂'}</div>
+                <div class="card-content">
+                    <div class="birth-year">${record.yearLabel}</div>
+                    <div class="birth-sub"><span>📅</span> ${record.subText || ''}</div>
+                    <div class="desc">${record.description || '点击探寻这段生日的私语与记忆碎片。'}</div>
+                    <button class="enter-archive" data-url="${link}">打开时光胶囊 🗝️</button>
+                </div>
+            `;
+            const enterBtn = card.querySelector('.enter-archive');
+            if (enterBtn) {
+                enterBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showQuizModal(link);
+                });
+            }
+            container.appendChild(card);
+        });
+    }
+
+    function goBackToSecret() { window.location.href = "../Secret.html"; }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderYearCards();
+        const backBtn = document.getElementById('backToMainBtn');
+        if (backBtn) backBtn.addEventListener('click', goBackToSecret);
+    });
+</script>
+</body>
+</html>
