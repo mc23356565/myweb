@@ -30,9 +30,12 @@ window.JournalComments = function (app) {
     }
 
     const rowsFor = itemKey => S.comments.filter(c => c.item_key === itemKey);
+    const PUBLIC_KEY = 'all';                     // thread_key = 'all' → 管理员写的公开留言，所有登录的人都可见
     function threadsFor(itemKey) {
+        const rows = rowsFor(itemKey);
+        const pub = rows.filter(c => c.thread_key === PUBLIC_KEY);
         const map = new Map();
-        rowsFor(itemKey).forEach(c => {
+        rows.filter(c => c.thread_key !== PUBLIC_KEY).forEach(c => {
             const key = c.thread_key || ('uid:' + (c.author_id || 'x'));
             if (!map.has(key)) map.set(key, { key: key, rows: [], name: c.author_name, last: c.created_at, unread: 0, mine: c.author_id === S.session.uid });
             const t = map.get(key);
@@ -42,7 +45,7 @@ window.JournalComments = function (app) {
             if (!c.is_read && c.role !== 'admin') t.unread++;
             t.mine = t.mine || c.author_id === S.session.uid;
         });
-        return Array.from(map.values());
+        return { pub: pub, list: Array.from(map.values()) };
     }
 
     async function post(entry, body, parentId, threadKey) {
@@ -116,24 +119,44 @@ window.JournalComments = function (app) {
         </div>`;
     }
 
+    /** 公开留言块：管理员写的，所有登录的人都能看到（游客只读，可以回） */
+    function publicThreadHtml(pub, withForm) {
+        return `
+        <div class="cmt-thread cmt-public" data-author="${PUBLIC_KEY}">
+            <div class="cmt-thread-head">
+                <b>📢 空曙的公开留言</b>
+                <span class="cmt-mail">所有登录的人都能看到</span>
+            </div>
+            ${pub.length
+                ? '<div class="cmt-list">' + pub.map(c => messageHtml(c, PUBLIC_KEY)).join('') + '</div>'
+                : '<div class="cmt-empty">还没有公开留言。</div>'}
+            ${withForm ? formHtml('写一条公开留言…（所有登录的人都能看到）') : ''}
+        </div>`;
+    }
+
     function panelHtml(e, admin) {
         if (!app.isMember()) return '';
         const rows = rowsFor(e.id);
-        const threads = threadsFor(e.id);
+        const g = threadsFor(e.id);
         const open = S.cmtOpenIds.has(e.id);
         if (!admin) {
-            const mine = rows;   // RLS 保证这里只有「自己那条线」（自己发的 + 空曙的回复）
+            // 游客：能读到「公开留言」+「自己那条线」
+            const mine = rows.filter(c => c.thread_key !== PUBLIC_KEY);
             return `
             <div class="cmt" data-cmt="${esc(e.id)}">
                 <div class="cmt-bar">
-                    <span class="cmt-title">💬 我和空曙的留言</span>
-                    <span class="cmt-count">${mine.length} 条</span>
-                    <span class="cmt-hint">只有你俩看得到</span>
+                    <span class="cmt-title">💬 留言</span>
+                    <span class="cmt-count">悄悄话 ${mine.length} 条${g.pub.length ? ` · 公开 ${g.pub.length} 条` : ''}</span>
+                    <span class="cmt-hint">悄悄话只有你俩看得到</span>
                     <button class="btn sm cmt-toggle" type="button">${open ? '收起' : '展开 / 留言'}</button>
                 </div>
                 <div class="cmt-panel"${open ? '' : ' hidden'}>
-                    ${listHtml(mine, 'me')}
-                    ${formHtml('给空曙留言…（空一行分段）')}
+                    ${publicThreadHtml(g.pub, false)}
+                    <div class="cmt-thread" data-author="${esc(S.session.uid || '')}">
+                        <div class="cmt-thread-head"><b>我和空曙的悄悄话</b><span class="cmt-mail">只有你俩看得到</span></div>
+                        ${listHtml(mine, S.session.uid)}
+                        ${formHtml('给空曙留言…（空一行分段）')}
+                    </div>
                 </div>
             </div>`;
         }
@@ -143,11 +166,12 @@ window.JournalComments = function (app) {
         <div class="cmt" data-cmt="${esc(e.id)}">
             <div class="cmt-bar">
                 <span class="cmt-title">💬 留言</span>
-                <span class="cmt-count">${total} 条${unread ? ` · <b>${unread} 条未读</b>` : ''}${threads.length > 1 ? ` · ${threads.length} 个人` : ''}</span>
-                <button class="btn sm cmt-toggle" type="button">${open ? '收起' : '查看 / 回复'}</button>
+                <span class="cmt-count">${total} 条${unread ? ` · <b>${unread} 条未读</b>` : ''}${g.list.length ? ` · ${g.list.length} 个人` : ''}</span>
+                <button class="btn sm cmt-toggle" type="button">${open ? '收起' : '查看 / 留言'}</button>
             </div>
             <div class="cmt-panel"${open ? '' : ' hidden'}>
-                ${threads.length ? threads.map(t => `
+                ${publicThreadHtml(g.pub, true)}
+                ${g.list.length ? g.list.map(t => `
                     <div class="cmt-thread" data-author="${esc(t.key)}">
                         <div class="cmt-thread-head">
                             <b>${esc(t.name || '游客')}</b>
@@ -158,7 +182,7 @@ window.JournalComments = function (app) {
                         ${listHtml(t.rows, t.key)}
                         ${formHtml('回复' + (t.name || '这位访客') + '…')}
                     </div>`).join('')
-                  : '<div class="cmt-empty">这一条还没有人留言</div>'}
+                  : '<div class="cmt-empty">还没有游客留言。你可以先用上面的「公开留言」说点什么。</div>'}
             </div>
         </div>`;
     }
@@ -192,20 +216,21 @@ window.JournalComments = function (app) {
                 const f = $('.cmt-text', panel);
                 if (f) setTimeout(() => f.focus(), 40);
             }
-            toggle.textContent = panel.hidden ? (admin ? '查看 / 回复' : '展开 / 留言') : '收起';
+            toggle.textContent = panel.hidden ? (admin ? '查看 / 留言' : '展开 / 留言') : '收起';
         });
 
         // 「回复」按钮：把该条设为回复目标
         $$('.cmt-reply', node).forEach(btn => btn.addEventListener('click', ev => {
             ev.stopPropagation();
             const holder = btn.closest('.cmt-thread') || panel;
-            const form = $('.cmt-form', holder);
+            // 游客回复「公开留言」时，那个块里没有表单 → 落到自己的悄悄话表单
+            const form = $('.cmt-form', holder) || $('.cmt-form', panel);
             if (!form) return;
             form.dataset.replyTo = btn.dataset.cid;
             const hint = $('.cmt-reply-hint', form);
             if (hint) { hint.hidden = false; $('b', hint).textContent = '@' + (btn.dataset.name || ''); }
             const f = $('.cmt-text', form);
-            if (f) f.focus();
+            if (f) { f.focus(); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
         }));
         $$('.cmt-reply-cancel', node).forEach(btn => btn.addEventListener('click', ev => {
             ev.stopPropagation();
@@ -227,7 +252,7 @@ window.JournalComments = function (app) {
             btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 送出中…';
             try {
                 const threadEl = btn.closest('.cmt-thread');
-                const threadKey = threadEl ? threadEl.dataset.author : S.session.uid;
+                const threadKey = (threadEl && threadEl.dataset.author) ? threadEl.dataset.author : S.session.uid;
                 await post(entry, body, form.dataset.replyTo || null, threadKey);
                 ta.value = '';
                 delete form.dataset.replyTo;
