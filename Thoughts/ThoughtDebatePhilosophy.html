@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>思辨话题 · 观念的锚点 | 空曙</title>
+<meta name="description" content="空曙的思辨辑录（需要账号访问）。">
+<link rel="stylesheet" href="../assets/journal.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="wrap topbar-inner">
+        <a class="brand" href="../Secret.html">
+            <span>⚖️</span><span>思辨话题</span>
+            <span class="brand-sub">观念的锚点 · 需要反复推敲的思绪</span>
+        </a>
+        <div class="topbar-spacer"></div>
+        <div class="topbar-actions">
+            <button class="btn icon" id="themeBtn" title="切换夜读模式">🌙</button>
+            <button class="btn icon" id="settingsBtn" title="后台说明">⚙️</button>
+            <button class="btn primary" id="lockBtn">🔑 登录</button>
+            <button class="btn icon" id="menuBtn" title="更多">⋯</button>
+            <a class="btn ghost" href="./ThoughtDebateDaily.html">📓 日常想法</a>
+            <a class="btn ghost" href="../Selects/ThoughtDebate.html">← 返回分类</a>
+        </div>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="hero">
+        <h1>⚖️ 思辨话题</h1>
+        <p>深度哲思、价值辩论、抽象命题与逻辑森林 —— 存放那些需要反复推敲的思绪。<br>登录后阅读，支持按标题、正文、日期检索。</p>
+        <div class="rule"></div>
+    </section>
+
+    <section class="stats" id="statsHost"></section>
+
+    <section class="toolbar" id="toolbarHost">
+        <div class="toolbar-row">
+            <label class="search-box">
+                <span aria-hidden="true">🔎</span>
+                <input type="search" id="searchInput" placeholder="搜索标题、正文或日期…" autocomplete="off">
+                <button class="clear" id="searchClear" title="清空" hidden>✕</button>
+            </label>
+            <select class="picker" id="yearPicker" title="按年份筛选"><option value="all">全部年份</option></select>
+            <select class="picker" id="sortPicker" title="排序方式">
+                <option value="desc">最新在前</option>
+                <option value="asc">最早在前</option>
+            </select>
+            <button class="btn sm" id="resetBtn">清除筛选</button>
+        </div>
+        <div class="meta-line" id="metaLine"></div>
+    </section>
+
+    <section class="timeline" id="timelineHost"></section>
+</main>
+
+<footer class="page-foot">⚬ 思辨无止境 · 每一次叩问都是星火 ⚬</footer>
+
+<script src="../assets/journal-core.js"></script>
+<script src="../assets/journal-comments.js"></script>
+<script>
+/* 思辨页：日期 + 标题 + 正文；和日记共用同一套账号与权限 */
+const app = Journal.init({
+    key: 'philosophy',
+    labels: {
+        kind: 'philosophy', idPrefix: 'p',
+        itemName: '话题', unit: '条',
+        newItem: '写话题', editItem: '编辑话题',
+        countLabel: '⚖️ 话题条数', spanLabel: '🕰 时间跨度',
+        charsLabel: '✍️ 累计字数', latestLabel: '🕒 最新一篇',
+        emptyText: '还没有任何话题', notFoundText: '没有找到匹配的话题'
+    },
+    field: {
+        key: 'title', label: '标题', type: 'text',
+        hint: '这一条叫什么', placeholder: '例如：所谓——友谊', required: true
+    },
+    tagOf: null,
+    cardTitle: e => e.title || '',
+    searchExtra: e => [e.title || '']
+});
+app.start();
+</script>
+</body>
+</html>

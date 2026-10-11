@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>日常想法 · 浮光掠影 | 空曙</title>
+<meta name="description" content="空曙的赛博日记（需要账号访问）。">
+<link rel="stylesheet" href="../assets/journal.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="wrap topbar-inner">
+        <a class="brand" href="../Secret.html">
+            <span>📓</span><span>日常想法</span>
+            <span class="brand-sub">浮光掠影 · 赛博日记</span>
+        </a>
+        <div class="topbar-spacer"></div>
+        <div class="topbar-actions">
+            <button class="btn icon" id="themeBtn" title="切换夜读模式">🌙</button>
+            <button class="btn icon" id="settingsBtn" title="后台说明">⚙️</button>
+            <button class="btn primary" id="lockBtn">🔑 登录</button>
+            <button class="btn icon" id="menuBtn" title="更多">⋯</button>
+            <a class="btn ghost" href="./ThoughtDebatePhilosophy.html">⚖️ 思辨话题</a>
+            <a class="btn ghost" href="../Selects/ThoughtDebate.html">← 返回分类</a>
+        </div>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="hero">
+        <h1>🌱 日常想法</h1>
+        <p>碎碎念、生活观察、情绪切片 —— 一个藏在角落里的树洞。<br>登录后阅读，支持按日期、心情与关键词检索。</p>
+        <div class="rule"></div>
+    </section>
+
+    <section class="stats" id="statsHost"></section>
+
+    <section class="toolbar" id="toolbarHost">
+        <div class="toolbar-row">
+            <label class="search-box">
+                <span aria-hidden="true">🔎</span>
+                <input type="search" id="searchInput" placeholder="搜索正文、心情或日期…" autocomplete="off">
+                <button class="clear" id="searchClear" title="清空" hidden>✕</button>
+            </label>
+            <select class="picker" id="yearPicker" title="按年份筛选"><option value="all">全部年份</option></select>
+            <select class="picker" id="sortPicker" title="排序方式">
+                <option value="desc">最新在前</option>
+                <option value="asc">最早在前</option>
+            </select>
+            <button class="btn sm" id="resetBtn">清除筛选</button>
+        </div>
+        <div class="toolbar-row"><div class="chip-row" id="tagChips"></div></div>
+        <div class="meta-line" id="metaLine"></div>
+    </section>
+
+    <section class="timeline" id="timelineHost"></section>
+</main>
+
+<footer class="page-foot">⚬ 日常即星辰 · 每一粒微光都值得记录 ⚬</footer>
+
+<script src="../assets/journal-core.js"></script>
+<script src="../assets/journal-comments.js"></script>
+<script>
+/* 日记页：日期 + 心情标签 + 正文；数据存在 Supabase 的 entries 表 */
+const app = Journal.init({
+    key: 'journal',
+    labels: {
+        kind: 'journal', idPrefix: 'd',
+        itemName: '日记', unit: '条',
+        newItem: '写日记', editItem: '编辑日记',
+        countLabel: '📓 记录条数', spanLabel: '🕰 记录跨度',
+        charsLabel: '✍️ 累计字数', latestLabel: '🕒 最新一篇',
+        emptyText: '还没有任何记录', notFoundText: '没有找到匹配的日记'
+    },
+    field: {
+        key: 'mood', label: '心情标签', type: 'chips',
+        hint: '点下面的标签快速选择，也可以自己写',
+        placeholder: '例如：😌 平静',
+        presets: Journal.MOODS
+    },
+    tagOf: e => e.mood || '',
+    tagNoneLabel: '未标注',
+    searchExtra: e => [e.mood || '']
+});
+app.start();
+</script>
+</body>
+</html>
