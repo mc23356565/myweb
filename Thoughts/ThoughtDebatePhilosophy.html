@@ -1,284 +1,95 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="day">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>思辨话题 · 观念沉锚 | 空曙</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-            background: #ece2d4;
-            padding: 2rem 1.5rem;
-        }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #cfbc9c;
-            padding-bottom: 1rem;
-        }
-        .page-title { font-size: 1.8rem; font-weight: 600; color: #3b2c1c; }
-        .back-buttons { display: flex; gap: 12px; }
-        .back-btn {
-            background: #9a7c5a; color: #fef3e4; border: none;
-            padding: 0.5rem 1.2rem; border-radius: 40px; cursor: pointer;
-            font-size: 0.85rem; transition: 0.2s;
-        }
-        .back-btn:hover { background: #755f41; transform: translateY(-2px); }
-        
-        .filter-bar {
-            background: #fef7ec;
-            padding: 1rem 1.5rem;
-            border-radius: 60px;
-            margin: 1rem 0 1.8rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 1rem;
-            justify-content: space-between;
-            border: 1px solid #e5cfb2;
-        }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .filter-label {
-            font-weight: 600;
-            color: #5f482e;
-        }
-        .search-input, .date-selector {
-            background: #fff;
-            border: 1px solid #d6bc96;
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            font-family: inherit;
-            font-size: 0.9rem;
-            outline: none;
-            width: 200px;
-        }
-        .reset-filter {
-            background: #d9c2a2;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .reset-filter:hover {
-            background: #c2a477;
-            color: white;
-        }
-        .stats {
-            font-size: 0.8rem;
-            color: #9a7e5c;
-        }
-
-        .topics-list { display: flex; flex-direction: column; gap: 1.2rem; margin: 1.5rem 0; }
-        .topic-item {
-            background: #fffcf5; border-radius: 1.5rem; border: 1px solid #e4d0b6;
-            overflow: hidden; transition: 0.2s;
-        }
-        .topic-summary {
-            padding: 1.2rem 1.5rem; display: flex; justify-content: space-between;
-            align-items: center; cursor: pointer; background: #ffffffd9;
-        }
-        .topic-summary:hover { background: #faf1e2; }
-        .topic-title { font-weight: 700; font-size: 1.05rem; color: #3f2d1b; }
-        .topic-date-badge {
-            font-family: monospace;
-            background: #ecdfce;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            color: #5e4128;
-            margin-left: 0.8rem;
-        }
-        .expand-icon { color: #b68b60; transition: transform 0.2s; }
-        .topic-detail {
-            max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.25s;
-            background: #fefaf2; border-top: 1px solid #eedfcb;
-        }
-        .topic-item.expanded .topic-detail {
-            max-height: 800px; padding: 1.2rem 1.8rem 1.8rem 1.8rem;
-        }
-        .topic-item.expanded .expand-icon { transform: rotate(180deg); }
-        
-        /* 段落样式 */
-        .topic-content p {
-            margin-bottom: 1em;
-            line-height: 1.7;
-        }
-        .topic-content p:last-child {
-            margin-bottom: 0;
-        }
-        .topic-content br {
-            display: block;
-            margin: 0.3em 0;
-        }
-        
-        .no-data {
-            text-align: center; padding: 2rem; background: #fdf5e8;
-            border-radius: 1.5rem; color: #b69063;
-        }
-        footer { margin-top: 2rem; text-align: center; font-size: 0.7rem; color: #af8f6b; }
-        @media (max-width: 700px) {
-            .filter-bar { flex-direction: column; align-items: stretch; }
-            .search-input, .date-selector { width: 100%; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>思辨话题 · 观念的锚点 | 空曙</title>
+<meta name="description" content="空曙的思辨辑录：深度哲思、价值辩论、抽象命题与逻辑森林。">
+<link rel="stylesheet" href="../assets/journal.css">
 </head>
 <body>
-<div class="container">
-    <div class="top-bar">
-        <div class="page-title">⚖️ 思辨话题 · 观念的锚点</div>
-        <div class="back-buttons">
-            <button class="back-btn" id="backToDebateMenu">← 返回分类</button>
-            <button class="back-btn" id="backToMainFromPhil">🏠 主厅</button>
+
+<header class="topbar">
+    <div class="wrap topbar-inner">
+        <a class="brand" href="../Secret.html">
+            <span>⚖️</span><span>思辨话题</span>
+            <span class="brand-sub">观念的锚点 · 需要反复推敲的思绪</span>
+        </a>
+        <div class="topbar-spacer"></div>
+        <div class="topbar-actions">
+            <button class="btn" id="messageBtn">💬 留言</button>
+            <button class="btn icon" id="themeBtn" title="切换夜读模式">🌙</button>
+            <button class="btn icon" id="settingsBtn" title="发布设置（GitHub）">⚙️</button>
+            <button class="btn" id="lockBtn">🔐 编辑模式</button>
+            <button class="btn icon" id="menuBtn" title="更多">⋯</button>
+            <a class="btn ghost" href="./ThoughtDebateDaily.html">📓 日常想法</a>
+            <a class="btn ghost" href="../Selects/ThoughtDebate.html">← 返回分类</a>
         </div>
     </div>
-    <p style="color: #775e3f; margin-bottom: 0.5rem;">🔍 点击条目展开思辨全文，支持搜索和日期筛选。段落之间空一行即可自动分段。</p>
-    
-    <div class="filter-bar">
-        <div class="filter-group">
-            <span class="filter-label">🔎 搜索</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="标题或内容...">
+</header>
+
+<main class="wrap">
+    <section class="hero">
+        <h1>⚖️ 思辨话题</h1>
+        <p>深度哲思、价值辩论、抽象命题与逻辑森林 —— 存放那些需要反复推敲的思绪。<br>点击卡片展开全文，支持按标题、正文、日期检索。</p>
+        <div class="rule"></div>
+    </section>
+
+    <section class="stats" id="statsHost"></section>
+
+    <section class="toolbar">
+        <div class="toolbar-row">
+            <label class="search-box">
+                <span aria-hidden="true">🔎</span>
+                <input type="search" id="searchInput" placeholder="搜索标题、正文或日期…" autocomplete="off">
+                <button class="clear" id="searchClear" title="清空" hidden>✕</button>
+            </label>
+            <select class="picker" id="yearPicker" title="按年份筛选"><option value="all">全部年份</option></select>
+            <select class="picker" id="sortPicker" title="排序方式">
+                <option value="desc">最新在前</option>
+                <option value="asc">最早在前</option>
+            </select>
+            <button class="btn sm" id="resetBtn">清除筛选</button>
         </div>
-        <div class="filter-group">
-            <span class="filter-label">📅 日期</span>
-            <input type="date" id="dateFilterInput" class="date-selector">
-        </div>
-        <button id="resetFilterBtn" class="reset-filter">清除筛选</button>
-        <div class="stats" id="statsInfo"></div>
-    </div>
-    
-    <div class="topics-list" id="philosophyContainer"></div>
-    <footer>⚬ 思辨无止境 · 每一次叩问都是星火 ⚬</footer>
-</div>
+        <div class="meta-line" id="metaLine"></div>
+    </section>
+
+    <section class="publish-bar" id="publishBar" hidden></section>
+    <section class="timeline" id="timelineHost"></section>
+</main>
+
+<footer class="page-foot">⚬ 思辨无止境 · 每一次叩问都是星火 ⚬</footer>
+
+<!-- 离线镜像：用 script 加载，双击本地文件也能正常显示 -->
+<script src="../data/philosophy.js"></script>
+<script src="../assets/journal-core.js"></script>
 <script>
-    // ========= 思辨话题数据库（可无限扩展） =========
-    const PHILOSOPHY_TOPICS = [
-        {
-            date: "2025-05-01",
-            title: "所谓——友谊",
-            content: "其实很早我就意识到了这样一个问题，现实与网上，友谊的践行形式是完全不同的。或者说，现实的友谊往往是点头之交，除了最明显的阶段性以外，更明显的特征是，一切关系的发展都靠事件和利益去驱动的。\n\n作为朋友，似乎就可以理所当然的给对方在学习和生活上提供人道主义援助，但其实从一种悲观的角度来看，这也只是另一个层面上的价值交换，很多关系实际上也是并没有必要去维护的。想到这些，我认为是该做一些改变，至少我应该把我的精力更多的放在，自己身上，而并不是去关注他人的苦难。\n\n另一个极端可能就是，所谓的网友，不难否认，在我的视角里，和网友的关系要比现实中朋友的关系牢靠的多，最早认识的朋友，距今为止也已有8个年头。这里的相处方式，更多类似于君子之交，日常没有互动，但一旦遇到事情，联系起来依然能说得上话。不可否认，和他们一期玩游戏，真的非常快乐，那时会感觉，这样的时光真的非常美好。\n\n但其实由此引申的还有另外一个问题，一个人，相当孤僻的人，是否能够离开所有的朋友，独自过好他的生活。这个答案我不知道，但我认为朋友虽然重要，也并非不可或缺，或许有机会，我也将尝试断绝一切关系，去经营我自己的生活，那样应该也能收获到不一样的人生经历吧，或许吧，但，谁又知道呢..."
-        }
-    ];
-
-    let currentSearch = "";
-    let currentDate = "";
-
-    // 智能分段函数：将连续两个及以上换行符转换为 <p> 段落，单个换行符转换为 <br>
-    function formatParagraphs(text) {
-        if (!text) return '';
-        let escaped = escapeHtml(text);
-        let paragraphs = escaped.split(/\n\s*\n/);
-        let result = paragraphs.map(para => {
-            let inner = para.replace(/\n/g, '<br>');
-            if (inner.trim() === '') return '';
-            return '<p>' + inner + '</p>';
-        }).join('');
-        return result;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if(m==='&') return '&amp;';
-            if(m==='<') return '&lt;';
-            if(m==='>') return '&gt;';
-            return m;
-        });
-    }
-
-    function renderTopics() {
-        const container = document.getElementById('philosophyContainer');
-        const statsSpan = document.getElementById('statsInfo');
-        if (!container) return;
-        
-        let filtered = [...PHILOSOPHY_TOPICS];
-        if (currentDate) {
-            filtered = filtered.filter(t => t.date === currentDate);
-        }
-        if (currentSearch.trim() !== "") {
-            const kw = currentSearch.trim().toLowerCase();
-            filtered = filtered.filter(t => 
-                t.title.toLowerCase().includes(kw) || 
-                t.content.toLowerCase().includes(kw)
-            );
-        }
-        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-        
-        if (filtered.length === 0) {
-            container.innerHTML = '<div class="no-data">📭 没有找到匹配的思辨话题，试试清除筛选或添加新内容～</div>';
-            statsSpan.innerText = `共 0 条话题`;
-            return;
-        }
-        statsSpan.innerText = `📌 显示 ${filtered.length} 条话题${currentDate ? ` (筛选日期 ${currentDate})` : ''}${currentSearch ? ` (搜索: ${currentSearch})` : ''}`;
-        
-        container.innerHTML = '';
-        filtered.forEach((topic, idx) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'topic-item';
-            const displayDate = new Date(topic.date).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
-            const formattedContent = formatParagraphs(topic.content);
-            itemDiv.innerHTML = `
-                <div class="topic-summary" data-idx="${idx}">
-                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                        <span class="topic-title">${escapeHtml(topic.title)}</span>
-                        <span class="topic-date-badge">📅 ${displayDate}</span>
-                    </div>
-                    <div class="expand-icon">▼</div>
-                </div>
-                <div class="topic-detail">
-                    <div class="topic-content">${formattedContent}</div>
-                </div>
-            `;
-            const summary = itemDiv.querySelector('.topic-summary');
-            summary.addEventListener('click', () => itemDiv.classList.toggle('expanded'));
-            container.appendChild(itemDiv);
-        });
-    }
-    
-    function initFilters() {
-        const searchInput = document.getElementById('searchInput');
-        const dateInput = document.getElementById('dateFilterInput');
-        const resetBtn = document.getElementById('resetFilterBtn');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                currentSearch = e.target.value;
-                renderTopics();
-            });
-        }
-        if (dateInput) {
-            dateInput.addEventListener('change', (e) => {
-                currentDate = e.target.value;
-                renderTopics();
-            });
-        }
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                if (searchInput) searchInput.value = '';
-                if (dateInput) dateInput.value = '';
-                currentSearch = '';
-                currentDate = '';
-                renderTopics();
-            });
-        }
-    }
-    
-    document.getElementById('backToDebateMenu').addEventListener('click', () => window.location.href = '../Select/ThoughtDebate.html');
-    document.getElementById('backToMainFromPhil').addEventListener('click', () => window.location.href = '../Secret.html');
-    
-    renderTopics();
-    initFilters();
+/* 本页配置：思辨话题 = 日期 + 标题 + 正文 */
+const app = Journal.init({
+    key: 'philosophy',
+    dataUrl: '../data/philosophy.json',
+    repoPath: 'data/philosophy.json',
+    mirrorVar: '__PHILOSOPHY_DATA__',
+    labels: {
+        itemName: '话题', unit: '条',
+        newItem: '写话题', editItem: '编辑话题',
+        publishNoun: '思辨更新',
+        countLabel: '⚖️ 话题条数', spanLabel: '🕰 时间跨度',
+        charsLabel: '✍️ 累计字数', latestLabel: '🕒 最新一篇',
+        emptyText: '还没有任何话题', notFoundText: '没有找到匹配的话题',
+        idPrefix: 'p'
+    },
+    field: {
+        key: 'title', label: '标题', type: 'text',
+        hint: '这一条叫什么',
+        placeholder: '例如：所谓——友谊',
+        required: true
+    },
+    tagOf: null,
+    cardTitle: e => e.title || '',
+    searchExtra: e => [e.title || '']
+});
+app.boot();
 </script>
 </body>
 </html>
