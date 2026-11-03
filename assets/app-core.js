@@ -70,10 +70,10 @@ window.SiteApp = (function () {
     /* ====================== 顶部导航（毛玻璃） ====================== */
     const NAV_ITEMS = [
         { key: 'home', href: 'Secret.html', label: '🏠 主厅' },
-        { key: 'thought', href: 'Selects/ThoughtDebate.html', label: '🧠 个性思辨' },
-        { key: 'birthday', href: 'Selects/BirthdayArchive.html', label: '🎂 生辰纪念' },
+        { key: 'articles', href: 'Articles/index.html', label: '📖 朴实文章' },
+        { key: 'photo', href: 'Photos/index.html', label: '📷 Love Photo' },
+        { key: 'list', href: 'List/index.html', label: '✅ Love List' },
         { key: 'survey', href: 'Questionnaires/index.html', label: '📝 问卷小屋' },
-        { key: 'fun', href: 'Selects/FunProjects.html', label: '🎮 趣味整活' },
         { key: 'admin', href: 'Admin.html', label: '🛠 后台' }
     ];
     function mountHeader(activeKey) {
@@ -84,7 +84,7 @@ window.SiteApp = (function () {
             // 根据当前页面深度修正相对链接
             const depth = (here.split('/').filter(Boolean).length
                 - here.split('/').filter(Boolean).lastIndexOf(here.split('/').filter(Boolean).slice(-1)[0]) , 0);
-            if (/\/(Selects|Thoughts|Questionnaires|Birthdays|Entertainments)\//.test(here)) return '../' + p;
+            if (/\/(Selects|Thoughts|Questionnaires|Birthdays|Entertainments|Articles|Photos|List)\//.test(here)) return '../' + p;
             return p;
         };
         header.innerHTML =
@@ -303,17 +303,19 @@ window.SiteApp = (function () {
         };
     }
 
-    /* 公开 API（也暴露给 20th.html 的轻量守卫用） */
+    /* 公开 API（轻量守卫 localGuard 供各页面备用） */
     const api = {
         init, sbRest, rpc, toast, esc, signIn, storeGet, storeSet, newId,
         signOutReload,
         session: () => state.session,
         me: () => state.me,
+        sbUrl: () => sbBase(),
+        sbAnonKey: () => state.sb.anonKey,
         /** 轻量守卫：只查本地会话是否登录（不做网络校验），未登录跳回主厅 */
         localGuard() {
             const s = storeGet(K.session, null);
             if (!s || !s.accessToken) {
-                location.replace((/\/(Selects|Thoughts|Questionnaires|Birthdays|Entertainments)\//.test(location.pathname) ? '../' : '') + 'Secret.html?needlogin=1');
+                location.replace((/\/(Selects|Thoughts|Questionnaires|Birthdays|Entertainments|Articles|Photos|List)\//.test(location.pathname) ? '../' : '') + 'Secret.html?needlogin=1');
                 return false;
             }
             return true;

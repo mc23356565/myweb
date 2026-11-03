@@ -160,7 +160,61 @@ window.Journal = (function () {
         'create policy sr_read   on public.survey_responses for select to authenticated using (public.is_member());',
         'create policy sr_insert on public.survey_responses for insert to authenticated with check (public.is_member());',
         'create policy sr_update on public.survey_responses for update to authenticated using (public.is_member());',
-        'create policy sr_delete on public.survey_responses for delete to authenticated using (public.is_member());'
+        'create policy sr_delete on public.survey_responses for delete to authenticated using (public.is_member());',
+        '',
+        '-- ===== 恋爱相册（photos）=====' ,
+        '-- 图片本体存在 Supabase Storage 的公开桶 photos 里，表里只存 URL 和说明',
+        'create table if not exists public.photos (',
+        '  id         text primary key,',
+        '  url        text not null,',
+        "  caption    text not null default '',",
+        "  date       text not null default '',",
+        '  created_at timestamptz not null default now()',
+        ');',
+        'alter table public.photos enable row level security;',
+        'drop policy if exists photos_read   on public.photos;',
+        'drop policy if exists photos_insert on public.photos;',
+        'drop policy if exists photos_update on public.photos;',
+        'drop policy if exists photos_delete on public.photos;',
+        'create policy photos_read   on public.photos for select to authenticated using (public.is_member());',
+        'create policy photos_insert on public.photos for insert to authenticated with check (public.is_member());',
+        'create policy photos_update on public.photos for update to authenticated using (public.is_member());',
+        'create policy photos_delete on public.photos for delete to authenticated using (public.is_member());',
+        '',
+        '-- ===== 恋爱清单（wishlist）=====',
+        'create table if not exists public.wishlist (',
+        '  id         text primary key,',
+        '  event      text not null,',
+        "  note       text not null default '',",
+        "  image_url  text not null default '',",
+        '  done       boolean not null default false,',
+        "  done_date  text not null default '',",
+        '  created_at timestamptz not null default now(),',
+        '  updated_at timestamptz not null default now()',
+        ');',
+        'alter table public.wishlist enable row level security;',
+        'drop policy if exists wishlist_read   on public.wishlist;',
+        'drop policy if exists wishlist_insert on public.wishlist;',
+        'drop policy if exists wishlist_update on public.wishlist;',
+        'drop policy if exists wishlist_delete on public.wishlist;',
+        'create policy wishlist_read   on public.wishlist for select to authenticated using (public.is_member());',
+        'create policy wishlist_insert on public.wishlist for insert to authenticated with check (public.is_member());',
+        'create policy wishlist_update on public.wishlist for update to authenticated using (public.is_member());',
+        'create policy wishlist_delete on public.wishlist for delete to authenticated using (public.is_member());',
+        '',
+        '-- ===== 恋爱相册的图片桶（Storage）=====',
+        '-- 公开桶 photos：登录成员可以上传 / 改 / 删，任何人可以带链接访问图片',
+        "insert into storage.buckets (id, name, public) values ('photos', 'photos', true)",
+        'on conflict (id) do update set public = true;',
+        'drop policy if exists photos_bucket_insert on storage.objects;',
+        'drop policy if exists photos_bucket_update on storage.objects;',
+        'drop policy if exists photos_bucket_delete on storage.objects;',
+        'create policy photos_bucket_insert on storage.objects for insert to authenticated',
+        "  with check (bucket_id = 'photos');",
+        'create policy photos_bucket_update on storage.objects for update to authenticated',
+        "  using (bucket_id = 'photos') with check (bucket_id = 'photos');",
+        'create policy photos_bucket_delete on storage.objects for delete to authenticated',
+        "  using (bucket_id = 'photos');"
     ].join('\n');
 
     /* ====================== 2. 小工具 ====================== */
@@ -298,6 +352,9 @@ window.Journal = (function () {
             idPrefix: 'e', kind: 'journal'
         }, cfg.labels || {});
         const KIND = labels.kind;
+        // 多类型合并：cfg.kinds 传 ['journal','philosophy'] 时，一页加载两种类型
+        const KINDS = (cfg.kinds && cfg.kinds.length ? cfg.kinds : [KIND]);
+        const kindLabel = k => (cfg.kindLabels && cfg.kindLabels[k]) || (k === 'philosophy' ? '思辨话题' : '日常想法');
 
         const state = {
             sb: Object.assign({}, SB_DEFAULT, cfg.sb || {}),
@@ -403,6 +460,7 @@ window.Journal = (function () {
         function normalize(row) {
             const out = {
                 id: String(row.id),
+                kind: String(row.kind || KIND),
                 date: String(row.date || todayStr()),
                 content: String(row.content || '')
             };
@@ -414,7 +472,7 @@ window.Journal = (function () {
         function toRow(entry) {
             const row = {
                 id: entry.id,
-                kind: KIND,
+                kind: entry.kind || KIND,
                 date: entry.date,
                 content: entry.content,
                 mood: '',
@@ -428,7 +486,7 @@ window.Journal = (function () {
 
         async function loadEntries() {
             if (!isMember()) { state.entries = []; return; }
-            const rows = await sbRest('entries?kind=eq.' + encodeURIComponent(KIND) + '&select=*&order=date.asc');
+            const rows = await sbRest('entries?kind=in.(' + KINDS.map(encodeURIComponent).join(',') + ')&select=*&order=date.asc');
             state.entries = (rows || []).map(normalize);
         }
         async function saveEntry(data) {
@@ -769,6 +827,15 @@ window.Journal = (function () {
             $('#editorTitle').textContent = entry ? '✎ ' + labels.editItem : '✎ ' + labels.newItem;
             $('#editorDate').value = entry ? entry.date : todayStr();
             $('#editorContent').value = entry ? entry.content : '';
+            const kindWrap = $('#editorKindWrap');
+            if (KINDS.length > 1) {
+                kindWrap.hidden = false;
+                const cur = entry ? entry.kind : KIND;
+                $('#editorKind').innerHTML = KINDS.map(k =>
+                    '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(kindLabel(k)) + '</option>').join('');
+            } else {
+                kindWrap.hidden = true;
+            }
             const wrap = $('#editorFieldWrap');
             if (cfg.field) {
                 wrap.hidden = false;
@@ -795,6 +862,7 @@ window.Journal = (function () {
             const date = $('#editorDate').value || todayStr();
             const content = $('#editorContent').value.trim();
             const data = { date: date, content: content };
+            if (KINDS.length > 1) data.kind = $('#editorKind').value;
             if (cfg.field) data[cfg.field.key] = $('#editorField').value.trim();
             if (!content) { toast('正文还是空的，先写点什么吧 📝', 'err'); return; }
             if (!parseDate(date)) { toast('请选择一个有效日期 📅', 'err'); return; }
@@ -817,7 +885,7 @@ window.Journal = (function () {
         function exportJson() {
             if (!isAdmin()) { toast('只有管理员能导出 🔒', 'err'); return; }
             const payload = {
-                version: 1, kind: KIND, updatedAt: localIso(),
+                version: 1, kinds: KINDS, updatedAt: localIso(),
                 entries: state.entries.map(e => { const c = Object.assign({}, e); delete c.createdAt; delete c.updatedAt; return c; })
             };
             const blob = new Blob([JSON.stringify(payload, null, 4) + '\n'], { type: 'application/json' });
@@ -876,6 +944,9 @@ window.Journal = (function () {
             <div class="row-inline">
                 <div class="field" style="flex:1 1 170px"><label>日期</label>
                     <input class="input" type="date" id="editorDate"></div>
+                <div class="field" style="flex:1 1 170px" id="editorKindWrap" hidden>
+                    <label>类型</label>
+                    <select class="input" id="editorKind"></select></div>
                 <div class="field" style="flex:2 1 250px" id="editorFieldWrap" hidden>
                     <label id="editorFieldLabel">字段</label>
                     <input class="input" type="text" id="editorField" autocomplete="off"></div>
@@ -1122,6 +1193,7 @@ window.Journal = (function () {
     return {
         init: init,
         MOODS: MOODS,
+        SB_SQL: SB_SQL,
         esc: esc, toast: toast, askConfirm: askConfirm,
         fmtDate: fmtDate, fmtDateShort: fmtDateShort, relTime: relTime,
         preview: preview, renderParagraphs: renderParagraphs, tagColor: tagColor,

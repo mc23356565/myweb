@@ -64,11 +64,12 @@
         <!-- 数据备份 -->
         <section class="admin-section" id="sec-data">
             <div class="card" style="cursor:default;">
-                <h3>日记 & 思辨 · 导出 / 导入</h3>
-                <p>entries 表的全部内容（27 篇日记 + 思辨都在里面），导出成 JSON 备份；导入按 id 合并覆盖。</p>
+                <h3>朴实文章 · 导出 / 导入</h3>
+                <p>entries 表的全部内容（日记 + 思辨都在里面），导出成 JSON 备份；导入按 id 合并覆盖。</p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;">
                     <button class="btn blue" id="exportBtn">⬇️ 导出全部 entries</button>
                     <button class="btn ghost" id="exportSurveyBtn">⬇️ 导出问卷数据</button>
+                    <button class="btn ghost" id="exportPwBtn">⬇️ 导出相册 + 清单</button>
                 </div>
                 <div class="field"><label>导入 entries JSON<span class="hint">粘贴备份文件内容，按 id 合并</span></label>
                     <textarea class="textarea" id="importArea" style="min-height:150px;" placeholder='[{"id":"d2026-04-06-xxxxx","kind":"journal",...}]'></textarea></div>
@@ -80,7 +81,7 @@
         <section class="admin-section" id="sec-sql">
             <div class="card" style="cursor:default;">
                 <h3>数据库安装 SQL</h3>
-                <p>在 Supabase 控制台 → SQL Editor 里执行一次即可（可重复执行）。包含：账号表、日记/思辨表、问卷三张表与全部行级安全策略。</p>
+                <p>在 Supabase 控制台 → SQL Editor 里执行一次即可（可重复执行）。包含：账号表、文章表、问卷三张表、相册与清单表，以及相册的 Storage 公开桶和全部行级安全策略。</p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.8rem;">
                     <button class="btn sm blue" id="copySqlBtn">📋 复制全部 SQL</button>
                 </div>
@@ -93,9 +94,10 @@
             <div class="card" style="cursor:default;">
                 <h3>这套站怎么运转</h3>
                 <div class="kv"><span class="k">登录</span><span>整站所有内容都要登录。账号只有两个（你和她），存在 Supabase Authentication；授权名单在 <b>members</b> 表。</span></div>
-                <div class="kv"><span class="k">日记/思辨</span><span><b>entries</b> 表，kind 字段区分 journal / philosophy；登录后即可读写。</span></div>
+                <div class="kv"><span class="k">朴实文章</span><span><b>entries</b> 表，kind 字段区分 journal（日常想法）/ philosophy（思辨话题）；「朴实文章」一页合并显示，编辑器里可选类型。</span></div>
                 <div class="kv"><span class="k">问卷</span><span><b>surveys</b> + <b>survey_questions</b> + <b>survey_responses</b> 三张表；每人每卷一份答卷，重复提交即覆盖；结果双方互看。</span></div>
-                <div class="kv"><span class="k">留言</span><span>已按计划移除（comments 模块与表策略不再使用）。</span></div>
+                <div class="kv"><span class="k">恋爱相册</span><span><b>photos</b> 表存照片的链接与说明；图片本体上传到 Storage 的公开桶 <b>photos</b>（执行安装 SQL 会自动建桶和策略，也可手动在 Storage 里建）。</span></div>
+                <div class="kv"><span class="k">恋爱清单</span><span><b>wishlist</b> 表：约定内容 + 补充说明 + 相关图片 + 完成状态，双方都可增删改。</span></div>
                 <div class="kv"><span class="k">问卷文本格式</span><span><code># 标题</code> / <code>&gt; 描述</code> / <code>1. 题干 [单选|多选|文本]</code> / <code>- 选项</code>；「问卷小屋 → 设计问卷 → AI 提示词」里有一键复制的提示词。</span></div>
                 <div class="kv"><span class="k">安全</span><span>anon key 本来就是公开的，真正的权限由 RLS（行级安全策略）保证：不是成员，连一行都读不到。</span></div>
             </div>
@@ -106,117 +108,10 @@
 </main>
 
 <script src="./assets/app-core.js"></script>
+<script src="./assets/journal-core.js"></script>
 <script>
-/* ====================== 数据库安装 SQL ====================== */
-const INSTALL_SQL = [
-    '-- ===== 空曙 · 记忆回廊 数据库安装（可重复执行）=====',
-    '-- ① 先在 Authentication → Users 里建账号（两个人的都建）',
-    '-- ② members 表：两个人的 role 都填 admin（权限完全一样）',
-    '',
-    'create table if not exists public.members (',
-    '  email        text primary key,',
-    "  role         text not null default 'guest' check (role in ('guest','admin')),",
-    '  display_name text,',
-    '  created_at   timestamptz not null default now()',
-    ');',
-    'alter table public.members enable row level security;   -- 不建策略：只有 Supabase 后台能改',
-    "insert into public.members (email, role, display_name) values ('dreemurrdawnlit@outlook.com', 'admin', '空曙') on conflict (email) do update set role = 'admin';",
-    "-- 她的账号：去掉下一行注释、改成她的邮箱再执行",
-    "-- insert into public.members (email, role, display_name) values ('她的邮箱', 'admin', '她') on conflict (email) do update set role = 'admin';",
-    '',
-    '-- ===== 权限函数 =====',
-    'create or replace function public.my_profile() returns jsonb',
-    'language sql stable security definer set search_path = public as $$',
-    '  select coalesce(jsonb_build_object(',
-    '    \'email\', m.email, \'role\', m.role, \'display_name\', m.display_name),',
-    '    jsonb_build_object(\'email\', coalesce(auth.jwt() ->> \'email\', \'\'), \'role\', \'none\', \'display_name\', \'\'))',
-    '  from public.members m',
-    '  where lower(m.email) = lower(coalesce(auth.jwt() ->> \'email\', \'\'))',
-    '$$;',
-    'create or replace function public.is_admin() returns boolean',
-    'language sql stable security definer set search_path = public as $$',
-    "  select coalesce((select m.role from public.members m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email',''))), 'none') = 'admin';",
-    '$$;',
-    'create or replace function public.is_member() returns boolean',
-    'language sql stable security definer set search_path = public as $$',
-    "  select coalesce((select m.role from public.members m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email',''))), 'none') in ('guest','admin');",
-    '$$;',
-    '',
-    '-- ===== 日记 / 思辨（entries）=====',
-    'create table if not exists public.entries (',
-    '  id         text primary key,',
-    "  kind       text not null default 'journal' check (kind in ('journal','philosophy')),",
-    '  date       text not null,',
-    "  mood       text not null default '',",
-    "  title      text not null default '',",
-    "  content    text not null default '',",
-    '  created_at timestamptz not null default now(),',
-    '  updated_at timestamptz not null default now()',
-    ');',
-    'create index if not exists entries_kind_date_idx on public.entries (kind, date);',
-    'alter table public.entries enable row level security;',
-    'drop policy if exists entries_read on public.entries;',
-    'drop policy if exists entries_admin_insert on public.entries;',
-    'drop policy if exists entries_admin_update on public.entries;',
-    'drop policy if exists entries_admin_delete on public.entries;',
-    'create policy entries_read on public.entries for select to authenticated using (public.is_member());',
-    'create policy entries_admin_insert on public.entries for insert to authenticated with check (public.is_admin());',
-    'create policy entries_admin_update on public.entries for update to authenticated using (public.is_admin());',
-    'create policy entries_admin_delete on public.entries for delete to authenticated using (public.is_admin());',
-    '',
-    '-- ===== 问卷三表 =====',
-    'create table if not exists public.surveys (',
-    '  id          text primary key,',
-    '  title       text not null,',
-    "  description text not null default '',",
-    "  created_by  text not null default '',",
-    '  created_at  timestamptz not null default now()',
-    ');',
-    'create table if not exists public.survey_questions (',
-    '  id        bigint generated by default as identity primary key,',
-    '  survey_id text not null references public.surveys(id) on delete cascade,',
-    '  idx       int  not null default 0,',
-    "  qtype     text not null default 'single' check (qtype in ('single','multi','text')),",
-    '  prompt    text not null,',
-    "  options   jsonb not null default '[]'::jsonb",
-    ');',
-    'create table if not exists public.survey_responses (',
-    '  id              bigint generated by default as identity primary key,',
-    '  survey_id       text not null references public.surveys(id) on delete cascade,',
-    '  responder_email text not null,',
-    "  answers         jsonb not null default '{}'::jsonb,",
-    '  submitted_at    timestamptz not null default now(),',
-    '  updated_at      timestamptz not null default now(),',
-    '  unique (survey_id, responder_email)',
-    ');',
-    'alter table public.surveys enable row level security;',
-    'alter table public.survey_questions enable row level security;',
-    'alter table public.survey_responses enable row level security;',
-    'drop policy if exists surveys_read   on public.surveys;',
-    'drop policy if exists surveys_insert on public.surveys;',
-    'drop policy if exists surveys_update on public.surveys;',
-    'drop policy if exists surveys_delete on public.surveys;',
-    'drop policy if exists sq_read   on public.survey_questions;',
-    'drop policy if exists sq_insert on public.survey_questions;',
-    'drop policy if exists sq_update on public.survey_questions;',
-    'drop policy if exists sq_delete on public.survey_questions;',
-    'drop policy if exists sr_read   on public.survey_responses;',
-    'drop policy if exists sr_insert on public.survey_responses;',
-    'drop policy if exists sr_update on public.survey_responses;',
-    'drop policy if exists sr_delete on public.survey_responses;',
-    'create policy surveys_read   on public.surveys for select to authenticated using (public.is_member());',
-    'create policy surveys_insert on public.surveys for insert to authenticated with check (public.is_member());',
-    'create policy surveys_update on public.surveys for update to authenticated using (public.is_member());',
-    'create policy surveys_delete on public.surveys for delete to authenticated using (public.is_member());',
-    'create policy sq_read   on public.survey_questions for select to authenticated using (public.is_member());',
-    'create policy sq_insert on public.survey_questions for insert to authenticated with check (public.is_member());',
-    'create policy sq_update on public.survey_questions for update to authenticated using (public.is_member());',
-    'create policy sq_delete on public.survey_questions for delete to authenticated using (public.is_member());',
-    'create policy sr_read   on public.survey_responses for select to authenticated using (public.is_member());',
-    'create policy sr_insert on public.survey_responses for insert to authenticated with check (public.is_member());',
-    'create policy sr_update on public.survey_responses for update to authenticated using (public.is_member());',
-    'create policy sr_delete on public.survey_responses for delete to authenticated using (public.is_member());'
-].join('\n');
+/* ====================== 数据库安装 SQL（与 journal-core.js 的 SB_SQL 同一份，改 SQL 只改 journal-core.js）====================== */
+const INSTALL_SQL = Journal.SB_SQL;
 
 (async function () {
     const app = await SiteApp.init({ active: 'admin', main: '#pageMain' });
@@ -230,20 +125,27 @@ const INSTALL_SQL = [
 
     /* ---------- 统计 ---------- */
     try {
-        const [je, pe, sv, rs] = await Promise.all([
-            app.sbRest('entries?kind=eq.journal&select=id'),
-            app.sbRest('entries?kind=eq.philosophy&select=id'),
-            app.sbRest('surveys?select=id'),
-            app.sbRest('survey_responses?select=id')
-        ]).catch(() => null);
+        const safe = p => p.catch(() => []);
+        const [je, pe, sv, rs, ph, wl] = await Promise.all([
+            safe(app.sbRest('entries?kind=eq.journal&select=id')),
+            safe(app.sbRest('entries?kind=eq.philosophy&select=id')),
+            safe(app.sbRest('surveys?select=id')),
+            safe(app.sbRest('survey_responses?select=id')),
+            safe(app.sbRest('photos?select=id')),
+            safe(app.sbRest('wishlist?select=done'))
+        ]);
+        const doneN = wl.filter(x => x.done).length;
         const cards = [
-            ['📓 日常想法', (je || []).length + ' 条'],
-            ['⚖️ 思辨话题', (pe || []).length + ' 条'],
-            ['📋 问卷', (sv || []).length + ' 份'],
-            ['📨 答卷', (rs || []).length + ' 份']
+            ['📖 朴实文章', (je.length + pe.length) + ' 篇'],
+            ['📷 相册', ph.length + ' 张'],
+            ['✅ 清单', doneN + ' / ' + wl.length + ' 完成'],
+            ['📋 问卷', sv.length + ' 份'],
+            ['📨 答卷', rs.length + ' 份']
         ];
+        const missing = (je.length + pe.length) === 0 && sv.length === 0 && ph.length === 0 && wl.length === 0;
         document.getElementById('statCards').innerHTML = cards.map(c =>
-            '<div class="stat-card"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + '</div></div>').join('');
+            '<div class="stat-card"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + '</div></div>').join('') +
+            (missing ? '<div class="notice" style="grid-column:1/-1;">看起来各项都还是空的 —— 若是新装的数据库，先去「数据库安装」执行 SQL；否则就真的是一条记录都没有啦。</div>' : '');
     } catch (e) {
         document.getElementById('statCards').innerHTML =
             '<div class="notice" style="grid-column:1/-1;">统计加载失败：' + esc(e.message) + '（可能需要先执行数据库安装 SQL）</div>';
@@ -317,6 +219,16 @@ const INSTALL_SQL = [
             ]);
             downloadJson('surveys-backup-' + new Date().toISOString().slice(0, 10) + '.json', { surveys: s, questions: q, responses: r });
             SiteApp.toast('问卷数据已导出 💾', 'ok');
+        } catch (e) { SiteApp.toast('导出失败：' + e.message, 'err', 4000); }
+    });
+    document.getElementById('exportPwBtn').addEventListener('click', async () => {
+        try {
+            const [ph, wl] = await Promise.all([
+                app.sbRest('photos?select=*'),
+                app.sbRest('wishlist?select=*')
+            ]);
+            downloadJson('photos-wishlist-backup-' + new Date().toISOString().slice(0, 10) + '.json', { photos: ph, wishlist: wl });
+            SiteApp.toast('相册 + 清单已导出 💾', 'ok');
         } catch (e) { SiteApp.toast('导出失败：' + e.message, 'err', 4000); }
     });
     document.getElementById('importBtn').addEventListener('click', async () => {
