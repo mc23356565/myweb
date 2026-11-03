@@ -179,7 +179,7 @@ create table if not exists public.site_config (
 alter table public.site_config enable row level security;
 drop policy if exists site_config_read   on public.site_config;
 drop policy if exists site_config_write  on public.site_config;
-create policy site_config_read  on public.site_config for select to authenticated using (public.is_member());
+create policy site_config_read  on public.site_config for select to anon, authenticated using (true);   -- 站点名/头像等装饰信息公开，登录前界面也能显示真名
 create policy site_config_write on public.site_config for insert to authenticated with check (public.is_member());
 create policy site_config_upd   on public.site_config for update to authenticated using (public.is_member());
 insert into public.site_config (key, value) values
