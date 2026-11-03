@@ -21,8 +21,19 @@
                 <h1>朴实文章</h1>
             </div>
             <div class="lg-opsbar">
-                <label class="lg-search">🔎<input type="search" id="searchInput" placeholder="搜索标题或正文…" autocomplete="off"></label>
+                <label class="lg-search">🔎<input type="search" id="searchInput" placeholder="搜索标题 / 正文 / 日期…" autocomplete="off"></label>
+                <select class="input" id="filterKind" style="width:auto;">
+                    <option value="">全部类型</option>
+                    <option value="journal">日常想法</option>
+                    <option value="philosophy">思辨话题</option>
+                </select>
+                <select class="input" id="filterAuthor" style="width:auto;">
+                    <option value="">发布者：全部</option>
+                </select>
                 <button class="lg-btn blue" id="newBtn">✎ 写文章</button>
+            </div>
+            <div class="lg-opsbar" style="margin-top:-.4rem;opacity:.65;font-size:.85em;">
+                <span id="articleCount"></span>
             </div>
             <div class="row central central-800" id="articleHost">
                 <div class="lg-empty">正在检查登录状态…</div>
@@ -36,6 +47,8 @@
             <div class="lg-mhead"><h3 id="editTitle">✎ 写文章</h3><button class="x" data-close="editMask">✕</button></div>
             <div class="lg-mbody">
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 .9rem;">
+                    <div class="field"><label>发布者</label>
+                        <select class="input" id="evAuthor"></select></div>
                     <div class="field"><label>类型</label>
                         <select class="input" id="evKind">
                             <option value="journal">日常想法</option>

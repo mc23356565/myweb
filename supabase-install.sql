@@ -42,10 +42,14 @@ create table if not exists public.entries (
   date       text not null,
   mood       text not null default '',
   title      text not null default '',
+  author     text not null default '',
   content    text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+alter table public.entries add column if not exists title  text not null default '';
+alter table public.entries add column if not exists mood   text not null default '';
+alter table public.entries add column if not exists author text not null default '';
 create index if not exists entries_kind_date_idx on public.entries (kind, date);
 alter table public.entries enable row level security;
 drop policy if exists entries_read on public.entries;

@@ -18,6 +18,23 @@
     let entries = [];
     let editingId = null;
     let query = '';
+    let kindFilter = '';
+    let authorFilter = '';
+
+    /* 发布者两个选项：取后台「情侣配置」里的两个名字 */
+    function authorNames() {
+        const c = (app && app.config) || {};
+        return [c.name_a || '他', c.name_b || '她'];
+    }
+
+    /* 没写标题的文章：取正文第一行当标题 */
+    function autoTitle(e) {
+        const line = (e.content || '').split('\n').map(s => s.trim()).find(s => s) || '';
+        const clean = line.replace(/^[#>\-\s]+/, '').replace(/[。，、！？!?,.\s]+$/, '');
+        if (!clean) return '（无标题）';
+        return clean.length > 15 ? clean.slice(0, 15) + '……' : clean;
+    }
+    const titleOf = e => (e.title || '').trim() || autoTitle(e);
 
     function openMask(id) { document.getElementById(id).classList.add('show'); }
     function closeMask(id) { document.getElementById(id).classList.remove('show'); }
@@ -34,13 +51,13 @@
     }
 
     function cardOf(e) {
-        const title = e.title || (e.content || '').split('\n')[0].slice(0, 30) || '（无标题）';
         return '<div class="card col-lg-12 col-md-12 col-sm-12 col-sm-x-12 animated fadeInUp">' +
             '<div class="little_texts">' +
                 '<a href="page.html?id=' + encodeURIComponent(e.id) + '">' +
-                    '<div class="top-title textOneHide">' + esc(title) + '</div>' +
+                    '<div class="top-title textOneHide">' + esc(titleOf(e)) + '</div>' +
                 '</a>' +
-                '<div class="info"><span>✎ ' + esc(kindLabel(e.kind)) + (e.mood ? ' · ' + esc(e.mood) : '') +
+                '<div class="info"><span>👤 ' + esc(e.author || '佚名') +
+                    (e.mood ? ' · ' + esc(e.mood) : '') +
                     ' <i>记录于</i> ' + esc(e.date) + '</span></div>' +
             '</div>' +
         '</div>';
@@ -50,12 +67,17 @@
         const host = $('#articleHost');
         const q = query.trim().toLowerCase();
         let list = entries;
+        if (kindFilter) list = list.filter(e => (e.kind || 'journal') === kindFilter);
+        if (authorFilter) list = list.filter(e => (e.author || '') === authorFilter);
         if (q) {
             list = list.filter(e =>
                 (e.content || '').toLowerCase().indexOf(q) >= 0 ||
                 (e.title || '').toLowerCase().indexOf(q) >= 0 ||
+                (e.author || '').indexOf(q) >= 0 ||
                 String(e.date || '').indexOf(q) >= 0);
         }
+        const count = document.getElementById('articleCount');
+        if (count) count.textContent = '共 ' + list.length + ' 篇';
         if (!list.length) {
             host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">' +
                 (entries.length ? '没有找到匹配的文章' : '还没有文章 —— 点上面的「✎ 写文章」写下第一篇吧') + '</div>';
@@ -65,10 +87,17 @@
     }
 
     /* ---------- 编辑器 ---------- */
+    function fillAuthorSelect(sel, val) {
+        const names = authorNames();
+        sel.innerHTML = names.map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+        sel.value = names.indexOf(val) >= 0 ? val : names[0];
+    }
+
     function openEditor(id) {
         editingId = id || null;
         const e = id ? entries.find(x => x.id === id) : null;
         $('#editTitle').textContent = e ? '✎ 编辑文章' : '✎ 写文章';
+        fillAuthorSelect($('#evAuthor'), e ? (e.author || '') : (app.me.display_name || authorNames()[0]));
         $('#evKind').value = e ? (e.kind || 'journal') : 'journal';
         $('#evDate').value = e ? e.date : todayStr();
         $('#evTitle').value = e ? (e.title || '') : '';
@@ -90,10 +119,13 @@
             kind: $('#evKind').value,
             date: date,
             title: $('#evTitle').value.trim(),
+            author: $('#evAuthor').value || '',
             mood: $('#evMood').value.trim(),
             content: content,
             updated_at: new Date().toISOString()
         };
+        /* 标题留空就自动从正文第一行拟一个存进去 */
+        if (!row.title) row.title = autoTitle({ content: content });
         const btn = $('#editSave');
         const old = btn.innerHTML;
         btn.disabled = true; btn.innerHTML = '保存中…';
@@ -141,6 +173,8 @@
         $('#editSave').addEventListener('click', save);
         $('#editDelete').addEventListener('click', () => { if (editingId) del(editingId); });
         $('#searchInput').addEventListener('input', e => { query = e.target.value; render(); });
+        $('#filterKind').addEventListener('change', e => { kindFilter = e.target.value; render(); });
+        $('#filterAuthor').addEventListener('change', e => { authorFilter = e.target.value; render(); });
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') document.querySelectorAll('.lg-mask.show').forEach(m => m.classList.remove('show'));
         });
@@ -149,6 +183,10 @@
     (async function main() {
         app = await SiteApp.init({ shell: 'lg', main: '#articleHost' });
         if (!app.me) return; // 登录门已渲染
+        /* 筛选下拉：类型 + 发布者（取情侣配置里的两个名字） */
+        const fa = $('#filterAuthor');
+        fa.innerHTML = '<option value="">发布者：全部</option>' +
+            authorNames().map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
         bind();
         await load();
     })();

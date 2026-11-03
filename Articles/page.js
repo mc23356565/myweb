@@ -18,6 +18,14 @@
     function openMask(id) { document.getElementById(id).classList.add('show'); }
     function closeMask(id) { document.getElementById(id).classList.remove('show'); }
 
+    /* 发布者下拉：取情侣配置里的两个名字 */
+    function fillAuthorSelect(sel, val) {
+        const c = (window.SiteApp && SiteApp.config) ? SiteApp.config() : {};
+        const names = [c.name_a || '他', c.name_b || '她'];
+        sel.innerHTML = names.map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+        sel.value = names.indexOf(val) >= 0 ? val : names[0];
+    }
+
     (async function main() {
         const app = await SiteApp.init({ shell: 'lg', main: '#pageHost' });
         if (!app.me) return; // 登录门已渲染
@@ -46,7 +54,8 @@
             '<div class="card col-lg-12 col-md-12 col-sm-12 col-sm-x-12 animated fadeInUp">' +
                 '<div class="little_texts">' +
                     '<div class="top-title f2">' + esc(title) + '</div>' +
-                    '<div class="info"><span>✎ ' + esc(kindLabel(e.kind)) + (e.mood ? ' · ' + esc(e.mood) : '') +
+                    '<div class="info"><span>👤 ' + esc(e.author || '佚名') +
+                        (e.mood ? ' · ' + esc(e.mood) : '') +
                         ' <i>记录于</i> ' + esc(e.date) + '</span></div>' +
                     '<div class="line-top"></div>' +
                     '<div id="md-view" class="file">' + renderContent(e.content) + '</div>' +
@@ -59,6 +68,7 @@
             '</div>';
 
         $('#pgEdit').addEventListener('click', () => {
+            fillAuthorSelect($('#evAuthor'), e.author || '');
             $('#evKind').value = e.kind || 'journal';
             $('#evDate').value = e.date || '';
             $('#evTitle').value = e.title || '';
@@ -76,10 +86,16 @@
                 kind: $('#evKind').value,
                 date: $('#evDate').value || e.date,
                 title: $('#evTitle').value.trim(),
+                author: $('#evAuthor').value || '',
                 mood: $('#evMood').value.trim(),
                 content: content,
                 updated_at: new Date().toISOString()
             };
+            if (!row.title) {
+                const line = content.split('\n').map(s => s.trim()).find(s => s) || '';
+                const clean = line.replace(/^[#>\-\s]+/, '').replace(/[。，、！？!?,.\s]+$/, '');
+                row.title = clean ? (clean.length > 15 ? clean.slice(0, 15) + '……' : clean) : '（无标题）';
+            }
             const btn = $('#editSave');
             const old = btn.innerHTML;
             btn.disabled = true; btn.innerHTML = '保存中…';

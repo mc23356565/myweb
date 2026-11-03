@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>生辰纪念 · 年轮回响 | 空曙</title>
+    <meta name="robots" content="noindex">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page="birthday">
+<main class="central">
+    <div id="pageMain">
+        <div class="gate-card">
+            <span class="spin" style="width:22px;height:22px;border-width:3px;color:var(--blue-2)"></span>
+            <h2>正在检查登录状态…</h2>
+        </div>
+    </div>
+
+    <template id="pageContent">
+        <div class="section-head">🎂 生辰纪念 · 年轮回廊</div>
+        <p class="section-sub">✦ 每一道年轮都是一座记忆密室，轻触卡片，重返那一年的独白时刻 ✦</p>
+        <div class="card-grid" id="birthdayYearsContainer"></div>
+        <footer class="page-foot">⚬ 不过是一些往昔的记忆，而已... ⚬</footer>
+    </template>
+</main>
+
+<script src="../assets/app-core.js"></script>
+<script>
+const BIRTHDAY_RECORDS = [
+    {
+        id: "20th",
+        yearLabel: "沉寂 · 二十岁",
+        bannerIcon: "🎂✨",
+        subText: "2026 · 孤寂之年",
+        description: "最煎熬的那年，历经磨难，无边的内耗与绝望，在此刻写下了一封漫长的内心书信...这里似乎还有一些，尚未发现的秘密",
+        pageUrl: "../Birthdays/20th.html"
+    },
+];
+
+(async function () {
+    const app = await SiteApp.init({ active: 'birthday', main: '#pageMain' });
+    if (!app.me) return;
+    const main = document.getElementById('pageMain');
+    main.innerHTML = '';
+    main.appendChild(document.getElementById('pageContent').content.cloneNode(true));
+
+    const container = document.getElementById('birthdayYearsContainer');
+    if (!BIRTHDAY_RECORDS.length) {
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">✨ 暂无生辰档案，等待时光填充 ✨</div>';
+        return;
+    }
+    BIRTHDAY_RECORDS.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'card clickable';
+        card.style.padding = '0';
+        card.style.overflow = 'hidden';
+        card.innerHTML =
+            '<div class="card-banner" style="height:120px;background:linear-gradient(130deg,#70a9ff,#10bbff);display:flex;align-items:center;justify-content:center;font-size:3.2rem;">' + record.bannerIcon + '</div>' +
+            '<div style="padding:1.5rem 1.6rem 1.7rem;">' +
+                '<div style="font-size:1.5rem;font-weight:700;">' + record.yearLabel + '</div>' +
+                '<div style="color:var(--ink-3);font-size:.85rem;margin:.3rem 0 .8rem;">📅 ' + (record.subText || '') + '</div>' +
+                '<div style="color:var(--ink-2);line-height:1.75;font-size:.9rem;margin:.4rem 0 1.2rem;">' + (record.description || '点击探寻这段生日的私语与记忆碎片。') + '</div>' +
+                '<button class="btn sm blue">打开时光胶囊 🗝️</button>' +
+            '</div>';
+        card.addEventListener('click', () => location.href = record.pageUrl);
+        container.appendChild(card);
+    });
+})();
+</script>
+</body>
+</html>
