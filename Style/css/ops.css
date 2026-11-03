@@ -34,22 +34,48 @@
     font-size: .9rem; width: 12rem; background: transparent;
 }
 
-/* 筛选下拉：做成和搜索框/按钮同款的圆角白底件 */
+/* 筛选下拉：外观与 lg-btn 按钮完全一致（仅多一个下拉箭头） */
 .lg-opsbar select {
     appearance: none; -webkit-appearance: none;
-    font-family: 'Noto Serif SC', serif; font-size: .9rem; color: #707070;
-    background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b5b5b5' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right .7rem center;
+    display: inline-flex; align-items: center;
+    font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: .95rem; color: #707070;
+    background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2310bbff' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right .8rem center;
     border: 1px solid rgba(208, 206, 206, 0.6); border-radius: .6rem;
-    padding: .42rem 2.1rem .42rem .95rem; cursor: pointer; outline: none;
-    transition: border-color .15s, color .15s;
+    padding: .45rem 2.2rem .45rem 1.2rem; cursor: pointer; outline: none;
+    transition: all .15s;
 }
-.lg-opsbar select:hover, .lg-opsbar select:focus { border-color: #10bbff; color: #10bbff; }
+.lg-opsbar select:hover, .lg-opsbar select:focus {
+    color: #10bbff; border-color: #10bbff;
+    background-color: #f4fcff;
+}
 
 /* 篇数统计 */
 .lg-count {
     font-family: 'Noto Serif SC', serif; font-size: .85rem; color: #b5b5b5; letter-spacing: .05em;
 }
 .lg-count b { color: #707070; }
+
+/* ---------- 返回主厅的悬浮圆钮（LikeGirl 外壳子页） ---------- */
+.lg-back {
+    position: fixed; left: 1.1rem; top: 5.2rem; z-index: 60;
+    width: 2.8rem; height: 2.8rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; border: 1px solid rgba(208, 206, 206, 0.6);
+    color: #707070; font-size: 1.2rem; line-height: 1;
+    font-family: 'Noto Serif SC', serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    cursor: pointer; transition: all .15s;
+}
+.lg-back:hover { color: #10bbff; border-color: #10bbff; transform: translateX(-3px); }
+
+/* ---------- 全站可点元素统一手型光标 ---------- */
+button, .lg-btn, .btn, select, a, label.lg-search,
+li.cike, li.cike i, li.cike span, .cike .com, .cike .air,
+.img_card, .img_card img, .top-title, .little_texts a,
+.lovelist .open, .icon-btn, [role="button"] {
+    cursor: pointer;
+}
+input:not([type="button"]):not([type="submit"]), textarea { cursor: auto; }
 
 /* ---------- 遮罩 + 弹窗 ---------- */
 .lg-mask {

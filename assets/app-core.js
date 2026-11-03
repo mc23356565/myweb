@@ -202,6 +202,20 @@ window.SiteApp = (function () {
         document.body.appendChild(footer);
         const so = document.getElementById('lgSignOut');
         if (so) so.addEventListener('click', () => { storeSet(K.session, null); location.reload(); });
+
+        // ④ 返回主厅的悬浮圆钮（主页不需要）
+        const here = location.pathname.replace(/\\/g, '/');
+        const isHome = /\/Secret\.html$/.test(here) || /\/$/.test(here);
+        if (!isHome) {
+            const back = document.createElement('button');
+            back.className = 'lg-back';
+            back.type = 'button';
+            back.title = '返回主厅';
+            back.setAttribute('aria-label', '返回主厅');
+            back.textContent = '←';
+            back.addEventListener('click', () => location.href = lgRel('Secret.html'));
+            document.body.appendChild(back);
+        }
     }
     function renderAccountSlot(me) {
         const slot = document.getElementById('accountSlot');
