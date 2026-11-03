@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>日常想法 · 浮光掠影 | 空曙</title>
 <meta name="description" content="空曙的赛博日记（需要账号访问）。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/journal.css">
 </head>
 <body>
@@ -17,7 +19,6 @@
         </a>
         <div class="topbar-spacer"></div>
         <div class="topbar-actions">
-            <button class="btn icon" id="themeBtn" title="切换夜读模式">🌙</button>
             <button class="btn icon" id="settingsBtn" title="后台说明">⚙️</button>
             <button class="btn primary" id="lockBtn">🔑 登录</button>
             <button class="btn icon" id="menuBtn" title="更多">⋯</button>
@@ -60,7 +61,6 @@
 <footer class="page-foot">⚬ 日常即星辰 · 每一粒微光都值得记录 ⚬</footer>
 
 <script src="../assets/journal-core.js"></script>
-<script src="../assets/journal-comments.js"></script>
 <script>
 /* 日记页：日期 + 心情标签 + 正文；数据存在 Supabase 的 entries 表 */
 const app = Journal.init({

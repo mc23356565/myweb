@@ -483,6 +483,15 @@
     </style>
 </head>
 <body>
+<script>
+/* 整站登录门（轻量守卫）：未登录跳回主厅 */
+(function () {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('journal.session.v1') || 'null'); } catch (e) {}
+    if (!s || !s.accessToken) location.replace('../Secret.html?needlogin=1');
+})();
+</script>
+
     <div class="container">
         <!-- 历史档案徽章 -->
         <div class="archive-badge">📀 20th · 遗响档案 | 2026 📀</div>
