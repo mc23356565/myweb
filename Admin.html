@@ -7,6 +7,10 @@
     <meta name="robots" content="noindex">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/style.css">
+    <link rel="stylesheet" href="./Style/css/content.css">
+    <link rel="stylesheet" href="./Style/css/index.css">
+    <link rel="stylesheet" href="./Style/css/animate.min.css">
+    <link rel="stylesheet" href="./Style/css/ops.css">
     <style>
         .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 1.6rem 0 1.2rem; }
         .admin-section { display: none; }
@@ -153,7 +157,7 @@
 const INSTALL_SQL = SiteApp.INSTALL_SQL;
 
 (async function () {
-    const app = await SiteApp.init({ active: 'admin', main: '#pageMain' });
+    const app = await SiteApp.init({ shell: 'lg', main: '#pageMain' });
     if (!app.me) return;
     const main = document.getElementById('pageMain');
     main.innerHTML = '';

@@ -153,7 +153,7 @@ window.SiteApp = (function () {
     /* ====================== LikeGirl 外壳（照搬 head.php / footer.php） ====================== */
     function lgRel(p) {
         const here = location.pathname.replace(/\\/g, '/');
-        return /\/(Articles|Photos|List)\//.test(here) ? '../' + p : p;
+        return /\/(Articles|Photos|List|Questionnaires)\//.test(here) ? '../' + p : p;
     }
     function mountLgShell() {
         // ① 顶栏（head.php 的 header-wrap：logo + 文案）
