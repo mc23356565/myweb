@@ -22,18 +22,18 @@
             </div>
             <div class="lg-opsbar">
                 <label class="lg-search">🔎<input type="search" id="searchInput" placeholder="搜索标题 / 正文 / 日期…" autocomplete="off"></label>
-                <select class="input" id="filterKind" style="width:auto;">
+                <select id="filterKind">
                     <option value="">全部类型</option>
                     <option value="journal">日常想法</option>
                     <option value="philosophy">思辨话题</option>
                 </select>
-                <select class="input" id="filterAuthor" style="width:auto;">
+                <select id="filterAuthor">
                     <option value="">发布者：全部</option>
                 </select>
                 <button class="lg-btn blue" id="newBtn">✎ 写文章</button>
             </div>
-            <div class="lg-opsbar" style="margin-top:-.4rem;opacity:.65;font-size:.85em;">
-                <span id="articleCount"></span>
+            <div class="lg-opsbar">
+                <span class="lg-count" id="articleCount"></span>
             </div>
             <div class="row central central-800" id="articleHost">
                 <div class="lg-empty">正在检查登录状态…</div>

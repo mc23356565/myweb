@@ -26,12 +26,30 @@
 .lg-search {
     display: inline-flex; align-items: center; gap: .4rem;
     background: #fff; border: 1px solid rgba(208, 206, 206, 0.6); border-radius: .6rem;
-    padding: .4rem .9rem;
+    padding: .4rem .9rem; transition: border-color .15s;
 }
+.lg-search:hover, .lg-search:focus-within { border-color: #10bbff; }
 .lg-search input {
     border: none; outline: none; font-family: 'Noto Serif SC', serif;
     font-size: .9rem; width: 12rem; background: transparent;
 }
+
+/* 筛选下拉：做成和搜索框/按钮同款的圆角白底件 */
+.lg-opsbar select {
+    appearance: none; -webkit-appearance: none;
+    font-family: 'Noto Serif SC', serif; font-size: .9rem; color: #707070;
+    background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b5b5b5' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right .7rem center;
+    border: 1px solid rgba(208, 206, 206, 0.6); border-radius: .6rem;
+    padding: .42rem 2.1rem .42rem .95rem; cursor: pointer; outline: none;
+    transition: border-color .15s, color .15s;
+}
+.lg-opsbar select:hover, .lg-opsbar select:focus { border-color: #10bbff; color: #10bbff; }
+
+/* 篇数统计 */
+.lg-count {
+    font-family: 'Noto Serif SC', serif; font-size: .85rem; color: #b5b5b5; letter-spacing: .05em;
+}
+.lg-count b { color: #707070; }
 
 /* ---------- 遮罩 + 弹窗 ---------- */
 .lg-mask {

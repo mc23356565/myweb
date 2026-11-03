@@ -77,7 +77,7 @@
                 String(e.date || '').indexOf(q) >= 0);
         }
         const count = document.getElementById('articleCount');
-        if (count) count.textContent = '共 ' + list.length + ' 篇';
+        if (count) count.innerHTML = '共 <b>' + list.length + '</b> 篇';
         if (!list.length) {
             host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">' +
                 (entries.length ? '没有找到匹配的文章' : '还没有文章 —— 点上面的「✎ 写文章」写下第一篇吧') + '</div>';

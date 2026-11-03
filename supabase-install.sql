@@ -189,5 +189,6 @@ insert into public.site_config (key, value) values
   ('name_b', '她'),
   ('avatar_a', ''),
   ('avatar_b', ''),
+  ('bg_url', ''),
   ('since', '2026-04-06')
 on conflict (key) do nothing;

@@ -44,7 +44,7 @@
         <section class="admin-section on" id="sec-couple">
             <div class="card" style="cursor:default;">
                 <h3>💑 情侣配置</h3>
-                <p>站点名称、顶栏文案、两人名字、头像、纪念日（主厅计时器起点）。改完保存，全站立刻生效。</p>
+                <p>站点名称、顶栏文案、两人名字、头像、网页背景、纪念日（主厅计时器起点）。改完保存，全站立刻生效。</p>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 1.2rem;">
                     <div class="field"><label>站点名称（顶栏 logo / 浏览器标题）</label>
                         <input class="input" id="cfgTitle" autocomplete="off"></div>
@@ -67,6 +67,12 @@
                         <label style="display:block;font-size:.84rem;font-weight:700;color:var(--ink-2);margin-bottom:.4rem;">她的头像<span class="hint">选新图片即替换</span></label>
                         <img id="avaBPrev" src="./assets/avatar-b.svg" alt="" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--line-2);display:block;margin-bottom:.5rem;background:#fff;">
                         <input class="input" type="file" id="cfgAvaB" accept="image/*" style="max-width:240px;padding:.3rem;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:.84rem;font-weight:700;color:var(--ink-2);margin-bottom:.4rem;">网页背景<span class="hint">上传 / 贴图链，清空恢复网格纸</span></label>
+                        <img id="bgPrev" alt="" style="width:150px;height:84px;border-radius:.6rem;object-fit:cover;border:3px solid var(--line-2);display:block;margin-bottom:.5rem;background:#fff;">
+                        <input class="input" type="file" id="cfgBgFile" accept="image/*" style="max-width:240px;padding:.3rem;margin-bottom:.4rem;">
+                        <input class="input" id="cfgBg" placeholder="或直接粘贴图片链接 https://…" autocomplete="off" style="max-width:240px;">
                     </div>
                 </div>
                 <button class="btn blue" id="cfgSave">💾 保存配置</button>
@@ -191,12 +197,14 @@ const INSTALL_SQL = SiteApp.INSTALL_SQL;
         '<div class="kv"><span class="k">权限</span><b>成员（可读可写，和另一个账号完全一样）</b></div>';
 
     /* ---------- 情侣配置 ---------- */
-    const CFG_FIELDS = { site_title: 'cfgTitle', slogan: 'cfgSlogan', name_a: 'cfgNameA', name_b: 'cfgNameB', since: 'cfgSince' };
+    const CFG_FIELDS = { site_title: 'cfgTitle', slogan: 'cfgSlogan', name_a: 'cfgNameA', name_b: 'cfgNameB', bg_url: 'cfgBg', since: 'cfgSince' };
     Object.keys(CFG_FIELDS).forEach(k => {
         document.getElementById(CFG_FIELDS[k]).value = app.config[k] || '';
     });
     document.getElementById('avaAPrev').src = app.config.avatar_a || './assets/avatar-a.svg';
     document.getElementById('avaBPrev').src = app.config.avatar_b || './assets/avatar-b.svg';
+    document.getElementById('bgPrev').src = app.config.bg_url || '';
+    document.getElementById('bgPrev').style.display = app.config.bg_url ? 'block' : 'none';
     const pendingAva = { a: null, b: null };
     document.getElementById('cfgAvaA').addEventListener('change', e => {
         pendingAva.a = e.target.files[0] || null;
@@ -206,10 +214,23 @@ const INSTALL_SQL = SiteApp.INSTALL_SQL;
         pendingAva.b = e.target.files[0] || null;
         if (pendingAva.b) document.getElementById('avaBPrev').src = URL.createObjectURL(pendingAva.b);
     });
+    /* 背景：选了本地文件优先用文件，否则用输入框里的链接 */
+    let pendingBg = null;
+    document.getElementById('cfgBgFile').addEventListener('change', e => {
+        pendingBg = e.target.files[0] || null;
+        const prev = document.getElementById('bgPrev');
+        if (pendingBg) { prev.src = URL.createObjectURL(pendingBg); prev.style.display = 'block'; }
+    });
+    document.getElementById('cfgBg').addEventListener('input', e => {
+        if (pendingBg) return;   // 已选文件时以文件为准
+        const prev = document.getElementById('bgPrev');
+        prev.src = e.target.value.trim();
+        prev.style.display = e.target.value.trim() ? 'block' : 'none';
+    });
 
-    async function uploadAva(file, tag) {
+    async function uploadAva(file, tag, folder) {
         const ext = (file.name.match(/\.\w+$/) || ['.jpg'])[0];
-        const path = 'avatars/' + tag + '-' + Date.now().toString(36) + ext;
+        const path = (folder || 'avatars') + '/' + tag + '-' + Date.now().toString(36) + ext;
         const res = await fetch(SiteApp.sbUrl() + '/storage/v1/object/photos/' + path, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + SiteApp.session().accessToken },
@@ -237,14 +258,15 @@ const INSTALL_SQL = SiteApp.INSTALL_SQL;
             Object.keys(CFG_FIELDS).forEach(k => { patch[k] = document.getElementById(CFG_FIELDS[k]).value.trim(); });
             if (pendingAva.a) patch.avatar_a = await uploadAva(pendingAva.a, 'a');
             if (pendingAva.b) patch.avatar_b = await uploadAva(pendingAva.b, 'b');
+            if (pendingBg) patch.bg_url = await uploadAva(pendingBg, 'bg', 'bg');
             const rows = Object.keys(patch).map(k => ({ key: k, value: patch[k] }));
             await app.sbRest('site_config', {
                 method: 'POST',
                 prefer: 'resolution=merge-duplicates',
                 body: rows
             });
-            SiteApp.saveConfigLocal(patch);   // 立刻刷新本页顶栏 / 标题
-            msg.textContent = '✓ 已保存，全站（主厅头像、名字、计时器、站点名）立刻生效';
+            SiteApp.saveConfigLocal(patch);   // 立刻刷新本页顶栏 / 标题 / 背景
+            msg.textContent = '✓ 已保存，全站（主厅头像、名字、计时器、站点名、背景）立刻生效';
             SiteApp.toast('情侣配置已保存 💑', 'ok');
         } catch (e) {
             msg.textContent = '❌ ' + e.message;
