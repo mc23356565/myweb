@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>朴实文章</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Style/css/index.css">
+    <link rel="stylesheet" href="../Style/css/little.css">
+    <link rel="stylesheet" href="../Style/css/animate.min.css">
+    <link rel="stylesheet" href="../Style/css/ops.css">
+</head>
+
+<body>
+    <!-- 顶栏 / Banner / 页脚由 assets/app-core.js 按 LikeGirl head.php/footer.php 注入 -->
+
+    <div id="pjax-container">
+        <div class="central">
+            <div class="title"></div>
+            <div class="row central central-800" id="pageHost">
+                <div class="lg-empty" style="grid-column:1/-1">正在加载文章…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑 -->
+    <div class="lg-mask" id="editMask">
+        <div class="lg-modal">
+            <div class="lg-mhead"><h3>✎ 编辑文章</h3><button class="x" data-close="editMask">✕</button></div>
+            <div class="lg-mbody">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 .9rem;">
+                    <div class="field"><label>类型</label>
+                        <select class="input" id="evKind">
+                            <option value="journal">日常想法</option>
+                            <option value="philosophy">思辨话题</option>
+                        </select></div>
+                    <div class="field"><label>日期</label>
+                        <input class="input" type="date" id="evDate"></div>
+                </div>
+                <div class="field"><label>标题</label>
+                    <input class="input" id="evTitle" autocomplete="off"></div>
+                <div class="field"><label>心情标签</label>
+                    <input class="input" id="evMood" autocomplete="off"></div>
+                <div class="field"><label>正文</label>
+                    <textarea class="textarea" id="evContent"></textarea></div>
+                <div class="lg-err" id="editError"></div>
+            </div>
+            <div class="lg-mfoot">
+                <button class="lg-btn danger" id="editDelete">🗑 删除这篇</button>
+                <span class="grow"></span>
+                <button class="lg-btn" data-close="editMask">取消</button>
+                <button class="lg-btn blue" id="editSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/app-core.js"></script>
+    <script src="page.js"></script>
+</body>
+
+</html>

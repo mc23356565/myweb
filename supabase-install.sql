@@ -166,3 +166,24 @@ create policy photos_bucket_update on storage.objects for update to authenticate
   using (bucket_id = 'photos') with check (bucket_id = 'photos');
 create policy photos_bucket_delete on storage.objects for delete to authenticated
   using (bucket_id = 'photos');
+
+-- ===== 情侣配置（site_config：站点名/两人名字/头像/纪念日等）=====
+create table if not exists public.site_config (
+  key   text primary key,
+  value text not null default ''
+);
+alter table public.site_config enable row level security;
+drop policy if exists site_config_read   on public.site_config;
+drop policy if exists site_config_write  on public.site_config;
+create policy site_config_read  on public.site_config for select to authenticated using (public.is_member());
+create policy site_config_write on public.site_config for insert to authenticated with check (public.is_member());
+create policy site_config_upd   on public.site_config for update to authenticated using (public.is_member());
+insert into public.site_config (key, value) values
+  ('site_title', '我们的小窝'),
+  ('slogan', '总有些惊奇的际遇 比方说当我遇见你'),
+  ('name_a', '他'),
+  ('name_b', '她'),
+  ('avatar_a', ''),
+  ('avatar_b', ''),
+  ('since', '2026-04-06')
+on conflict (key) do nothing;

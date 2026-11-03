@@ -1,250 +1,190 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Love Photo · 恋爱相册 | 空曙</title>
-<meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
-<style>
-/* ---------- 相册网格（仿 LikeGirl loveImg） ---------- */
-.photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.6rem; }
-@media (max-width: 900px) { .photo-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .photo-grid { grid-template-columns: 1fr; } }
-.img-card {
-    position: relative; overflow: hidden; border-radius: var(--radius-sm);
-    background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
-    cursor: pointer; animation: zoomIn .4s ease both;
-}
-@keyframes zoomIn { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
-.img-card img {
-    display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
-    transition: transform .5s ease; background: var(--blue-soft);
-}
-.img-card:hover img { transform: scale(1.06); }
-.img-card .words {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    padding: 1.6rem .9rem .7rem; color: #fff;
-    background: linear-gradient(transparent, rgba(0,0,0,.62));
-    opacity: 0; transform: translateY(6px); transition: all .3s ease;
-}
-.img-card:hover .words { opacity: 1; transform: none; }
-.img-card .words i { display: block; font-style: normal; font-size: .72rem; opacity: .85; margin-bottom: 2px; }
-.img-card .words span { font-size: .86rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.img-card .del {
-    position: absolute; top: .5rem; right: .5rem; width: 1.7rem; height: 1.7rem;
-    border: none; border-radius: 50%; background: rgba(0,0,0,.45); color: #fff;
-    font-size: .85rem; cursor: pointer; opacity: 0; transition: opacity .25s ease;
-}
-.img-card:hover .del { opacity: 1; }
-.fab {
-    position: fixed; right: 1.4rem; bottom: 1.6rem; z-index: 60;
-    width: 3.2rem; height: 3.2rem; border: none; border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue-2), var(--blue)); color: #fff;
-    font-size: 1.4rem; cursor: pointer; box-shadow: 0 6px 18px rgba(112,169,255,.55);
-    transition: transform .2s ease;
-}
-.fab:hover { transform: scale(1.08) rotate(90deg); }
-.lightbox-img { max-width: 100%; max-height: 62vh; border-radius: var(--radius-sm); display: block; margin: 0 auto; }
-</style>
+    <meta charset="utf-8">
+    <title>Love Photo</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Style/css/index.css">
+    <link rel="stylesheet" href="../Style/css/loveImg.css">
+    <link rel="stylesheet" href="../Style/css/animate.min.css">
+    <link rel="stylesheet" href="../Style/css/ops.css">
 </head>
-<body data-page="photo">
-<main class="central">
-    <div id="pageMain">
-        <div class="gate-card">
-            <span class="spin" style="width:22px;height:22px;border-width:3px;color:var(--blue-2)"></span>
-            <h2>正在检查登录状态…</h2>
+
+<body>
+    <!-- 顶栏 / Banner / 页脚由 assets/app-core.js 按 LikeGirl head.php/footer.php 注入 -->
+
+    <div id="pjax-container">
+        <h4 class="text-ce central" style="text-align:center;font-size:1.8rem;font-family:'Noto Serif SC',serif;font-weight:700;">记录下你的最美瞬间</h4>
+        <div class="lg-opsbar" style="margin-bottom:1.4rem;">
+            <button class="lg-btn blue" id="addBtn">＋ 添加照片</button>
+        </div>
+        <div class="row central" id="photoHost">
+            <div class="lg-empty" style="grid-column:1/-1">正在检查登录状态…</div>
         </div>
     </div>
 
-    <template id="pageContent">
-        <div class="section-head">📷 Love Photo · 恋爱相册</div>
-        <p class="section-sub">记录下你的最美瞬间 —— 每一张照片，都是我们一起走过的证据。</p>
-        <div class="photo-grid" id="photoGrid"></div>
-        <button class="fab" id="addBtn" title="添加照片">＋</button>
-    </template>
-
-    <!-- 添加 / 编辑照片 -->
-    <div class="mask" id="editMask">
-        <div class="modal">
-            <div class="modal-head"><h3 id="editTitle">＋ 添加照片</h3><button class="x" data-close="editMask">✕</button></div>
-            <div class="modal-body">
-                <div class="field"><label>上传图片<span class="hint">直接选文件，会存到 Supabase Storage</span></label>
+    <!-- 添加照片 -->
+    <div class="lg-mask" id="editMask">
+        <div class="lg-modal narrow">
+            <div class="lg-mhead"><h3>＋ 添加照片</h3><button class="x" data-close="editMask">✕</button></div>
+            <div class="lg-mbody">
+                <div class="field"><label>上传图片<span class="hint">直接选文件，存到 Supabase Storage</span></label>
                     <input class="input" type="file" id="photoFile" accept="image/*"></div>
-                <div class="field"><label>或图片链接<span class="hint">二选一；编辑时只能改链接</span></label>
+                <div class="field"><label>或图片链接<span class="hint">二选一</span></label>
                     <input class="input" id="photoUrl" placeholder="https://…" autocomplete="off"></div>
                 <div class="field"><label>日期</label>
                     <input class="input" type="date" id="photoDate"></div>
-                <div class="field"><label>想说什么<span class="hint">悬停在照片上会显示</span></label>
+                <div class="field"><label>想说什么</label>
                     <input class="input" id="photoCaption" placeholder="例如：第一次一起看海 🌊" autocomplete="off"></div>
-                <div id="editError" style="min-height:18px;font-size:.8rem;color:var(--pink)"></div>
+                <div class="lg-err" id="editError"></div>
             </div>
-            <div class="modal-foot">
-                <button class="btn danger" id="editDelete" hidden>🗑 删除</button>
-                <span style="flex:1"></span>
-                <button class="btn" data-close="editMask">取消</button>
-                <button class="btn primary" id="editSave">保存</button>
+            <div class="lg-mfoot">
+                <span class="grow"></span>
+                <button class="lg-btn" data-close="editMask">取消</button>
+                <button class="lg-btn blue" id="editSave">保存</button>
             </div>
         </div>
     </div>
 
     <!-- 大图浏览 -->
-    <div class="mask" id="viewMask">
-        <div class="modal wide">
-            <div class="modal-head"><h3 id="viewTitle">照片</h3><button class="x" data-close="viewMask">✕</button></div>
-            <div class="modal-body">
-                <img class="lightbox-img" id="viewImg" alt="">
-                <p id="viewCaption" style="text-align:center;color:var(--ink-2);font-size:.9rem;line-height:1.8;margin:1rem 0 0;"></p>
+    <div class="lg-mask" id="viewMask">
+        <div class="lg-modal lg-lightbox">
+            <div class="lg-mhead"><h3 id="viewTitle">照片</h3><button class="x" data-close="viewMask">✕</button></div>
+            <div class="lg-mbody">
+                <img id="viewImg" alt="">
+                <p class="cap" id="viewCaption"></p>
             </div>
         </div>
     </div>
-</main>
 
-<script src="../assets/app-core.js"></script>
-<script>
-(async function () {
-    const app = await SiteApp.init({ active: 'photo', main: '#pageMain' });
-    if (!app.me) return;
-    const esc = app.esc;
-    const main = document.getElementById('pageMain');
-    main.innerHTML = '';
-    main.appendChild(document.getElementById('pageContent').content.cloneNode(true));
-    document.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () =>
-        document.getElementById(x.dataset.close).classList.remove('show')));
+    <script src="../assets/app-core.js"></script>
+    <script>
+    (async function () {
+        const app = await SiteApp.init({ shell: 'lg', main: '#photoHost' });
+        if (!app.me) return; // 登录门已渲染
 
-    const grid = document.getElementById('photoGrid');
-    let photos = [];
-    let editingId = null;
+        const host = document.getElementById('photoHost');
+        let photos = [];
 
-    function openMask(id) { document.getElementById(id).classList.add('show'); }
+        function openMask(id) { document.getElementById(id).classList.add('show'); }
+        function closeMask(id) { document.getElementById(id).classList.remove('show'); }
+        document.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeMask(x.dataset.close)));
+        document.querySelectorAll('.lg-mask').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('show'); }));
 
-    async function load() {
-        try {
-            photos = (await app.sbRest('photos?select=*&order=date.desc,created_at.desc')) || [];
-        } catch (e) {
-            grid.innerHTML = '<div class="notice" style="grid-column:1/-1;">加载失败：' + esc(e.message) +
-                '（可能需要先去后台执行「数据库安装 SQL」）</div>';
-            return;
-        }
-        render();
-    }
-
-    function render() {
-        if (!photos.length) {
-            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">📷 还没有照片。点右下角的 ＋ 添加第一张吧。</div>';
-            return;
-        }
-        grid.innerHTML = photos.map((p, i) =>
-            '<div class="img-card" data-i="' + i + '" style="animation-delay:' + Math.min(i * 60, 600) + 'ms">' +
-                '<img loading="lazy" src="' + esc(p.url) + '" alt="' + esc(p.caption || '照片') + '">' +
-                '<div class="words"><i>Date：' + esc(p.date || '') + '</i><span>' + esc(p.caption || '') + '</span></div>' +
-                '<button class="del" data-del="' + esc(p.id) + '" title="删除">✕</button>' +
-            '</div>').join('');
-        grid.querySelectorAll('.img-card').forEach(card => {
-            card.addEventListener('click', ev => {
-                if (ev.target.closest('.del')) return;
-                const p = photos[+card.dataset.i];
-                document.getElementById('viewImg').src = p.url;
-                document.getElementById('viewTitle').textContent = p.date || '照片';
-                document.getElementById('viewCaption').textContent = p.caption || '';
-                openMask('viewMask');
-            });
-        });
-        grid.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', ev => {
-            ev.stopPropagation();
-            del(btn.dataset.del);
-        }));
-    }
-
-    async function del(id) {
-        const p = photos.find(x => x.id === id);
-        if (!p) return;
-        if (!confirm('确定删除这张照片？\n' + (p.caption || p.date || ''))) return;
-        try {
-            await app.sbRest('photos?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
-            photos = photos.filter(x => x.id !== id);
-            render();
-            app.toast('已删除 🗑', 'ok');
-        } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
-    }
-
-    /* ---------- 添加 / 编辑 ---------- */
-    document.getElementById('addBtn').addEventListener('click', () => {
-        editingId = null;
-        document.getElementById('editTitle').textContent = '＋ 添加照片';
-        document.getElementById('photoFile').value = '';
-        document.getElementById('photoUrl').value = '';
-        document.getElementById('photoDate').value = new Date().toISOString().slice(0, 10);
-        document.getElementById('photoCaption').value = '';
-        document.getElementById('editError').textContent = '';
-        document.getElementById('editDelete').hidden = true;
-        openMask('editMask');
-    });
-
-    document.getElementById('editSave').addEventListener('click', async () => {
-        const err = document.getElementById('editError');
-        const btn = document.getElementById('editSave');
-        err.textContent = '';
-        let url = document.getElementById('photoUrl').value.trim();
-        const date = document.getElementById('photoDate').value || '';
-        const caption = document.getElementById('photoCaption').value.trim();
-        const file = document.getElementById('photoFile').files[0];
-        if (editingId) {
-            if (!url) { err.textContent = '编辑模式下请填写图片链接'; return; }
-        } else if (!url && !file) {
-            err.textContent = '选一个图片文件，或填一个图片链接'; return;
-        }
-        const old = btn.innerHTML;
-        btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 保存中…';
-        try {
-            if (file) {
-                btn.innerHTML = '<span class="spin"></span> 上传中…';
-                url = await uploadToStorage(file);
+        async function load() {
+            try {
+                photos = (await app.sbRest('photos?select=*&order=date.desc,created_at.desc')) || [];
+            } catch (e) {
+                host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">加载失败：' + app.esc(e.message) +
+                    '<br>（可能需要先去后台执行「数据库安装」里的 SQL）</div>';
+                return;
             }
-            if (editingId) {
-                const row = { url: url, caption: caption, date: date, updated_at: new Date().toISOString() };
-                await app.sbRest('photos?id=eq.' + encodeURIComponent(editingId), { method: 'PATCH', body: row });
-                const i = photos.findIndex(x => x.id === editingId);
-                if (i >= 0) photos[i] = Object.assign({}, photos[i], row);
-            } else {
-                const row = { id: app.newId('ph'), url: url, caption: caption, date: date };
+            render();
+        }
+
+        function render() {
+            if (!photos.length) {
+                host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">📷 还没有照片 —— 点上面的「＋ 添加照片」存下第一张吧</div>';
+                return;
+            }
+            host.innerHTML = photos.map((p, i) =>
+                '<div class="img_card col-lg-4 col-md-6 col-sm-12 col-sm-x-12 animated zoomIn" data-i="' + i + '">' +
+                    '<button class="lg-del" data-del="' + app.esc(p.id) + '" title="删除">✕</button>' +
+                    '<div class="love_img">' +
+                        '<img loading="lazy" src="' + app.esc(p.url) + '" alt="' + app.esc(p.caption || '照片') + '">' +
+                        '<div class="words"><i>Date：' + app.esc(p.date || '') + '</i><span>' + app.esc(p.caption || '') + '</span></div>' +
+                    '</div>' +
+                '</div>').join('');
+            host.querySelectorAll('.img_card').forEach(card => {
+                card.addEventListener('click', ev => {
+                    if (ev.target.closest('.lg-del')) return;
+                    const p = photos[+card.dataset.i];
+                    document.getElementById('viewImg').src = p.url;
+                    document.getElementById('viewTitle').textContent = p.date || '照片';
+                    document.getElementById('viewCaption').textContent = p.caption || '';
+                    openMask('viewMask');
+                });
+            });
+            host.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', ev => {
+                ev.stopPropagation();
+                del(btn.dataset.del);
+            }));
+        }
+
+        async function del(id) {
+            const p = photos.find(x => x.id === id);
+            if (!p) return;
+            if (!confirm('确定删除这张照片？\n' + (p.caption || p.date || ''))) return;
+            try {
+                await app.sbRest('photos?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+                photos = photos.filter(x => x.id !== id);
+                render();
+                app.toast('已删除 🗑', 'ok');
+            } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
+        }
+
+        document.getElementById('addBtn').addEventListener('click', () => {
+            document.getElementById('photoFile').value = '';
+            document.getElementById('photoUrl').value = '';
+            document.getElementById('photoDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('photoCaption').value = '';
+            document.getElementById('editError').textContent = '';
+            openMask('editMask');
+        });
+
+        document.getElementById('editSave').addEventListener('click', async () => {
+            const err = document.getElementById('editError');
+            const btn = document.getElementById('editSave');
+            err.textContent = '';
+            let url = document.getElementById('photoUrl').value.trim();
+            const date = document.getElementById('photoDate').value || '';
+            const caption = document.getElementById('photoCaption').value.trim();
+            const file = document.getElementById('photoFile').files[0];
+            if (!url && !file) { err.textContent = '选一个图片文件，或填一个图片链接'; return; }
+            const old = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '保存中…';
+            try {
+                if (file) {
+                    btn.innerHTML = '上传中…';
+                    url = await uploadToStorage(file);
+                }
+                const row = { id: 'ph' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), url: url, caption: caption, date: date };
                 await app.sbRest('photos', { method: 'POST', body: row });
                 photos.unshift(row);
+                closeMask('editMask');
+                render();
+                app.toast('已保存 ✓', 'ok');
+            } catch (e) {
+                err.textContent = '❌ ' + e.message;
+            } finally {
+                btn.disabled = false; btn.innerHTML = old;
             }
-            document.getElementById('editMask').classList.remove('show');
-            render();
-            app.toast('已保存 ✓', 'ok');
-        } catch (e) {
-            err.textContent = '❌ ' + e.message;
-        } finally {
-            btn.disabled = false; btn.innerHTML = old;
-        }
-    });
-
-    async function uploadToStorage(file) {
-        const ext = (file.name.match(/\.\w+$/) || ['.jpg'])[0];
-        const path = 'ph' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6) + ext;
-        const sbUrl = SiteApp.sbUrl();
-        const res = await fetch(sbUrl + '/storage/v1/object/photos/' + path, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + SiteApp.session().accessToken },
-            body: file
         });
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            const msg = data.message || data.error || ('上传失败（' + res.status + '）');
-            if (/Bucket not found|does not exist/i.test(msg)) {
-                throw new Error('Storage 里还没有公开桶 photos —— 去 Supabase → Storage → New bucket，名字填 photos、勾选 Public，再重试');
-            }
-            throw new Error(msg);
-        }
-        return sbUrl + '/storage/v1/object/public/photos/' + path;
-    }
 
-    load();
-})();
-</script>
+        async function uploadToStorage(file) {
+            const ext = (file.name.match(/\.\w+$/) || ['.jpg'])[0];
+            const path = 'ph' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6) + ext;
+            const res = await fetch(SiteApp.sbUrl() + '/storage/v1/object/photos/' + path, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + SiteApp.session().accessToken },
+                body: file
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                const msg = data.message || data.error || ('上传失败（' + res.status + '）');
+                if (/Bucket not found|does not exist/i.test(msg)) {
+                    throw new Error('Storage 里还没有公开桶 photos —— 去 Supabase SQL Editor 执行一遍 supabase-install.sql 即可自动创建');
+                }
+                throw new Error(msg);
+            }
+            return SiteApp.sbUrl() + '/storage/v1/object/public/photos/' + path;
+        }
+
+        load();
+    })();
+    </script>
 </body>
+
 </html>

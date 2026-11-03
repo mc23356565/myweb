@@ -1,0 +1,120 @@
+/* ==========================================================================
+   我们的小窝 —— 前台操作件（编辑器弹窗 / 按钮 / 搜索）
+   LikeGirl 的界面归 LikeGirl 的 CSS 管；这些只是补上「写文章、传照片、
+   记清单」所必需的弹窗与按钮，风格跟着 LikeGirl 走（白卡 + 思源宋体）。
+   ========================================================================== */
+
+/* ---------- 小按钮 ---------- */
+.lg-btn {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: .95rem;
+    padding: .45rem 1.2rem; border-radius: .6rem; border: 1px solid rgba(208, 206, 206, 0.6);
+    background: #fff; color: #707070; cursor: pointer; transition: all .15s;
+}
+.lg-btn:hover { color: #10bbff; border-color: #10bbff; }
+.lg-btn.blue { background: #10bbff; border-color: #10bbff; color: #fff; }
+.lg-btn.blue:hover { filter: brightness(1.08); color: #fff; }
+.lg-btn.danger { color: #ff5916; border-color: #ffc3ad; }
+.lg-btn.danger:hover { color: #fff; background: #ff5916; border-color: #ff5916; }
+.lg-btn.sm { font-size: .82rem; padding: .25rem .8rem; }
+
+/* ---------- 标题下操作行 ---------- */
+.lg-opsbar {
+    display: flex; gap: .6rem; align-items: center; justify-content: center;
+    flex-wrap: wrap; margin: 1rem 0 0;
+}
+.lg-search {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: #fff; border: 1px solid rgba(208, 206, 206, 0.6); border-radius: .6rem;
+    padding: .4rem .9rem;
+}
+.lg-search input {
+    border: none; outline: none; font-family: 'Noto Serif SC', serif;
+    font-size: .9rem; width: 12rem; background: transparent;
+}
+
+/* ---------- 遮罩 + 弹窗 ---------- */
+.lg-mask {
+    position: fixed; inset: 0; z-index: 100; display: none;
+    align-items: flex-start; justify-content: center;
+    background: rgba(0, 0, 0, .35); overflow-y: auto; padding: 4rem 1rem;
+}
+.lg-mask.show { display: flex; animation: lgFade .18s ease; }
+@keyframes lgFade { from { opacity: 0; } to { opacity: 1; } }
+.lg-modal {
+    width: 100%; max-width: 680px; background: #fff; border-radius: 1rem;
+    box-shadow: 0 8px 12px #ebedf0, 0 20px 60px rgba(0, 0, 0, .25);
+    font-family: 'Noto Serif SC', serif; overflow: hidden;
+}
+.lg-modal.narrow { max-width: 440px; }
+.lg-modal .lg-mhead {
+    display: flex; align-items: center; padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid #efefef;
+}
+.lg-modal .lg-mhead h3 { font-size: 1.1rem; font-weight: 700; }
+.lg-modal .lg-mhead .x {
+    margin-left: auto; border: none; background: transparent; color: #a1a1a1;
+    font-size: 1.3rem; cursor: pointer; line-height: 1;
+}
+.lg-modal .lg-mhead .x:hover { color: #ff5916; }
+.lg-modal .lg-mbody { padding: 1.2rem 1.4rem; }
+.lg-modal .lg-mfoot {
+    display: flex; gap: .6rem; padding: 1rem 1.4rem 1.3rem;
+    border-top: 1px solid #efefef;
+}
+.lg-modal .lg-mfoot .grow { flex: 1; }
+.lg-modal .field { margin-bottom: .9rem; }
+.lg-modal .field > label {
+    display: block; font-size: .85rem; font-weight: 700; color: #707070; margin-bottom: .35rem;
+}
+.lg-modal .field > label .hint { font-weight: 400; color: #a1a1a1; font-size: .78rem; margin-left: .4rem; }
+.lg-modal .input, .lg-modal .textarea {
+    width: 100%; box-sizing: border-box; padding: .55rem .8rem;
+    border: 1px solid #ddd; border-radius: .5rem; outline: none;
+    font-family: 'Noto Serif SC', serif; font-size: .95rem; background: #fff;
+}
+.lg-modal .input:focus, .lg-modal .textarea:focus { border-color: #10bbff; }
+.lg-modal .textarea { min-height: 200px; resize: vertical; line-height: 1.9; }
+.lg-modal .lg-err { min-height: 1.1em; color: #ff5916; font-size: .8rem; margin-bottom: .5rem; }
+
+/* ---------- 大图浏览 ---------- */
+.lg-lightbox img {
+    display: block; max-width: 100%; max-height: 66vh; margin: 0 auto; border-radius: .8rem;
+}
+.lg-lightbox .cap { text-align: center; color: #707070; font-size: .9rem; line-height: 1.8; padding-top: 1rem; }
+
+/* ---------- 相册卡片上的删除角标 ---------- */
+.img_card { position: relative; }
+.img_card .lg-del {
+    position: absolute; top: .6rem; right: .6rem; z-index: 2;
+    width: 1.8rem; height: 1.8rem; border-radius: 50%; border: none;
+    background: rgba(0, 0, 0, .45); color: #fff; font-size: .85rem;
+    cursor: pointer; opacity: 0; transition: opacity .23s linear;
+}
+.img_card:hover .lg-del { opacity: 1; }
+
+/* ---------- 清单的展开详情与操作 ---------- */
+.lovelist ul { display: none; padding: 0 0 1rem 3rem; }
+.lovelist li.cike.open + ul { display: block; }
+.lovelist ul .note {
+    color: #959595; font-size: 1rem; line-height: 2; white-space: pre-wrap; margin: .4rem 0 .8rem;
+}
+.lovelist ul .meta { color: #b5b5b5; font-size: .8rem; margin-bottom: .6rem; }
+.lovelist ul .ops { display: flex; gap: .5rem; flex-wrap: wrap; }
+.lovelist li.cike span.ev-done { text-decoration: line-through; color: #b5b5b5; }
+
+/* ---------- 添加条目行（清单页顶部） ---------- */
+.lg-addbar {
+    display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin: 0 0 1.6rem;
+}
+.lg-addbar .input {
+    width: min(24rem, 100%); padding: .55rem .9rem; border: 1px solid rgba(208, 206, 206, .6);
+    border-radius: .6rem; outline: none; font-family: 'Noto Serif SC', serif; font-size: .95rem;
+}
+.lg-addbar .input:focus { border-color: #10bbff; }
+
+/* ---------- 空状态 ---------- */
+.lg-empty {
+    text-align: center; color: #a1a1a1; font-family: 'Noto Serif SC', serif;
+    padding: 3rem 0; line-height: 2.2;
+}

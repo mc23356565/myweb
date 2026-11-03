@@ -1,15 +1,12 @@
-# 空曙 · 记忆回廊
+# 我们的小窝
 
-一个纯静态的**私人情侣站**，部署在 GitHub Pages 上。**所有内容存在 Supabase**，
-访问权限由「账号 + 行级安全策略（RLS）」控制，不需要服务器。
-
-GUI 整体基于 LikeGirl 的设计重做：网格纸背景 + 白色卡片 + 毛玻璃顶栏 + 思源宋体 +
-双头像心跳 Banner + SVG 波浪 + 彩虹渐变计时器。
+一个纯静态的**情侣网站**，GUI 完全照搬 LikeGirl v5.2.0 的界面（顶栏 logo+文案、
+双头像 Banner + 心跳 + 波浪、彩虹渐变计时器、3 小卡 + 2 宽卡首页、朴实文章 /
+恋爱相册 / 恋爱清单的原始版式），数据层换成 **Supabase**，不需要 PHP 和 MySQL。
 
 ```
-没账号 → 什么都看不到（整站所有页面都有登录门）
-成员   → 账号一共只有两个（空曙 + 她），权限完全一样：
-         看内容、写文章、传照片、记清单、设计/作答问卷、进后台
+登录后才能看到内容：账号一共两个（情侣双方），都在 Supabase Authentication 里建，
+权限完全一样 —— 看文章、传照片、记清单、出问卷、进后台、改情侣配置。
 ```
 
 ---
@@ -18,38 +15,45 @@ GUI 整体基于 LikeGirl 的设计重做：网格纸背景 + 白色卡片 + 毛
 
 ```
 .
-├── index.html / Secret.html        # 入口跳转 + 主厅（双头像 Banner、波浪、计时器、栏目卡片）
-├── Admin.html                      # 后台：账号、统计、问卷管理、数据备份、数据库安装 SQL
-├── Articles/index.html             # 朴实文章：日常想法（journal）+ 思辨话题（philosophy）合并一页
-├── Photos/index.html               # Love Photo 恋爱相册：上传/链接图片 + 日期 + 说明
-├── List/index.html                 # Love List 恋爱清单：想一起做的事，打卡完成
-├── Questionnaires/index.html       # 问卷小屋：设计问卷 + 答问卷 + 结果互看
+├── index.html / Secret.html        # 入口跳转 + 主页（LikeGirl index.php：计时器 + 卡片）
+├── Admin.html                      # 后台：情侣配置 / 账号 / 问卷管理 / 数据备份 / 安装 SQL
+├── Articles/index.html + page.html # 朴实文章（LikeGirl little.php / page.php）
+├── Photos/index.html               # Love Photo 恋爱相册（LikeGirl loveImg.php）
+├── List/index.html                 # Love List 恋爱清单（LikeGirl list.php）
+├── Questionnaires/index.html       # 问卷小屋（LikeGirl 没有的自研模块）
+├── Style/css/…, Style/img/…        # 从 LikeGirl 原版拷贝的 CSS 与图片素材（未改动设计）
 ├── assets/
-│   ├── style.css                   # 全站设计系统（LikeGirl 风格）
-│   ├── app-core.js                 # 全站登录门 + 顶栏 + Supabase REST 封装
-│   ├── questionnaire.js            # 问卷引擎（设计/导入解析/作答/互看）
-│   ├── journal-core.js             # 文章引擎（entries 表，支持多类型合并；含全站安装 SQL 常量）
-│   └── journal.css                 # 朴实文章页样式（同一套蓝色系）
-└── supabase-install.sql            # 数据库一次性安装 SQL（可重复执行，与 journal-core.js 同源）
+│   ├── app-core.js                 # LikeGirl 外壳注入 + 登录门 + Supabase REST + 安装 SQL
+│   ├── articles.js / page.js       # 朴实文章逻辑
+│   └── questionnaire.js            # 问卷引擎
+└── supabase-install.sql            # 数据库一次性安装 SQL（可重复执行）
 ```
 
-> 相比上一版的变化：日记 + 思辨合并为「朴实文章」；新增恋爱相册（Love Photo）与
-> 恋爱清单（Love List）；删除了生辰纪念（20th 彩蛋链）、趣味整活（MathTI）、
-> 留言模块、暗号题与夜读模式。生辰纪念以后要加的话可以再补回一个栏目。
+> 站点名称、顶栏文案、两人名字、头像、纪念日都在 **后台 → 情侣配置** 里改，
+> 存在 Supabase 的 `site_config` 表，改完全站立即生效。
 
 ---
 
-## 二、首次配置
+## 二、Supabase 需要的配置（就这三步）
 
-1. **推仓库**：推到 GitHub `main`，Settings → Pages 选 `main / (root)`。
-2. **跑安装 SQL**：Supabase 控制台 → SQL Editor → 粘贴 `supabase-install.sql` → Run
-   （网页「后台 → 数据库安装」里也有一键复制按钮）。会自动建好文章/问卷/相册/清单
-   全部表、RLS 策略，以及相册用的 Storage 公开桶 `photos`。
-3. **建账号（两个人）**：
-   - Authentication → Users → Add user：邮箱 + 密码（勾 Auto Confirm），建两个；
-   - SQL 里 members 的 insert 已含空曙的邮箱；她的账号：去掉 SQL 里那行注释、
-     改成她的邮箱再执行一次（role 都填 `admin`，两人权限完全一样）。
-4. 打开网站 → 任意页面都会出现登录门 → 登录即可。
+1. **执行安装 SQL**：Supabase 控制台 → SQL Editor → 粘贴 `supabase-install.sql` → Run
+   （后台 → 数据库安装 里有一键复制）。它会建好：
+   - `members` 表 + `my_profile()/is_member()/is_admin()` 函数
+   - `entries`（朴实文章）、`surveys/survey_questions/survey_responses`（问卷）
+   - `photos`（相册索引）、`wishlist`（恋爱清单）、`site_config`（情侣配置）
+   - 全部 RLS 行级安全策略
+   - Storage 公开桶 `photos`（相册图片与头像上传用）及其上传/删除策略
+2. **建两个账号**：Authentication → Users → Add user，邮箱 + 密码（勾 Auto Confirm）。
+   然后在 SQL Editor 执行（把邮箱换成实际邮箱）：
+   ```sql
+   insert into public.members (email, role, display_name) values
+     ('你的邮箱',   'admin', '他'),
+     ('她的邮箱',   'admin', '她');
+   ```
+3. **（建议）关闭公开注册**：Authentication → Sign In / Providers → 关掉
+   **Allow new users to sign up**，这样只有你们俩能登录。
+
+之后就不用再碰 Supabase 了：头像/名字/站点名在网页后台改，数据在页面上增删。
 
 > 建议在 Authentication → Sign In / Providers 里关掉 **Allow new users to sign up**，
 > 这样只有你们俩的账号能存在。
@@ -128,5 +132,6 @@ anon key 公开在前端是正常的（它只代表"匿名访客"，真正能做
 **Q：想换邮箱 / 换项目**
 浏览器控制台/设置里可覆盖 Supabase URL 与 anon key（localStorage：`journal.supabase.v1`）。
 
-**Q：Banner 上的头像**
-替换 `assets/avatar-a.svg`（空曙）和 `assets/avatar-b.svg`（她）即可，换成 png 也要同步改 Secret.html 里的文件名。
+**Q：Banner 上的头像 / 名字 / 站点名称想换**
+登录后进「后台 → 情侣配置」：直接上传头像图片（存到 Storage）、改两人名字、
+站点名称、顶栏文案和纪念日，保存后全站立即生效。

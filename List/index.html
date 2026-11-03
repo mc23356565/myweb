@@ -1,241 +1,215 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Love List · 恋爱清单 | 空曙</title>
-<meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
-<style>
-/* ---------- 恋爱清单（仿 LikeGirl list.php） ---------- */
-.list-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    box-shadow: var(--shadow-lg); padding: 1.6rem 1.6rem 1rem; margin-top: 1.6rem;
-}
-.list-add { display: flex; gap: .6rem; margin-bottom: .6rem; }
-.list-add .input { flex: 1; }
-.list-progress {
-    font-size: .8rem; color: var(--ink-3); text-align: right; padding-bottom: .7rem;
-    border-bottom: 1px dashed var(--line-2);
-}
-.list-progress b { color: var(--green); }
-.wl-item { border-bottom: 1px solid #eee; }
-.wl-item:last-child { border-bottom: none; }
-.wl-row {
-    display: flex; align-items: center; gap: .7rem; padding: .85rem .2rem;
-    cursor: pointer; transition: background .2s ease; border-radius: .5rem;
-}
-.wl-row:hover { background: var(--blue-soft); }
-.wl-tick {
-    flex: 0 0 1.5rem; width: 1.5rem; height: 1.5rem; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .8rem; border: 2px solid var(--line-2); color: transparent;
-    transition: all .25s ease; background: transparent;
-}
-.wl-item.done .wl-tick { background: var(--green); border-color: var(--green); color: #fff; }
-.wl-name { flex: 1; font-size: .95rem; color: var(--ink); line-height: 1.5; word-break: break-all; }
-.wl-item.done .wl-name { color: var(--ink-3); text-decoration: line-through; }
-.wl-imgflag { flex: 0 0 auto; font-size: .95rem; opacity: .6; }
-.wl-detail { display: none; padding: 0 .2rem 1rem 2.4rem; }
-.wl-item.open .wl-detail { display: block; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-.wl-detail .note { color: var(--ink-2); font-size: .88rem; line-height: 1.9; white-space: pre-wrap; margin: 0 0 .6rem; }
-.wl-detail img {
-    max-width: 100%; max-height: 320px; border-radius: var(--radius-sm);
-    border: 1px solid var(--line); display: block; margin-bottom: .7rem;
-}
-.wl-detail .meta { font-size: .76rem; color: var(--ink-3); margin-bottom: .6rem; }
-.wl-detail .ops { display: flex; gap: .5rem; flex-wrap: wrap; }
-</style>
+    <meta charset="utf-8">
+    <title>Love List</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Style/css/index.css">
+    <link rel="stylesheet" href="../Style/css/list.css">
+    <link rel="stylesheet" href="../Style/css/animate.min.css">
+    <link rel="stylesheet" href="../Style/css/ops.css">
 </head>
-<body data-page="list">
-<main class="central">
-    <div id="pageMain">
-        <div class="gate-card">
-            <span class="spin" style="width:22px;height:22px;border-width:3px;color:var(--blue-2)"></span>
-            <h2>正在检查登录状态…</h2>
+
+<body>
+    <!-- 顶栏 / Banner / 页脚由 assets/app-core.js 按 LikeGirl head.php/footer.php 注入 -->
+
+    <div id="pjax-container">
+        <div class="central">
+            <div class="title">
+                <h1>总有些惊奇的际遇 比方说当我遇见你</h1>
+            </div>
+            <div id="mainHost">
+                <div class="gate-card"><span class="spin"></span><h2>正在检查登录状态…</h2></div>
+            </div>
         </div>
     </div>
 
-    <template id="pageContent">
-        <div class="section-head">✅ Love List · 恋爱清单</div>
-        <p class="section-sub">总有些惊奇的际遇 比方说当我遇见你 —— 你我之间的约定，一件一件去实现。</p>
-        <div class="list-card">
-            <div class="list-add">
-                <input class="input" id="newEvent" placeholder="想一起做的事，写下来吧…" autocomplete="off">
-                <button class="btn blue" id="addBtn">＋ 加入清单</button>
+    <template id="listContent">
+        <div class="lg-addbar">
+            <input class="input" id="newEvent" placeholder="想一起做的事，写下来吧…" autocomplete="off">
+            <button class="lg-btn blue" id="addBtn">＋ 加入清单</button>
+        </div>
+        <div class="row central central-800">
+            <div class="card col-lg-12 col-md-12 col-sm-12 col-sm-x-12">
+                <div class="list_texts">
+                    <div class="lovelist" id="wishList"></div>
+                </div>
             </div>
-            <div class="list-progress" id="listProgress"></div>
-            <div id="wishList"></div>
+        </div>
+        <div class="lg-opsbar">
+            <span class="lg-search" style="border:none;background:transparent;color:#a1a1a1;font-size:.85rem;" id="listProgress"></span>
         </div>
     </template>
 
     <!-- 编辑约定 -->
-    <div class="mask" id="editMask">
-        <div class="modal">
-            <div class="modal-head"><h3>✎ 编辑这条约定</h3><button class="x" data-close="editMask">✕</button></div>
-            <div class="modal-body">
+    <div class="lg-mask" id="editMask">
+        <div class="lg-modal narrow">
+            <div class="lg-mhead"><h3>✎ 编辑这条约定</h3><button class="x" data-close="editMask">✕</button></div>
+            <div class="lg-mbody">
                 <div class="field"><label>约定内容</label>
                     <input class="input" id="evName" autocomplete="off"></div>
                 <div class="field"><label>补充说明<span class="hint">可留空</span></label>
-                    <textarea class="textarea" id="evNote" style="min-height:90px"></textarea></div>
+                    <textarea class="textarea" id="evNote" style="min-height:100px"></textarea></div>
                 <div class="field"><label>相关图片链接<span class="hint">可留空</span></label>
                     <input class="input" id="evImg" placeholder="https://…" autocomplete="off"></div>
+                <div class="lg-err" id="editError"></div>
             </div>
-            <div class="modal-foot">
-                <button class="btn" data-close="editMask">取消</button>
-                <button class="btn primary" id="editSave">保存</button>
+            <div class="lg-mfoot">
+                <span class="grow"></span>
+                <button class="lg-btn" data-close="editMask">取消</button>
+                <button class="lg-btn blue" id="editSave">保存</button>
             </div>
         </div>
     </div>
-</main>
 
-<script src="../assets/app-core.js"></script>
-<script>
-(async function () {
-    const app = await SiteApp.init({ active: 'list', main: '#pageMain' });
-    if (!app.me) return;
-    const esc = app.esc;
-    const main = document.getElementById('pageMain');
-    main.innerHTML = '';
-    main.appendChild(document.getElementById('pageContent').content.cloneNode(true));
-    document.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () =>
-        document.getElementById(x.dataset.close).classList.remove('show')));
+    <script src="../assets/app-core.js"></script>
+    <script>
+    (async function () {
+        const app = await SiteApp.init({ shell: 'lg', main: '#mainHost' });
+        if (!app.me) return; // 登录门已渲染
 
-    const host = document.getElementById('wishList');
-    const progress = document.getElementById('listProgress');
-    let items = [];
-    let editingId = null;
+        const main = document.getElementById('mainHost');
+        main.innerHTML = '';
+        main.appendChild(document.getElementById('listContent').content.cloneNode(true));
+        document.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () =>
+            document.getElementById(x.dataset.close).classList.remove('show')));
+        document.querySelectorAll('.lg-mask').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('show'); }));
 
-    async function load() {
-        try {
-            items = (await app.sbRest('wishlist?select=*&order=done.asc,created_at.desc')) || [];
-        } catch (e) {
-            host.innerHTML = '<div class="notice">加载失败：' + esc(e.message) +
-                '（可能需要先去后台执行「数据库安装 SQL」）</div>';
-            return;
+        const host = document.getElementById('wishList');
+        const progress = document.getElementById('listProgress');
+        let items = [];
+        let editingId = null;
+
+        async function load() {
+            try {
+                items = (await app.sbRest('wishlist?select=*&order=done.asc,created_at.desc')) || [];
+            } catch (e) {
+                host.innerHTML = '<div class="lg-empty">加载失败：' + app.esc(e.message) +
+                    '<br>（可能需要先去后台执行「数据库安装」里的 SQL）</div>';
+                return;
+            }
+            render();
         }
-        render();
-    }
 
-    function render() {
-        const doneN = items.filter(x => x.done).length;
-        progress.innerHTML = items.length
-            ? '已完成 <b>' + doneN + '</b> / 共 ' + items.length + ' 件 ✦ 还剩 ' + (items.length - doneN) + ' 件等我们去做'
-            : '';
-        if (!items.length) {
-            host.innerHTML = '<div class="empty-state" style="padding:2rem 0;">✨ 清单还是空的 —— 想一起做的第一件事是什么？</div>';
-            return;
+        function render() {
+            const doneN = items.filter(x => x.done).length;
+            progress.textContent = items.length
+                ? '已完成 ' + doneN + ' / 共 ' + items.length + ' 件 ✦ 还剩 ' + (items.length - doneN) + ' 件等我们去做'
+                : '';
+            if (!items.length) {
+                host.innerHTML = '<div class="lg-empty">✨ 清单还是空的 —— 想一起做的第一件事是什么？</div>';
+                return;
+            }
+            /* li.cike + ul 的结构照搬 list.php：点击条目展开下一级 ul */
+            host.innerHTML = items.map((w, i) =>
+                '<li class="cike' + (w.done ? ' done' : '') + '" data-i="' + i + '">' +
+                    '<i class="' + (w.done ? 'com' : 'air') + '" data-toggle="' + app.esc(w.id) + '" title="' + (w.done ? '标记为未完成' : '标记为已完成') + '">' + (w.done ? '✓' : '○') + '</i>' +
+                    '<span class="' + (w.done ? 'ev-done' : '') + '">' + app.esc(w.event) + '</span>' +
+                    (w.image_url ? ' 🖼' : '') +
+                '</li>' +
+                '<ul>' +
+                    '<li>' +
+                        (w.note ? '<div class="note">' + app.esc(w.note) + '</div>' : '<div class="note" style="color:#c9c9c9">还没有补充说明。</div>') +
+                        (w.image_url ? '<img loading="lazy" src="' + app.esc(w.image_url) + '" alt="' + app.esc(w.event) + '">' : '') +
+                        '<div class="meta">创建于 ' + app.esc((w.created_at || '').slice(0, 10)) + (w.done && w.done_date ? ' · ' + app.esc(w.done_date) + ' 完成' : '') + '</div>' +
+                        '<div class="ops">' +
+                            '<button class="lg-btn sm blue" data-edit="' + app.esc(w.id) + '">✎ 编辑</button>' +
+                            '<button class="lg-btn sm danger" data-del="' + app.esc(w.id) + '">🗑 删除</button>' +
+                        '</div>' +
+                    '</li>' +
+                '</ul>').join('');
+
+            host.querySelectorAll('li.cike').forEach(row => row.addEventListener('click', ev => {
+                if (ev.target.closest('[data-toggle]')) return;
+                row.classList.toggle('open');
+            }));
+            host.querySelectorAll('[data-toggle]').forEach(t => t.addEventListener('click', ev => {
+                ev.stopPropagation();
+                toggleDone(t.dataset.toggle);
+            }));
+            host.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', ev => {
+                ev.stopPropagation();
+                openEdit(b.dataset.edit);
+            }));
+            host.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', ev => {
+                ev.stopPropagation();
+                del(b.dataset.del);
+            }));
         }
-        host.innerHTML = items.map((w, i) => {
-            const today = w.done && w.done_date ? ' · ' + w.done_date + ' 完成' : '';
-            return '<div class="wl-item' + (w.done ? ' done' : '') + '" data-i="' + i + '">' +
-                '<div class="wl-row">' +
-                    '<span class="wl-tick" data-toggle="' + esc(w.id) + '" title="' + (w.done ? '标记为未完成' : '标记为已完成') + '">✓</span>' +
-                    '<span class="wl-name">' + esc(w.event) + '</span>' +
-                    (w.image_url ? '<span class="wl-imgflag">🖼</span>' : '') +
-                '</div>' +
-                '<div class="wl-detail">' +
-                    (w.note ? '<p class="note">' + esc(w.note) + '</p>' : '<p class="note" style="color:var(--ink-3)">还没有补充说明。</p>') +
-                    (w.image_url ? '<img loading="lazy" src="' + esc(w.image_url) + '" alt="' + esc(w.event) + '">' : '') +
-                    '<div class="meta">创建于 ' + esc((w.created_at || '').slice(0, 10)) + today + '</div>' +
-                    '<div class="ops">' +
-                        '<button class="btn sm blue" data-edit="' + esc(w.id) + '">✎ 编辑</button>' +
-                        '<button class="btn sm danger" data-del="' + esc(w.id) + '">🗑 删除</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-        }).join('');
 
-        host.querySelectorAll('.wl-row').forEach(row => row.addEventListener('click', ev => {
-            if (ev.target.closest('[data-toggle]')) return;
-            row.parentElement.classList.toggle('open');
-        }));
-        host.querySelectorAll('[data-toggle]').forEach(t => t.addEventListener('click', ev => {
-            ev.stopPropagation();
-            toggleDone(t.dataset.toggle);
-        }));
-        host.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', ev => {
-            ev.stopPropagation();
-            openEdit(b.dataset.edit);
-        }));
-        host.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', ev => {
-            ev.stopPropagation();
-            del(b.dataset.del);
-        }));
-    }
+        async function addEvent() {
+            const input = document.getElementById('newEvent');
+            const text = input.value.trim();
+            if (!text) { app.toast('先写点什么吧 ✍️', 'err'); return; }
+            try {
+                const row = { id: 'w' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), event: text };
+                await app.sbRest('wishlist', { method: 'POST', body: row });
+                items.unshift(row);
+                input.value = '';
+                render();
+                app.toast('已加入清单 ✓', 'ok');
+            } catch (e) { app.toast('保存失败：' + e.message, 'err', 4000); }
+        }
+        document.getElementById('addBtn').addEventListener('click', addEvent);
+        document.getElementById('newEvent').addEventListener('keydown', e => { if (e.key === 'Enter') addEvent(); });
 
-    async function addEvent() {
-        const input = document.getElementById('newEvent');
-        const text = input.value.trim();
-        if (!text) { app.toast('先写点什么吧 ✍️', 'err'); return; }
-        try {
-            const row = { id: app.newId('w'), event: text };
-            await app.sbRest('wishlist', { method: 'POST', body: row });
-            items.unshift(row);
-            input.value = '';
-            render();
-            app.toast('已加入清单 ✓', 'ok');
-        } catch (e) { app.toast('保存失败：' + e.message, 'err', 4000); }
-    }
-    document.getElementById('addBtn').addEventListener('click', addEvent);
-    document.getElementById('newEvent').addEventListener('keydown', e => { if (e.key === 'Enter') addEvent(); });
+        async function toggleDone(id) {
+            const w = items.find(x => x.id === id);
+            if (!w) return;
+            const row = { done: !w.done, done_date: !w.done ? new Date().toISOString().slice(0, 10) : '', updated_at: new Date().toISOString() };
+            try {
+                await app.sbRest('wishlist?id=eq.' + encodeURIComponent(id), { method: 'PATCH', body: row });
+                Object.assign(w, row);
+                if (w.done) app.toast('又完成了一件，恭喜你们 🎉', 'ok');
+                render();
+            } catch (e) { app.toast('更新失败：' + e.message, 'err', 4000); }
+        }
 
-    async function toggleDone(id) {
-        const w = items.find(x => x.id === id);
-        if (!w) return;
-        const row = { done: !w.done, done_date: !w.done ? new Date().toISOString().slice(0, 10) : '', updated_at: new Date().toISOString() };
-        try {
-            await app.sbRest('wishlist?id=eq.' + encodeURIComponent(id), { method: 'PATCH', body: row });
-            Object.assign(w, row);
-            if (w.done) app.toast('又完成了一件，恭喜你们 🎉', 'ok');
-            render();
-        } catch (e) { app.toast('更新失败：' + e.message, 'err', 4000); }
-    }
+        function openEdit(id) {
+            const w = items.find(x => x.id === id);
+            if (!w) return;
+            editingId = id;
+            document.getElementById('evName').value = w.event || '';
+            document.getElementById('evNote').value = w.note || '';
+            document.getElementById('evImg').value = w.image_url || '';
+            document.getElementById('editError').textContent = '';
+            document.getElementById('editMask').classList.add('show');
+        }
+        document.getElementById('editSave').addEventListener('click', async () => {
+            const name = document.getElementById('evName').value.trim();
+            if (!name) { app.toast('约定内容不能为空 ✍️', 'err'); return; }
+            const row = {
+                event: name,
+                note: document.getElementById('evNote').value.trim(),
+                image_url: document.getElementById('evImg').value.trim(),
+                updated_at: new Date().toISOString()
+            };
+            try {
+                await app.sbRest('wishlist?id=eq.' + encodeURIComponent(editingId), { method: 'PATCH', body: row });
+                Object.assign(items.find(x => x.id === editingId), row);
+                document.getElementById('editMask').classList.remove('show');
+                render();
+                app.toast('已保存 ✓', 'ok');
+            } catch (e) { app.toast('保存失败：' + e.message, 'err', 4000); }
+        });
 
-    function openEdit(id) {
-        const w = items.find(x => x.id === id);
-        if (!w) return;
-        editingId = id;
-        document.getElementById('evName').value = w.event || '';
-        document.getElementById('evNote').value = w.note || '';
-        document.getElementById('evImg').value = w.image_url || '';
-        document.getElementById('editMask').classList.add('show');
-    }
-    document.getElementById('editSave').addEventListener('click', async () => {
-        const name = document.getElementById('evName').value.trim();
-        if (!name) { app.toast('约定内容不能为空 ✍️', 'err'); return; }
-        const row = {
-            event: name,
-            note: document.getElementById('evNote').value.trim(),
-            image_url: document.getElementById('evImg').value.trim(),
-            updated_at: new Date().toISOString()
-        };
-        try {
-            await app.sbRest('wishlist?id=eq.' + encodeURIComponent(editingId), { method: 'PATCH', body: row });
-            Object.assign(items.find(x => x.id === editingId), row);
-            document.getElementById('editMask').classList.remove('show');
-            render();
-            app.toast('已保存 ✓', 'ok');
-        } catch (e) { app.toast('保存失败：' + e.message, 'err', 4000); }
-    });
+        async function del(id) {
+            const w = items.find(x => x.id === id);
+            if (!w) return;
+            if (!confirm('确定删除这条约定？\n' + w.event)) return;
+            try {
+                await app.sbRest('wishlist?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+                items = items.filter(x => x.id !== id);
+                render();
+                app.toast('已删除 🗑', 'ok');
+            } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
+        }
 
-    async function del(id) {
-        const w = items.find(x => x.id === id);
-        if (!w) return;
-        if (!confirm('确定删除这条约定？\n' + w.event)) return;
-        try {
-            await app.sbRest('wishlist?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
-            items = items.filter(x => x.id !== id);
-            render();
-            app.toast('已删除 🗑', 'ok');
-        } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
-    }
-
-    load();
-})();
-</script>
+        load();
+    })();
+    </script>
 </body>
+
 </html>
