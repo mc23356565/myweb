@@ -143,6 +143,41 @@
         return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
     }
 
+    /* ---------- 导出 TXT（线下作答用） ---------- */
+    function exportSurveyTxt(sid) {
+        const s = surveys.find(x => x.id === sid);
+        const qs = questionsBySurvey[sid] || [];
+        if (!s || !qs.length) { app.toast('这份问卷没有题目可导出', 'err'); return; }
+        const rule = '────────────────────────────';
+        const pad = '   ';
+        const L = [];
+        L.push(rule);
+        L.push('　' + (s.title || '问卷'));
+        L.push(rule);
+        if (s.description) { s.description.split('\n').forEach(d => L.push('> ' + d)); L.push(''); }
+        L.push('回答人：＿＿＿＿＿＿＿＿＿＿　　日期：＿＿＿＿＿＿＿＿＿＿');
+        L.push('');
+        qs.forEach((q, i) => {
+            L.push((i + 1) + '. ' + q.prompt + '（' + TYPE_LABEL[q.qtype] + (q.qtype === 'multi' ? ' · 可多选' : '') + '）');
+            if (q.qtype === 'text') {
+                for (let k = 0; k < 3; k++) L.push(pad + '＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿');
+            } else {
+                q.options.forEach(o => L.push(pad + '□ ' + o));
+            }
+            L.push('');
+        });
+        L.push(rule);
+        const blob = new Blob(['\ufeff' + L.join('\r\n')], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (s.title || '问卷').replace(/[\\/:*?"<>|]/g, '_') + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        app.toast('已导出 TXT，可以打印或发给她线下作答 📄', 'ok');
+    }
+
     /* ---------- 视图：问卷列表 ---------- */
     function showList() {
         currentSurveyId = null;
@@ -171,6 +206,7 @@
                         '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
                             '<button class="btn sm blue" data-act="answer" data-id="' + esc(s.id) + '">' + (mine ? '✏️ 修改答卷' : '✍️ 去作答') + '</button>' +
                             '<button class="btn sm ghost" data-act="results" data-id="' + esc(s.id) + '">👀 查看结果</button>' +
+                            '<button class="btn sm ghost" data-act="export" data-id="' + esc(s.id) + '" title="导出题目为 TXT，方便打印线下作答">📄 导出 TXT</button>' +
                             '<button class="btn sm danger" data-act="del" data-id="' + esc(s.id) + '">🗑 删除</button>' +
                         '</div>' +
                     '</div></div>';
@@ -187,6 +223,7 @@
                 const id = btn.dataset.id;
                 if (btn.dataset.act === 'answer') showAnswer(id);
                 else if (btn.dataset.act === 'results') showResults(id);
+                else if (btn.dataset.act === 'export') exportSurveyTxt(id);
                 else if (btn.dataset.act === 'del') {
                     if (!confirm('确定删除这份问卷吗？题目和双方的答卷都会一起删除。')) return;
                     try {
