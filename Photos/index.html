@@ -18,6 +18,13 @@
     <div id="pjax-container">
         <h4 class="text-ce central" style="text-align:center;font-size:1.8rem;font-family:'Noto Serif SC',serif;font-weight:700;">记录下你的最美瞬间</h4>
         <div class="lg-opsbar" style="margin-bottom:1.4rem;">
+            <select id="albumSel" title="选择相册"></select>
+            <label class="lg-search"><span>🔍</span><input id="kwInput" placeholder="搜照片说明…" autocomplete="off"></label>
+            <input type="date" id="dateFrom" title="从这一天起">
+            <input type="date" id="dateTo" title="到这一天止">
+            <span class="lg-count" id="count"></span>
+            <button class="lg-btn" id="newAlbumBtn">📁 新建相册</button>
+            <button class="lg-btn danger" id="delAlbumBtn" style="display:none">🗑 删除此相册</button>
             <button class="lg-btn blue" id="addBtn">＋ 添加照片</button>
         </div>
         <div class="row central" id="photoHost">
@@ -25,14 +32,16 @@
         </div>
     </div>
 
-    <!-- 添加照片 -->
+    <!-- 添加 / 编辑照片 -->
     <div class="lg-mask" id="editMask">
         <div class="lg-modal narrow">
-            <div class="lg-mhead"><h3>＋ 添加照片</h3><button class="x" data-close="editMask">✕</button></div>
+            <div class="lg-mhead"><h3 id="editTitle">＋ 添加照片</h3><button class="x" data-close="editMask">✕</button></div>
             <div class="lg-mbody">
-                <div class="field"><label>上传图片<span class="hint">直接选文件，存到 Supabase Storage</span></label>
+                <div class="field"><label>所属相册</label>
+                    <select class="input" id="photoAlbum"></select></div>
+                <div class="field"><label>上传图片<span class="hint" id="fileHint">直接选文件，存到 Supabase Storage</span></label>
                     <input class="input" type="file" id="photoFile" accept="image/*"></div>
-                <div class="field"><label>或图片链接<span class="hint">二选一</span></label>
+                <div class="field"><label>或图片链接<span class="hint">二选一；编辑时留空则保留原图</span></label>
                     <input class="input" id="photoUrl" placeholder="https://…" autocomplete="off"></div>
                 <div class="field"><label>日期</label>
                     <input class="input" type="date" id="photoDate"></div>
@@ -55,6 +64,9 @@
             <div class="lg-mbody">
                 <img id="viewImg" alt="">
                 <p class="cap" id="viewCaption"></p>
+                <div style="text-align:center;padding:.8rem 0 .2rem;">
+                    <button class="lg-btn sm" id="viewEditBtn">✎ 编辑这张照片</button>
+                </div>
             </div>
         </div>
     </div>
@@ -66,45 +78,92 @@
         if (!app.me) return; // 登录门已渲染
 
         const host = document.getElementById('photoHost');
+        const NONE = '__none__';   // 「未分类」在筛选里的代号
         let photos = [];
+        let albums = [];           // [{id, name}]
+        let curAlbum = '';         // ''=全部  NONE=未分类  其他=相册名
+        let editingId = null;      // 非空 = 编辑已有照片
+        let viewingId = null;      // 大图浏览中的照片 id
 
         function openMask(id) { document.getElementById(id).classList.add('show'); }
         function closeMask(id) { document.getElementById(id).classList.remove('show'); }
         document.querySelectorAll('[data-close]').forEach(x => x.addEventListener('click', () => closeMask(x.dataset.close)));
         document.querySelectorAll('.lg-mask').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('show'); }));
 
+        /* ---------- 数据 ---------- */
         async function load() {
             try {
-                photos = (await app.sbRest('photos?select=*&order=date.desc,created_at.desc')) || [];
+                const [ph, al] = await Promise.all([
+                    app.sbRest('photos?select=*&order=date.desc,created_at.desc'),
+                    app.sbRest('photo_albums?select=*&order=created_at.asc').catch(() => [])
+                ]);
+                photos = ph || [];
+                albums = al || [];
+                // 表里可能有手动改名/导入带来的「野」相册名，补进列表
+                photos.forEach(p => { if (p.album && !albumNames().includes(p.album)) albums.push({ id: 'wild-' + p.album, name: p.album }); });
             } catch (e) {
                 host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">加载失败：' + app.esc(e.message) +
-                    '<br>（可能需要先去后台执行「数据库安装」里的 SQL）</div>';
+                    '<br>（相册功能需要先去后台执行 photos-albums-upgrade.sql）</div>';
                 return;
             }
+            renderAlbumSel();
             render();
         }
 
+        function albumNames() { return albums.map(a => a.name); }
+
+        /* ---------- 相册下拉 ---------- */
+        function renderAlbumSel() {
+            const sel = document.getElementById('albumSel');
+            const opts = ['<option value="">📁 全部照片（' + photos.length + '）</option>',
+                '<option value="' + NONE + '">🗂 未分类（' + photos.filter(p => !p.album).length + '）</option>'];
+            albums.forEach(a => {
+                const n = photos.filter(p => p.album === a.name).length;
+                opts.push('<option value="' + app.esc(a.name) + '">' + app.esc(a.name) + '（' + n + '）</option>');
+            });
+            sel.innerHTML = opts.join('');
+            sel.value = curAlbum;
+            if (sel.value !== curAlbum) { curAlbum = ''; sel.value = ''; }   // 相册被删后回落
+            document.getElementById('delAlbumBtn').style.display =
+                (curAlbum && curAlbum !== NONE) ? '' : 'none';
+        }
+
+        /* ---------- 筛选 ---------- */
+        function filtered() {
+            const kw = document.getElementById('kwInput').value.trim().toLowerCase();
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            return photos.filter(p => {
+                if (curAlbum === NONE && p.album) return false;
+                if (curAlbum && curAlbum !== NONE && p.album !== curAlbum) return false;
+                if (kw && !(p.caption || '').toLowerCase().includes(kw)) return false;
+                if (from && (!p.date || p.date < from)) return false;
+                if (to && (!p.date || p.date > to)) return false;
+                return true;
+            });
+        }
+
         function render() {
-            if (!photos.length) {
-                host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">📷 还没有照片 —— 点上面的「＋ 添加照片」存下第一张吧</div>';
+            renderAlbumSel();
+            const list = filtered();
+            document.getElementById('count').innerHTML = '共 <b>' + list.length + '</b> 张';
+            if (!list.length) {
+                const tip = photos.length ? '这个筛选条件下没有照片' : '📷 还没有照片 —— 点上面的「＋ 添加照片」存下第一张吧';
+                host.innerHTML = '<div class="lg-empty" style="grid-column:1/-1">' + tip + '</div>';
                 return;
             }
-            host.innerHTML = photos.map((p, i) =>
-                '<div class="img_card col-lg-4 col-md-6 col-sm-12 col-sm-x-12 animated zoomIn" data-i="' + i + '">' +
+            host.innerHTML = list.map((p, i) =>
+                '<div class="img_card col-lg-4 col-md-6 col-sm-12 col-sm-x-12 animated zoomIn" data-id="' + app.esc(p.id) + '">' +
                     '<button class="lg-del" data-del="' + app.esc(p.id) + '" title="删除">✕</button>' +
                     '<div class="love_img">' +
                         '<img loading="lazy" src="' + app.esc(p.url) + '" alt="' + app.esc(p.caption || '照片') + '">' +
-                        '<div class="words"><i>Date：' + app.esc(p.date || '') + '</i><span>' + app.esc(p.caption || '') + '</span></div>' +
+                        '<div class="words"><i>Date：' + app.esc(p.date || '') + (p.album ? ' · ' + app.esc(p.album) : '') + '</i><span>' + app.esc(p.caption || '') + '</span></div>' +
                     '</div>' +
                 '</div>').join('');
             host.querySelectorAll('.img_card').forEach(card => {
                 card.addEventListener('click', ev => {
                     if (ev.target.closest('.lg-del')) return;
-                    const p = photos[+card.dataset.i];
-                    document.getElementById('viewImg').src = p.url;
-                    document.getElementById('viewTitle').textContent = p.date || '照片';
-                    document.getElementById('viewCaption').textContent = p.caption || '';
-                    openMask('viewMask');
+                    view(card.dataset.id);
                 });
             });
             host.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', ev => {
@@ -113,6 +172,22 @@
             }));
         }
 
+        /* ---------- 大图浏览 ---------- */
+        function view(id) {
+            const p = photos.find(x => x.id === id);
+            if (!p) return;
+            viewingId = id;
+            document.getElementById('viewImg').src = p.url;
+            document.getElementById('viewTitle').textContent = (p.album ? '📁 ' + p.album + ' · ' : '') + (p.date || '照片');
+            document.getElementById('viewCaption').textContent = (p.caption || '') + (p.album ? ' ｜ 相册：' + p.album : '');
+            openMask('viewMask');
+        }
+        document.getElementById('viewEditBtn').addEventListener('click', () => {
+            closeMask('viewMask');
+            openEdit(viewingId);
+        });
+
+        /* ---------- 删除照片 ---------- */
         async function del(id) {
             const p = photos.find(x => x.id === id);
             if (!p) return;
@@ -125,13 +200,70 @@
             } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
         }
 
-        document.getElementById('addBtn').addEventListener('click', () => {
+        /* ---------- 相册的新建 / 删除 ---------- */
+        document.getElementById('newAlbumBtn').addEventListener('click', async () => {
+            const name = (prompt('新相册叫什么名字？', '') || '').trim();
+            if (!name) return;
+            if (albumNames().includes(name)) { app.toast('已经有叫这个名字的相册啦', 'err'); return; }
+            try {
+                const row = { id: 'al' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: name };
+                await app.sbRest('photo_albums', { method: 'POST', body: row });
+                albums.push(row);
+                curAlbum = name;
+                render();
+                app.toast('相册「' + name + '」建好了 📁', 'ok');
+            } catch (e) { app.toast('创建失败：' + e.message, 'err', 4000); }
+        });
+        document.getElementById('delAlbumBtn').addEventListener('click', async () => {
+            if (!curAlbum || curAlbum === NONE) return;
+            const n = photos.filter(p => p.album === curAlbum).length;
+            if (!confirm('删除相册「' + curAlbum + '」？\n里面有 ' + n + ' 张照片，删除后它们会回到「未分类」，照片不会丢。')) return;
+            try {
+                if (n) await app.sbRest('photos?album=eq.' + encodeURIComponent(curAlbum), { method: 'PATCH', body: { album: '' } });
+                const row = albums.find(a => a.name === curAlbum);
+                if (row && !row.id.startsWith('wild-')) {
+                    await app.sbRest('photo_albums?id=eq.' + encodeURIComponent(row.id), { method: 'DELETE' });
+                }
+                albums = albums.filter(a => a.name !== curAlbum);
+                curAlbum = '';
+                render();
+                app.toast('相册已删除，照片回到未分类', 'ok');
+            } catch (e) { app.toast('删除失败：' + e.message, 'err', 4000); }
+        });
+
+        /* ---------- 添加 / 编辑照片 ---------- */
+        function albumOptions(selected) {
+            const opts = ['<option value="">🗂 未分类</option>'];
+            albums.forEach(a => opts.push('<option value="' + app.esc(a.name) + '"' + (a.name === selected ? ' selected' : '') + '>' + app.esc(a.name) + '</option>'));
+            opts.push('<option value="__new__">＋ 新建相册…</option>');
+            return opts.join('');
+        }
+        function openEdit(id) {
+            editingId = id || null;
+            const p = id ? photos.find(x => x.id === id) : null;
+            document.getElementById('editTitle').textContent = p ? '✎ 编辑照片' : '＋ 添加照片';
             document.getElementById('photoFile').value = '';
-            document.getElementById('photoUrl').value = '';
-            document.getElementById('photoDate').value = new Date().toISOString().slice(0, 10);
-            document.getElementById('photoCaption').value = '';
+            document.getElementById('photoUrl').value = p ? p.url : '';
+            document.getElementById('photoDate').value = p ? (p.date || '') : new Date().toISOString().slice(0, 10);
+            document.getElementById('photoCaption').value = p ? (p.caption || '') : '';
+            document.getElementById('photoAlbum').innerHTML = albumOptions(p ? p.album : (curAlbum && curAlbum !== NONE ? curAlbum : ''));
+            document.getElementById('fileHint').textContent = p ? '不换图就别选文件' : '直接选文件，存到 Supabase Storage';
             document.getElementById('editError').textContent = '';
             openMask('editMask');
+        }
+        document.getElementById('addBtn').addEventListener('click', () => openEdit(null));
+        document.getElementById('photoAlbum').addEventListener('change', async () => {
+            const sel = document.getElementById('photoAlbum');
+            if (sel.value !== '__new__') return;
+            const name = (prompt('新相册叫什么名字？', '') || '').trim();
+            if (!name) { sel.value = ''; return; }
+            if (albumNames().includes(name)) { app.toast('已经有叫这个名字的相册啦，直接选中它', 'err'); sel.innerHTML = albumOptions(name); return; }
+            try {
+                const row = { id: 'al' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: name };
+                await app.sbRest('photo_albums', { method: 'POST', body: row });
+                albums.push(row);
+                sel.innerHTML = albumOptions(name);
+            } catch (e) { app.toast('创建失败：' + e.message, 'err', 4000); sel.value = ''; }
         });
 
         document.getElementById('editSave').addEventListener('click', async () => {
@@ -141,25 +273,33 @@
             let url = document.getElementById('photoUrl').value.trim();
             const date = document.getElementById('photoDate').value || '';
             const caption = document.getElementById('photoCaption').value.trim();
+            const album = document.getElementById('photoAlbum').value || '';
             const file = document.getElementById('photoFile').files[0];
-            if (!url && !file) { err.textContent = '选一个图片文件，或填一个图片链接'; return; }
-            const old = btn.innerHTML;
+            const old = editingId ? photos.find(x => x.id === editingId) : null;
+            if (!old && !url && !file) { err.textContent = '选一个图片文件，或填一个图片链接'; return; }
             btn.disabled = true; btn.innerHTML = '保存中…';
             try {
                 if (file) {
                     btn.innerHTML = '上传中…';
                     url = await uploadToStorage(file);
                 }
-                const row = { id: 'ph' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), url: url, caption: caption, date: date };
-                await app.sbRest('photos', { method: 'POST', body: row });
-                photos.unshift(row);
+                let row;
+                if (old) {
+                    row = Object.assign({}, old, { url: url || old.url, caption: caption, date: date, album: album });
+                    await app.sbRest('photos?id=eq.' + encodeURIComponent(old.id), { method: 'PATCH', body: { url: row.url, caption: caption, date: date, album: album } });
+                    photos = photos.map(x => x.id === old.id ? row : x);
+                } else {
+                    row = { id: 'ph' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), url: url, caption: caption, date: date, album: album };
+                    await app.sbRest('photos', { method: 'POST', body: row });
+                    photos.unshift(row);
+                }
                 closeMask('editMask');
                 render();
                 app.toast('已保存 ✓', 'ok');
             } catch (e) {
                 err.textContent = '❌ ' + e.message;
             } finally {
-                btn.disabled = false; btn.innerHTML = old;
+                btn.disabled = false; btn.innerHTML = '保存';
             }
         });
 
@@ -181,6 +321,12 @@
             }
             return SiteApp.sbUrl() + '/storage/v1/object/public/photos/' + path;
         }
+
+        /* ---------- 筛选事件 ---------- */
+        document.getElementById('albumSel').addEventListener('change', e => { curAlbum = e.target.value; render(); });
+        document.getElementById('kwInput').addEventListener('input', render);
+        document.getElementById('dateFrom').addEventListener('change', render);
+        document.getElementById('dateTo').addEventListener('change', render);
 
         load();
     })();

@@ -124,6 +124,7 @@ create table if not exists public.photos (
   url        text not null,
   caption    text not null default '',
   date       text not null default '',
+  album      text not null default '',
   created_at timestamptz not null default now()
 );
 alter table public.photos enable row level security;
@@ -136,6 +137,23 @@ create policy photos_insert on public.photos for insert to authenticated with ch
 create policy photos_update on public.photos for update to authenticated using (public.is_member());
 create policy photos_delete on public.photos for delete to authenticated using (public.is_member());
 
+
+-- ===== 相册分组（photo_albums）=====
+-- 想分几个相册就建几个：照片表里的 album 存相册名，相册删了照片回到「未分类」
+create table if not exists public.photo_albums (
+  id         text primary key,
+  name       text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.photo_albums enable row level security;
+drop policy if exists albums_read   on public.photo_albums;
+drop policy if exists albums_insert on public.photo_albums;
+drop policy if exists albums_update on public.photo_albums;
+drop policy if exists albums_delete on public.photo_albums;
+create policy albums_read   on public.photo_albums for select to authenticated using (public.is_member());
+create policy albums_insert on public.photo_albums for insert to authenticated with check (public.is_member());
+create policy albums_update on public.photo_albums for update to authenticated using (public.is_member());
+create policy albums_delete on public.photo_albums for delete to authenticated using (public.is_member());
 -- ===== 恋爱清单（wishlist）=====
 create table if not exists public.wishlist (
   id         text primary key,

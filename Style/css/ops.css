@@ -49,6 +49,16 @@
     background-color: #f4fcff;
 }
 
+/* 日期筛选输入框：与 select / lg-btn 同款外观 */
+.lg-opsbar input[type="date"] {
+    font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: .95rem; color: #707070;
+    background: #fff; border: 1px solid rgba(208, 206, 206, 0.6); border-radius: .6rem;
+    padding: .35rem .8rem; cursor: pointer; outline: none; transition: all .15s;
+}
+.lg-opsbar input[type="date"]:hover, .lg-opsbar input[type="date"]:focus {
+    color: #10bbff; border-color: #10bbff; background-color: #f4fcff;
+}
+
 /* 篇数统计 */
 .lg-count {
     font-family: 'Noto Serif SC', serif; font-size: .85rem; color: #b5b5b5; letter-spacing: .05em;

@@ -492,7 +492,7 @@
             });
             if (unanswered && !confirm('还有 ' + unanswered + ' 道题没作答，空着提交吗？')) return;
             try {
-                await app.sbRest('survey_responses', {
+                await app.sbRest('survey_responses?on_conflict=survey_id,responder_email', {
                     method: 'POST',
                     prefer: 'resolution=merge-duplicates',
                     body: { survey_id: sid, responder_email: app.me.email, answers: answers, updated_at: new Date().toISOString() }

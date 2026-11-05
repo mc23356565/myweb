@@ -345,11 +345,12 @@ const INSTALL_SQL = SiteApp.INSTALL_SQL;
     });
     document.getElementById('exportPwBtn').addEventListener('click', async () => {
         try {
-            const [ph, wl] = await Promise.all([
+            const [ph, al, wl] = await Promise.all([
                 app.sbRest('photos?select=*'),
+                app.sbRest('photo_albums?select=*').catch(() => []),
                 app.sbRest('wishlist?select=*')
             ]);
-            downloadJson('photos-wishlist-backup-' + new Date().toISOString().slice(0, 10) + '.json', { photos: ph, wishlist: wl });
+            downloadJson('photos-wishlist-backup-' + new Date().toISOString().slice(0, 10) + '.json', { photos: ph, albums: al, wishlist: wl });
             SiteApp.toast('相册 + 清单已导出 💾', 'ok');
         } catch (e) { SiteApp.toast('导出失败：' + e.message, 'err', 4000); }
     });
